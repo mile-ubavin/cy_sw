@@ -1,0 +1,34 @@
+{
+  "baseUrl": "https://supportviewpayslip.edeja.com/fe/login",
+  "username_supportViewMaster": "e-gehaltszettelMaster",
+  "password_supportViewMaster": "Test1234!",
+  "company": "Aqua",
+  "username_supportViewAdmin": "aquaAdmin",
+  "password_supportViewAdmin": "Test1234!",
+  "username_egEbox": "000_qabilly",
+  "password_egEbox": "Test1234!",
+  "enableXML": [
+    {
+      "id": "T101",
+      "name": "BB Care"
+    },
+    {
+      "id": "T102",
+      "name": "Beiersdorfer"
+    },
+    {
+      "id": "L103",
+      "name": "Wein & Co"
+    }
+  ],
+  "disableXML": [
+    {
+      "id": "T101",
+      "name": "BB Care"
+    },
+    {
+      "id": "T102",
+      "name": "Beiersdorfer"
+    }
+  ]
+}

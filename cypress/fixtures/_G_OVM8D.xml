@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE PBInvoice_2_5_at PUBLIC ""
+ "https://business.ebpp.at/xml/DTD/PBInvoice_2_5_at.dtd">
+<PBInvoice_2_5_at>
+<InvoiceNumber>1020123320230524389702-1-2S</InvoiceNumber>
+<InvoiceDate>20230524</InvoiceDate>
+<DueDate Suppress="yes">20230524</DueDate>
+<URL>http://www.linde-gas.at/</URL>
+<LogoURL>https://business.ebpp.at/resources/HZC382/logo.jpg</LogoURL>
+<LayoutID>T201</LayoutID>
+<Language>GER</Language>
+<Biller>
+<SystemsBillerID>HZC382</SystemsBillerID>
+<Address>
+<Salutation>Firma</Salutation>
+<Name>Linde Gas GmbH</Name>
+<Street>Carl-von-Linde-Platz 1</Street>
+<Town>Stadl-Paura</Town>
+<ZIP>4651</ZIP>
+<Country>�sterreich</Country>
+</Address>
+</Biller>
+<InvoiceRecipient>
+<BillersInvoiceRecipientID>0100</BillersInvoiceRecipientID>
+<Address>
+<Name>Schittko Marvin</Name>
+<Street>Dinghoferstra�e 18</Street>
+<Town>Linz</Town>
+<ZIP>4020</ZIP>
+</Address>
+</InvoiceRecipient>
+<ShortComment>Gehalt_202305</ShortComment>
+<Details>
+<ItemList>
+<LineItem><Element>
+
+
+
+
+    Verdienstabrechnung      Mai 2023                                  Seite 1
+
+
+
+
+    Linde Gas GmbH                                      Eintritt : 01.10.2022
+
+
+    10201233    Stadl-Paura                     Alleinverd.-/erz.:
+                                                Freibetrag Monat :
+    Schittko Marvin                             Pendlerpauschale :
+    Dinghoferstra�e 18                          Pendlereuro      :
+    4020 Linz
+                                                Einstufung       : GR.II    00
+                                                Kostenstelle     : 100940000
+
+
+
+   ----------------------------------------------------------------------------
+   Loa  Bezeichnung                 RR     Menge           Satz        Betrag
+   ----------------------------------------------------------------------------
+   0100 Gehalt                                                         954,37
+   /4H1 freie HO-Pausch.         04.23                                   1,20
+   0701 Urlaubszuschu� automat.            49,59         954,50        473,34
+   9231 Urlaubsentgelt           04.23     14,00
+                                                                 -------------
+        Summe Bez�ge             04.23                                   1,20
+        Summe Bez�ge                                                 1.427,71
+
+                                                         810,08
+   /594 Betriebsratsumlage                                               1,91
+   Z320 SV laufend                                       954,37        144,29
+   Z336 SV SZ                                            473,34         66,84
+                                                                 -------------
+        Summe Abz�ge                                                   213,04
+
+   /401 Jahressechstel                                 1.757,34
+   94H0 C-19 HO-Pausch.          04.23                     3,00
+   /400 Steuertage                                        30,00
+   /303 SV-Tage                                           30,00
+   /670 BV: Bemessungsgrundlage                        1.427,71
+   /672 BV: Gesetzlicher Beitrag                          21,84
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ----------------------------------------------------------------------------
+   Auszahlungsbetrag                                    EUR          1.215,87
+   ----------------------------------------------------------------------------
+   BLZ 10011 N26                      Konto 2626685134  Auszahlung 31.05.2023
+</Element></LineItem>
+</ItemList>
+</Details>
+<Tax>
+<TaxID>no Tax</TaxID>
+<Amount Currency="EUR">0</Amount>
+</Tax>
+<TotalAmount Currency="EUR">
+<Full SuppressZero="yes">0</Full>
+<Minimum>0.00</Minimum>
+</TotalAmount>
+<PaymentMethod>
+<NoPayment>
+<Comment>Zu dieser Abrechnung kann keine Zahlung erfasst werden.</Comment>
+</NoPayment>
+</PaymentMethod>
+</PBInvoice_2_5_at>
+
+
+
+
+
+
+
+
+
+
+
+
+
