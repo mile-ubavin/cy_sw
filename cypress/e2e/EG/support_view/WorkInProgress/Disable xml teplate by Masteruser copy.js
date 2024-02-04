@@ -247,7 +247,7 @@ describe("Enable XML template by Masteruser", () => {
           // Log the information about the unchecked element
           cy.log(`Unchecked element with text: ${criteria}`);
 
-          //--------------------------------------------------------------------------------------------
+          //-------------------------------------------------------
 
           if (!allElementsUnchecked) {
             cy.get(".pdf_dictionary__table > table > tbody > tr > td")
