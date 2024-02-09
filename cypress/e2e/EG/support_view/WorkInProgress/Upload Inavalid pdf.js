@@ -1,4 +1,6 @@
 // Import test that alredy exixts
+//PRECONDIION:
+import "./Enable xml teplate by Masteruser";
 import "./Disable xml teplate by Masteruser";
 /// <reference types="Cypress" />
 
@@ -43,7 +45,7 @@ describe("Upload Invalid file", () => {
           expect(uploadButtonTxt).to.include(t["Upload Document"]);
           // cy.log("uploadButtonTxt :", uploadButtonTxt);
         }); // end Upload document button
-      //Click on button with txt taken from translate (Cancel)
+      //Click on button with txt taken from translate (Upload Documents)
       const uploadButton = t["Upload Document"];
       cy.get(".upload__document").contains(uploadButton).click();
 

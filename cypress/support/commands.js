@@ -368,3 +368,78 @@ Cypress.Commands.add("uploadMultipleDocuments", function (fileNames) {
       .click();
   });
 });
+
+// Upload Multiple Attachments
+Cypress.Commands.add("uploadValidMultipleDocuments", function (fileNames) {
+  cy.get("@t").then((t) => {
+    cy.wrap(fileNames).each((fileName) => {
+      cy.fixture(fileName, "binary")
+        .then(Cypress.Blob.binaryStringToBlob)
+        .then((fileContent) => {
+          cy.get(".dialog-content>.upload-section>div>form>input").attachFile({
+            fileContent,
+            filePath: fileName,
+            fileName,
+          });
+        });
+    });
+    // Additional assertions for each uploaded file
+    cy.get(".upload-section>div>span")
+      .invoke("text")
+      .then((uploadAreaTxt) => {
+        expect(uploadAreaTxt, "upload Area Txt").to.include(
+          t["Drag documents to this area or click here to upload"]
+        );
+      });
+
+    cy.get(".dialog-actions>button>.title")
+      .eq(0)
+      .invoke("text")
+      .then((cancelButton) => {
+        expect(cancelButton, "Cancel Upload document button").to.include(
+          t.Cancel
+        );
+      });
+
+    cy.get(".dialog-actions>button>.title")
+      .eq(1)
+      .invoke("text")
+      .then((uploadButton) => {
+        expect(uploadButton, "Upload document button").to.include(
+          t["Upload Documents"]
+        );
+      });
+  });
+});
+//Logout from SW
+Cypress.Commands.add("logoutFromSW", () => {
+  cy.get(".logout-icon ").click();
+  cy.wait(2000);
+  cy.get(".confirm-buttons > :nth-child(2)").click();
+  cy.url().should("include", "https://supportviewpayslip.edeja.com/fe/login"); // Validate url
+});
+
+// Delete all emails from Admin user's inbox
+Cypress.Commands.add("deleteAllEmails", () => {
+  cy.visit("https://yopmail.com/en/");
+  cy.get("#login").type("aqua.admin@yopmail.com");
+  cy.get("#refreshbut > .md > .material-icons-outlined").click();
+  cy.get(
+    ".wminboxheader > :nth-child(1) > .textu > .material-icons-outlined"
+  ).click();
+
+  // Check if the "Delete all" button is enabled
+  cy.get(".menu>div>#delall").then(($button) => {
+    if (!$button.prop("disabled")) {
+      //$button.click(); // Click and delete all emails
+      cy.wait(1000);
+      cy.wrap($button).click({ force: true }); // Click and delete all emails
+      cy.get(".bl").click(); // Back to home page
+    } else {
+      // If the button is disabled, navigate back to the home page
+      cy.get(".bl").click(); // Back to home page
+    }
+  });
+
+  cy.wait(1500);
+});

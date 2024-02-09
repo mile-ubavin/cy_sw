@@ -10,7 +10,7 @@ describe("Enable XML template by Masteruser", () => {
     return currentLanguage === "English" ? "German" : "English";
   }
 
-  it("Diasable xml teplate by Masteruser", () => {
+  it("Enable xml teplate by Masteruser", () => {
     cy.loginToSupportViewMaster(); //login as a masteruser
 
     cy.intercept(
@@ -27,9 +27,10 @@ describe("Enable XML template by Masteruser", () => {
 
         // Select the opposite language
         cy.selectLanguage(oppositeLanguage);
-
+        cy.wait(1500);
         // Load t based on the opposite language
         cy.loadTranslate(oppositeLanguage);
+        cy.wait(1500);
       });
     cy.get("@t").then((t) => {
       //Search for Group section
@@ -179,7 +180,7 @@ describe("Enable XML template by Masteruser", () => {
         } else {
           // Handle the case where data.enableXML is not an array
           cy.log("Error: 'data.enableXML' is not an array.");
-        }
+        } //end IF
       });
 
       const findAndCheckElement = () => {
@@ -261,7 +262,7 @@ describe("Enable XML template by Masteruser", () => {
           cy.log(
             "All elements from the search criteria are checked. Stopping the process."
           );
-        }
+        } //end !allElementsChecked
       };
 
       //Find the Send button by txt

@@ -1,143 +1,368 @@
-/// <reference types="cypress" />
+/// <reference types="Cypress" />
 
-// Welcome to Cypress!
-//
-// This spec file contains a variety of sample tests
-// for a todo list app that are designed to demonstrate
-// the power of writing tests in Cypress.
-//
-// To learn more about how Cypress works and
-// what makes it such an awesome testing tool,
-// please read our getting started guide:
-// https://on.cypress.io/introduction-to-cypress
+describe("Disable XML template by Masteruser", () => {
+  // Custom command to load t based on the selected language
+  Cypress.Commands.add("loadTranslate", (language) => {
+    cy.fixture(`${language}.json`).as("t");
+  });
+  //getOppositeLanguage
+  function getOppositeLanguage(currentLanguage) {
+    return currentLanguage === "English" ? "German" : "English";
+  }
 
-describe('example to-do app', () => {
-  beforeEach(() => {
-    // Cypress starts out with a blank slate for each test
-    // so we must tell it to visit our website with the `cy.visit()` command.
-    // Since we want to visit the same URL at the start of all our tests,
-    // we include it in our beforeEach function so that it runs before each test
-    cy.visit('https://example.cypress.io/todo')
-  })
+  it("Diasable xml teplate by Masteruser", () => {
+    cy.loginToSupportViewMaster(); //login as a masteruser
 
-  it('displays two todo items by default', () => {
-    // We use the `cy.get()` command to get all elements that match the selector.
-    // Then, we use `should` to assert that there are two matched items,
-    // which are the two default items.
-    cy.get('.todo-list li').should('have.length', 2)
+    cy.intercept(
+      "GET",
+      "https://supportviewpayslip.edeja.com/be/supportView/v1/group/template/tenant/AQUA"
+    ).as("apiRequest");
+    //get language
+    cy.get("#mat-select-value-1")
+      .invoke("text")
+      .then((selectedLanguage) => {
+        const oppositeLanguage = getOppositeLanguage(selectedLanguage.trim());
+        cy.log(`Selected Languages: ${selectedLanguage}`);
+        cy.log(`Switching to Opposite Language: ${oppositeLanguage}`);
 
-    // We can go even further and check that the default todos each contain
-    // the correct text. We use the `first` and `last` functions
-    // to get just the first and last matched elements individually,
-    // and then perform an assertion with `should`.
-    cy.get('.todo-list li').first().should('have.text', 'Pay electric bill')
-    cy.get('.todo-list li').last().should('have.text', 'Walk the dog')
-  })
+        // Select the opposite language
+        cy.selectLanguage(oppositeLanguage);
+        cy.wait(1000);
+        // Load t based on the opposite language
+        cy.loadTranslate(oppositeLanguage);
+        cy.wait(1000);
+      });
+    cy.get("@t").then((t) => {
+      //Search for Group section
+      cy.get("#searchButton>span")
+        .invoke("text")
+        .then((search) => {
+          expect(search, "Search:").to.include(t["Search"]);
+        });
+      cy.get("#searchButton>span").click(); //Click on search button
+      //Search form label
 
-  it('can add new todo items', () => {
-    // We'll store our item text in a variable so we can reuse it
-    const newItem = 'Feed the cat'
+      cy.get(".search-dialog>form>.form-fields>.searchText-wrap>.label")
+        .eq(0)
+        .invoke("text")
+        .then((searchLabel) => {
+          expect(searchLabel, "Account Number").to.include(t["Account Number"]);
+        }); //end
+      cy.get(".search-dialog>form>.form-fields>.searchText-wrap>.label")
+        .eq(1)
+        .invoke("text")
+        .then((searchLabel) => {
+          expect(searchLabel, "Display Name").to.include(t["Display Name"]);
+        }); //end
+      cy.get(".search-dialog>form>.form-fields>.searchText-wrap>.label")
+        .eq(2)
+        .invoke("text")
+        .then((searchLabel) => {
+          expect(searchLabel, "Description").to.include(t["Description"]);
+        }); //end
 
-    // Let's get the input element and use the `type` command to
-    // input our new list item. After typing the content of our item,
-    // we need to type the enter key as well in order to submit the input.
-    // This input has a data-test attribute so we'll use that to select the
-    // element in accordance with best practices:
-    // https://on.cypress.io/selecting-elements
-    cy.get('[data-test=new-todo]').type(`${newItem}{enter}`)
+      //Search form Action buttons
+      cy.get(".search-dialog>form>.form-actions>button>.mdc-button__label")
+        .eq(0)
+        .invoke("text")
+        .then((searchButton) => {
+          expect(searchButton, "resetUserSearch:").to.include(
+            t["resetUserSearch"]
+          );
+        }); //end
+      cy.get(".search-dialog>form>.form-actions>button>.mdc-button__label")
+        .eq(1)
+        .invoke("text")
+        .then((searchButton) => {
+          expect(searchButton, "searchUse").to.include(t["searchUser"]);
+        }); //end
 
-    // Now that we've typed our new item, let's check that it actually was added to the list.
-    // Since it's the newest item, it should exist as the last element in the list.
-    // In addition, with the two default items, we should have a total of 3 elements in the list.
-    // Since assertions yield the element that was asserted on,
-    // we can chain both of these assertions together into a single statement.
-    cy.get('.todo-list li')
-      .should('have.length', 3)
-      .last()
-      .should('have.text', newItem)
-  })
+      //Search for Group by Display Name
+      cy.fixture("supportView.json").then((data) => {
+        // Use the company name from the JSON file
+        const companyName = data.company;
+        // Search for Group by Display Name using the company name
+        cy.get(".search-dialog>form>.form-fields>.searchText-wrap")
+          .eq(1)
+          .type(companyName);
+      });
 
-  it('can check off an item as completed', () => {
-    // In addition to using the `get` command to get an element by selector,
-    // we can also use the `contains` command to get an element by its contents.
-    // However, this will yield the <label>, which is lowest-level element that contains the text.
-    // In order to check the item, we'll find the <input> element for this <label>
-    // by traversing up the dom to the parent element. From there, we can `find`
-    // the child checkbox <input> element and use the `check` command to check it.
-    cy.contains('Pay electric bill')
-      .parent()
-      .find('input[type=checkbox]')
-      .check()
+      //Find the Search button by button name and click on it
+      const search = t["searchUser"];
+      cy.get(".search-dialog>form>.form-actions>button")
+        .contains(search)
+        .click();
 
-    // Now that we've checked the button, we can go ahead and make sure
-    // that the list element is now marked as completed.
-    // Again we'll use `contains` to find the <label> element and then use the `parents` command
-    // to traverse multiple levels up the dom until we find the corresponding <li> element.
-    // Once we get that element, we can assert that it has the completed class.
-    cy.contains('Pay electric bill')
-      .parents('li')
-      .should('have.class', 'completed')
-  })
+      //Action buttons labels
 
-  context('with a checked task', () => {
-    beforeEach(() => {
-      // We'll take the command we used above to check off an element
-      // Since we want to perform multiple tests that start with checking
-      // one element, we put it in the beforeEach hook
-      // so that it runs at the start of every test.
-      cy.contains('Pay electric bill')
-        .parent()
-        .find('input[type=checkbox]')
-        .check()
-    })
+      cy.get(".action-buttons>button>.mdc-button__label")
+        .eq(0)
+        .invoke("text")
+        .then((actionButton) => {
+          expect(actionButton, "Edit button").to.include(t["Edit"]);
+        }); //end
 
-    it('can filter for uncompleted tasks', () => {
-      // We'll click on the "active" button in order to
-      // display only incomplete items
-      cy.contains('Active').click()
+      cy.get(".action-buttons>button>.mdc-button__label")
+        .eq(1)
+        .invoke("text")
+        .then((actionButton) => {
+          expect(actionButton, "Assign XML Template").to.include(
+            t["Assign XML Template"]
+          );
+        }); //end
 
-      // After filtering, we can assert that there is only the one
-      // incomplete item in the list.
-      cy.get('.todo-list li')
-        .should('have.length', 1)
-        .first()
-        .should('have.text', 'Walk the dog')
+      cy.get(".action-buttons>button>.mdc-button__label")
+        .eq(2)
+        .invoke("text")
+        .then((actionButton) => {
+          expect(actionButton, "Assign PDF Dictionary").to.include(
+            t["Assign PDF Dictionary"]
+          );
+        }); //end
 
-      // For good measure, let's also assert that the task we checked off
-      // does not exist on the page.
-      cy.contains('Pay electric bill').should('not.exist')
-    })
+      cy.get(".action-buttons>button>.mdc-button__label")
+        .eq(3)
+        .invoke("text")
+        .then((actionButton) => {
+          expect(actionButton, "Admin User").to.include(t["Admin User"]);
+        }); //end
 
-    it('can filter for completed tasks', () => {
-      // We can perform similar steps as the test above to ensure
-      // that only completed tasks are shown
-      cy.contains('Completed').click()
+      cy.get(".action-buttons>button>.mdc-button__label")
+        .eq(4)
+        .invoke("text")
+        .then((actionButton) => {
+          expect(actionButton, "User").to.include(t["User"]);
+        }); //end
+      //Click on button with txt XmlTemplate... taken from translate
+      const assignXmlTemplateButtonText = t["Assign XML Template"];
 
-      cy.get('.todo-list li')
-        .should('have.length', 1)
-        .first()
-        .should('have.text', 'Pay electric bill')
+      cy.get(".action-buttons button")
+        .contains(assignXmlTemplateButtonText)
+        .click();
 
-      cy.contains('Walk the dog').should('not.exist')
-    })
+      cy.get(".pdf_dictionary__table > table > tbody > tr").each(
+        ($el, index, $list) => {
+          cy.log(`Element ${index + 1}: ${$el.text()}`);
+        }
+      );
 
-    it('can delete all completed tasks', () => {
-      // First, let's click the "Clear completed" button
-      // `contains` is actually serving two purposes here.
-      // First, it's ensuring that the button exists within the dom.
-      // This button only appears when at least one task is checked
-      // so this command is implicitly verifying that it does exist.
-      // Second, it selects the button so we can click it.
-      cy.contains('Clear completed').click()
+      let searchCriteria; // Declare searchCriteria in a higher scope
 
-      // Then we can make sure that there is only one element
-      // in the list and our element does not exist
-      cy.get('.todo-list li')
-        .should('have.length', 1)
-        .should('not.have.text', 'Pay electric bill')
+      // Load search criteria from the 'supportWiev.json' file
+      cy.fixture("supportView.json").then((data) => {
+        // Log searchCriteria
+        searchCriteria = data.disableXML.map((item) => item.name);
+        cy.log(searchCriteria);
 
-      // Finally, make sure that the clear button no longer exists.
-      cy.contains('Clear completed').should('not.exist')
-    })
-  })
-})
+        // Start the process by finding elements based on search criteria
+        // OPTIONAL
+        // Verify message from response
+        cy.wait("@apiRequest").then((interception) => {
+          // Log the status code to the Cypress console
+          cy.log(`Status Code: ${interception.response.statusCode}`);
+
+          // Log or assert on the response body
+          const responseBody = interception.response.body;
+          cy.log("Response Body:", responseBody);
+
+          responseBody.sort((a, b) => {
+            if (a.assigned && !b.assigned) {
+              return -1; // a comes before b
+            } else if (!a.assigned && b.assigned) {
+              return 1; // b comes before a
+            } else {
+              return 0; // Keep the same order
+            }
+          });
+
+          // Log only the elements with assigned: true
+          const assignedTrueElements = [];
+          for (let i = 0; i < searchCriteria.length; i++) {
+            const criteria = searchCriteria[i];
+            const matchedElement = responseBody.find(
+              (item) => item.name === criteria && item.assigned
+            );
+            if (matchedElement) {
+              assignedTrueElements.push(matchedElement);
+              cy.log("YES ELEMENTS");
+            } else {
+              cy.log("NO ELEMENTS");
+            }
+          }
+
+          // Uncheck elements with assigned: true
+          cy.log("Elements with assigned: true after search:");
+          cy.wrap(assignedTrueElements).each((item) => {
+            cy.log(
+              `ID: ${item.id}, Name: ${item.name}, Assigned: ${item.assigned}`
+            );
+            cy.contains(
+              ".pdf_dictionary__table > table > tbody > tr > td",
+              item.name
+            )
+              .parent()
+              .find('td:first-child input[type="checkbox"]')
+              .should("be.visible")
+              .uncheck({ force: true }); // Use force if needed
+          });
+        });
+      });
+
+      //Find the Send button by txt
+      const buttonTxt = t["Save"];
+      cy.get(".pdf_dictionary>.pdf_dictionary__actions>button")
+        .contains(buttonTxt)
+        .click();
+      //Check validation message
+      cy.get(
+        "#mat-snack-bar-container-live-0>div>.mat-mdc-simple-snack-bar>.mat-mdc-snack-bar-label"
+      )
+        .invoke("text")
+        .then((message) => {
+          expect(message, "Success Message ").to.include(
+            t["XML template was assigned successfully"]
+          );
+        }); //end
+    }); //end TRANSLATE
+    cy.wait(2500);
+    // Logout;
+    cy.logoutFromSW();
+    // cy.get(".logout-icon ").click();
+    // cy.wait(2000);
+    // cy.get(".confirm-buttons > :nth-child(2)").click();
+    // cy.url();
+    // cy.should("include", "https://supportviewpayslip.edeja.com/fe/login"); // Validate url
+  }); //end it
+}); //end describe
+
+// /// <reference types="Cypress" />
+
+// describe("Disable XML template by Masteruser", () => {
+//   // Custom command to load translation based on the selected language
+//   Cypress.Commands.add("loadTranslate", (language) => {
+//     cy.fixture(`${language}.json`).as("t");
+//   });
+
+//   // Custom command to get the opposite language
+//   Cypress.Commands.add("getOppositeLanguage", (currentLanguage) => {
+//     return currentLanguage === "English" ? "German" : "English";
+//   });
+
+//   // Custom command to perform logout
+//   Cypress.Commands.add("logout", () => {
+//     cy.get(".logout-icon ").click();
+//     cy.wait(2000);
+//     cy.get(".confirm-buttons > :nth-child(2)").click();
+//     cy.url().should("include", "https://supportviewpayslip.edeja.com/fe/login"); // Validate url
+//   });
+
+//   it("Disable XML template by Masteruser", () => {
+//     cy.loginToSupportViewMaster(); //login as a masteruser
+
+//     cy.intercept(
+//       "GET",
+//       "https://supportviewpayslip.edeja.com/be/supportView/v1/group/template/tenant/AQUA"
+//     ).as("apiRequest");
+
+//     //get language and switch to opposite language
+//     cy.get("#mat-select-value-1")
+//       .invoke("text")
+//       .then((selectedLanguage) => {
+//         const oppositeLanguage = cy.getOppositeLanguage(
+//           selectedLanguage.trim()
+//         );
+//         cy.log(`Selected Language: ${selectedLanguage}`);
+//         cy.log(`Switching to Opposite Language: ${oppositeLanguage}`);
+
+//         cy.selectLanguage(oppositeLanguage); // Select the opposite language
+//         cy.loadTranslate(oppositeLanguage); // Load translation based on the opposite language
+//       });
+
+//     cy.get("@t").then((t) => {
+//       // Search for Group section
+//       cy.contains("#searchButton>span", t["Search"]).click();
+
+//       // Verify search form labels
+//       cy.get(".search-dialog>form>.form-fields>.searchText-wrap>.label").each(
+//         ($label, index) => {
+//           const expectedLabel = [
+//             t["Account Number"],
+//             t["Display Name"],
+//             t["Description"],
+//           ][index];
+//           expect($label.text()).to.include(expectedLabel);
+//         }
+//       );
+
+//       // Verify search form action buttons
+//       cy.get(
+//         ".search-dialog>form>.form-actions>button>.mdc-button__label"
+//       ).each(($button, index) => {
+//         const expectedButton = [t["resetUserSearch"], t["searchUser"]][index];
+//         expect($button.text()).to.include(expectedButton);
+//       });
+
+//       // Search for Group by Display Name
+//       cy.fixture("supportView.json").then((data) => {
+//         const companyName = data.company;
+//         cy.get(".search-dialog>form>.form-fields>.searchText-wrap")
+//           .eq(1)
+//           .type(companyName);
+//       });
+
+//       // Click on the Search button
+//       cy.get(".search-dialog>form>.form-actions>button")
+//         .contains(t["searchUser"])
+//         .click();
+
+//       // Verify action buttons labels
+//       const actionButtonsLabels = [
+//         t["Edit"],
+//         t["Assign XML Template"],
+//         t["Assign PDF Dictionary"],
+//         t["Admin User"],
+//         t["User"],
+//       ];
+//       cy.get(".action-buttons>button>.mdc-button__label").each(
+//         ($button, index) => {
+//           expect($button.text()).to.include(actionButtonsLabels[index]);
+//         }
+//       );
+
+//       // Click on the button to assign XML template
+//       cy.contains(".action-buttons button", t["Assign XML Template"]).click();
+
+//       // Log elements in the PDF dictionary table
+//       cy.get(".pdf_dictionary__table > table > tbody > tr").each(
+//         ($el, index) => {
+//           cy.log(`Element ${index + 1}: ${$el.text()}`);
+//         }
+//       );
+
+//       // Load search criteria and handle API response
+//       cy.fixture("supportView.json").then((data) => {
+//         const searchCriteria = data.disableXML.map((item) => item.name);
+//         cy.log(searchCriteria);
+
+//         cy.waitForApiResponse(searchCriteria);
+//       });
+
+//       // Click on the Save button and check validation message
+//       cy.get(".pdf_dictionary>.pdf_dictionary__actions>button")
+//         .contains(t["Save"])
+//         .click();
+//       cy.get(
+//         "#mat-snack-bar-container-live-0>div>.mat-mdc-simple-snack-bar>.mat-mdc-snack-bar-label"
+//       )
+//         .invoke("text")
+//         .then((message) => {
+//           expect(message).to.include(
+//             t["XML template was assigned successfully"]
+//           );
+//         });
+
+//       // Logout
+//       cy.logout();
+//     });
+//   });
+// });
