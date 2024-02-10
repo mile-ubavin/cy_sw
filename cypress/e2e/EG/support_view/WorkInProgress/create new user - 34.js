@@ -253,6 +253,7 @@ describe("crate user from SW", () => {
                       "eq",
                       "https://eboxpayslip.edeja.com/fe.e-box_t/"
                     );
+                    cy.log("Test completed successfully.");
                   });
               });
             });
