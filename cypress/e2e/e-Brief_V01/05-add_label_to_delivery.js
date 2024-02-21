@@ -11,11 +11,14 @@ describe("Login, Crete_delivery-Upload_doc(pdf), Logout", () => {
   //Crete delivery
   it.only("Crete_delivery-Upload_doc(pdf)", function () {
     cy.visit("/deliveries");
-    cy.get(
-      '[iconafter="custom:post-icon-upload"] > #toolbar-toggle_upload'
-    ).click();
+    cy.get("#toolbar-toggle_upload").click();
     cy.upload_attachment(); //upload pdf documents from fixtures folder - custom command
     cy.wait(2000);
+
+    let randomString = Math.random().toString(15).substring(2); //Generating random string
+    const title = "Upload pdf - " + randomString;
+    //cy.get('input[name="deliveryTitle"]').type(title); //Generate Delivery title using random string method
+    cy.get("#mat-input-5").type(title);
     //cy.get('.list-item-status>.success').should('have.text', 'Dokument erfolgreich hochgeladen: ')
     cy.wait(2000);
     cy.contains(" Speichern ").click({ force: true });
@@ -26,7 +29,7 @@ describe("Login, Crete_delivery-Upload_doc(pdf), Logout", () => {
 
     // cy.get('.content-header>.ng-star-inserted').eq(2).click()//Click on add new label to document
     cy.get(
-      ".even-row.hovered > .labels-cell > .labels-list > .assign-label-wrap > app-custom-icon-button.ng-star-inserted > #undefined > .mat-button-wrapper > .button-content-wrap"
+      ".even-row.details > .labels-cell > .labels-list > .assign-label-wrap > app-custom-icon-button.ng-star-inserted > #undefined > .mat-mdc-button-touch-target"
     ).click();
     cy.get("h2.dialog-title").should(
       "have.text",
@@ -55,5 +58,6 @@ describe("Login, Crete_delivery-Upload_doc(pdf), Logout", () => {
     cy.contains("Logout").click();
     Cypress.session.clearAllSavedSessions(); //Clear all session
     cy.url().should("include", "/"); // Validate url
+    cy.log("Test completed successfully.");
   }); //end it
 });

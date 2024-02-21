@@ -16,7 +16,7 @@ describe("Login, Validate header links from SettingsPasge, Logout", () => {
   //Count and validate number of links, linkText, linkUrl, and redirection from the every Header links visible in overview page - dynamic result"
   it("Count and Validate header links from SettingsPasge - dynamic result", () => {
     cy.visit("/settings/overview");
-    cy.get(".mat-tab-links")
+    cy.get(".mat-mdc-tab-links")
       .find("a")
       .then((a) => {
         const listingCount = Cypress.$(a).length;
@@ -30,7 +30,7 @@ describe("Login, Validate header links from SettingsPasge, Logout", () => {
         let url = []; //url array
         let linkText = []; //linkText array
         let att = [];
-        cy.get(".mat-tab-list > .mat-tab-links>a")
+        cy.get(".mat-mdc-tab-list > .mat-mdc-tab-links>a")
           .each(($el, index, $list) => {
             //iterating trough each element visible as a link in settings page, e.g. el[1]->index[0]...
             linkText[index] = $el.text(); //store approprite linkText depending on the index: linkText of element 1 is set as a linkText[0], and stored to linkText array variabile
@@ -40,7 +40,7 @@ describe("Login, Validate header links from SettingsPasge, Logout", () => {
           })
           .then(() => {
             for (let index = 0; index < listingCount; index++) {
-              cy.get(".mat-tab-list > .mat-tab-links>a")
+              cy.get(".mat-mdc-tab-list > .mat-mdc-tab-links>a")
                 .eq(index)
                 .invoke("text")
                 .as("settingsOptions");

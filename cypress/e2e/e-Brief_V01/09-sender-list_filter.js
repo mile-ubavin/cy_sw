@@ -48,7 +48,7 @@ describe("Login, Sender-list - Filter by random character A-Z, Logout", () => {
     cy.url().should("include", "/sender-list"); // Validate url
     //Set a number of executing test (3)
     for (let index = 0; index < 3; index++) {
-      cy.get(".mat-tab-links > div")
+      cy.get(".mat-mdc-tab-links>div")
         .eq(Math.floor(Math.random() * (28 - 1) + 1))
         .click(); //Set a random letter A-Z as a filter criteria
       //Verify if results is null '.sender-list' does not exists
@@ -73,6 +73,8 @@ describe("Login, Sender-list - Filter by random character A-Z, Logout", () => {
           });
       });
     }
+    // Completion message at the end of the test
+    cy.log("Test completed successfully.");
   });
   //Logout and clear session
   it("Logout & Clear saved session", function () {
@@ -83,5 +85,7 @@ describe("Login, Sender-list - Filter by random character A-Z, Logout", () => {
     cy.contains("Logout").click();
     Cypress.session.clearAllSavedSessions(); //Clear all session
     cy.url().should("include", "/"); // Validate url
+    // Completion message at the end of the test
+    cy.log("Test completed successfully.");
   }); //end it
 });

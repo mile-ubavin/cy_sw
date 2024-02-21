@@ -1,5 +1,7 @@
 /// <reference types="cypress" />
 /// <reference types="cypress-xpath" />
+import dayjs from "dayjs";
+
 // NOTE: install: npm install dayjs --save
 
 describe("Login, Update personal data, Logout", () => {
@@ -72,7 +74,7 @@ describe("Login, Update personal data, Logout", () => {
     );
   });
 
-  it.only("Validate Birthday", () => {
+  it("Validate Birthday", () => {
     cy.visit("https://www.e-brief.at/fe_t/deliveries");
     cy.get(".user-title").click(); //switch to Persons tab
     cy.get('[color="primary"] > .button').click();
@@ -89,6 +91,9 @@ describe("Login, Update personal data, Logout", () => {
       .then((val) => {
         year = currYear - 14;
         cy.get("#mat-input-9").clear().type(year);
+        cy.get(
+          ".bottom-fix > .form-field > .small-height > .input > .input__field-input"
+        ).click({ force: true });
       });
     cy.log("YEAR------------>", year); //prints hi@there.com
 
@@ -122,7 +127,7 @@ describe("Login, Update personal data, Logout", () => {
     cy.log("DATEEEE------------>", dateDay);
     cy.log("DATEEEE------------>", dateMonth);
     cy.log("DATEEEE------------>", dateYear);
-    cy.log("****************DAY------------>", year); //prints hi@there.com
+    cy.log("****************YEAR------------>", year); //prints hi@there.com
 
     let dateOfBirthday = "5.7." + year;
     cy.log("dateOfBirthday--------------->", dateOfBirthday);
@@ -140,7 +145,7 @@ describe("Login, Update personal data, Logout", () => {
       cy.log("DIFF------------>", diff_days);
       var years = Math.ceil(diff_days * 0.002738); //Convert and round diff_days to years
       cy.log("DIFFYYYYYYYYY------------>", years);
-      if (years < 16) {
+      if (years < 14) {
         cy.get(".ebox-error-notification").should(
           "have.text",
           " Um das e-Brief Service nutzen zu können, müssen Sie mindestens 14 Jahre oder älter sein. "

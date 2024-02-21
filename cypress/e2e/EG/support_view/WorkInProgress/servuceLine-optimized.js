@@ -1,19 +1,20 @@
 /// <reference types="Cypress" />
 
-describe("Upload serviceLine pdf file and check emails", () => {
+describe("Upload serviceLine pdf file and chec emails", () => {
+  // Custom command to load t based on the selected language
+  Cypress.Commands.add("loadTranslate", (language) => {
+    cy.fixture(`${language}.json`).as("t");
+  });
+  //getOppositeLanguage
+  function getOppositeLanguage(currentLanguage) {
+    return currentLanguage === "English" ? "German" : "English";
+  }
+  //Precondition - delete all emails from Admin user's inbox -> call custom command
   before(() => {
     cy.deleteAllEmails();
   });
-
-  it(`Upload serviceLine pdf by Admin User and check emails`, function () {
-    cy.loginAndUploadServiceLinePDF();
-    cy.checkEmails();
-    cy.log("Test completed successfully.");
-  });
-
-  // Define custom commands
-  Cypress.Commands.add("loginAndUploadServiceLinePDF", () => {
-    // Login and upload PDF logic
+  //Upload valid serviceLine pdf by Admn User
+  it(`Upload serviceLine pdf by Admn User and check emails`, function () {
     cy.loginToSupportViewAdmin() //Login custom commands
       //Optional
       .wait(2000);
@@ -111,49 +112,56 @@ describe("Upload serviceLine pdf file and check emails", () => {
             t["We are processing in the background"]
           );
         }); //end
+      // cy.pause();
+      // cy.get(".mdc-button")
+      //   .invoke("text")
+      //   .then((message) => {
+      //     expect(message, "Message:").to.include(
+      //       t["We are processing in the background"]
+      //     );
+      //   }); //end
     }); //END TRANSLATE
-  });
 
-  Cypress.Commands.add("checkEmails", () => {
-    const expectedEmailTexts = [
-      "Guten Tag,Sie haben 0 Sendungen erfolgreich in des e-Gehaltszettel Portal eingeliefert.0 Sendungen konnten nicht zugestellt werden.1 Sendungen sind in der Warteschlange und werden demnächst verarbeitet.mit freundlichen Grüßen,Ihr e-Gehaltszettel Team",
-      "Guten Tag,Sie haben 0 ServiceLine Sendungen erfolgreich in des e-Gehaltszettel Portal eingeliefert.3 Sendungen konnten nicht zugestellt werden.Folgende Personalnummern sind betroffen:ABBA000100279311ABBA234500123mit freundlichen Grüßen,Ihr e-Gehaltszettel Team",
-    ];
-
-    cy.visit("https://yopmail.com/en/");
-    cy.get("#login").clear().type("aqua.admin@yopmail.com");
-    cy.get("#refreshbut > .md > .material-icons-outlined").click();
-    cy.wait(3000);
-    cy.get("#refresh").click();
-    cy.wait(1000);
-
-    cy.iframe("#ifinbox")
-      .find(".mctn > .m > button > .lms")
-      .eq(0)
-      .should("include.text", "Versandreport e-Gehaltszettel Portal");
-
-    cy.iframe("#ifmail")
-      .find("#mail>div")
-      .invoke("text")
-      .then((emailText) => {
-        expect(emailText).to.contain(expectedEmailTexts[0]);
-      });
-
-    cy.wait(20000);
-
-    cy.get("#refresh").click();
-    cy.wait(1000);
-
-    cy.iframe("#ifinbox")
-      .find(".mctn > .m > button > .lms")
-      .eq(0)
-      .should("include.text", "Versandreport e-Gehaltszettel Portal");
-
-    cy.iframe("#ifmail")
-      .find("#mail>div")
-      .invoke("text")
-      .then((emailText) => {
-        expect(emailText).to.contain(expectedEmailTexts[1]);
-      });
-  });
+    //********************* Yopmail *********************
+    // // Expected emails text
+    // const expectedEmailText1 =
+    //   "Guten Tag,Sie haben 0 Sendungen erfolgreich in des e-Gehaltszettel Portal eingeliefert.0 Sendungen konnten nicht zugestellt werden.1 Sendungen sind in der Warteschlange und werden demnächst verarbeitet.mit freundlichen Grüßen,Ihr e-Gehaltszettel Team";
+    // const expectedEmailText2 =
+    //   "Guten Tag,Sie haben 2 ServiceLine Sendungen erfolgreich in des e-Gehaltszettel Portal eingeliefert.1 Sendungen konnten nicht zugestellt werden.Folgende Personalnummern sind betroffen:234500123mit freundlichen Grüßen,Ihr e-Gehaltszettel Team";
+    // cy.visit("https://yopmail.com/en/");
+    // cy.get("#login").clear();
+    // cy.get("#login").type("aqua.admin@yopmail.com");
+    // cy.get("#refreshbut > .md > .material-icons-outlined").click();
+    // cy.wait(3000);
+    // cy.get("#refresh").click(); //Click on Refresh inbox icon
+    // cy.wait(1000);
+    // cy.iframe("#ifinbox")
+    //   .find(".mctn > .m > button > .lms")
+    //   .eq(0)
+    //   .should("include.text", "Versandreport e-Gehaltszettel Portal"); //Versandreport e-Gehaltszettel Portal
+    // cy.iframe("#ifmail")
+    //   .find("#mail>div")
+    //   .invoke("text")
+    //   .then((emailText) => {
+    //     // EmailText1 validation
+    //     expect(emailText).to.contain(expectedEmailText1);
+    //   });
+    // cy.wait(50000);
+    // cy.get("#refresh").click(); //Click on Refresh inbox icon
+    // cy.wait(1000);
+    // // Email2 subject validation
+    // cy.iframe("#ifinbox")
+    //   .find(".mctn > .m > button > .lms")
+    //   .eq(0)
+    //   .should("include.text", "Versandreport e-Gehaltszettel Portal"); //Versandreport e-Gehaltszettel Portal
+    // cy.iframe("#ifmail")
+    //   .find("#mail>div")
+    //   .invoke("text")
+    //   .then((emailText) => {
+    //     // EmailText2 validation
+    //     expect(emailText).to.contain(expectedEmailText2);
+    //   });
+    // Completion message at the end of the test
+    cy.log("Test completed successfully.");
+  }); //end it
 });

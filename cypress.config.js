@@ -23,6 +23,6 @@ module.exports = defineConfig({
     modifyObstructiveCode: false,
     // experimentalSessionAndOrigin: true,
     // experimentalSessionSupport: true,
-    // baseUrl: "https://www.e-brief.at/fe_t",
+    baseUrl: "https://www.e-brief.at/fe_t",
   },
 });

@@ -105,6 +105,7 @@ describe("Verifying Footer links", () => {
                       });
                   }
                 });
+              cy.log("Test completed successfully.");
             }); //end clicking on a elements
           });
       });

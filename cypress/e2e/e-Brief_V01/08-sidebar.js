@@ -67,5 +67,7 @@ describe("Sidebar assertion", () => {
         expect(numberOfLabelsExpended).to.be.greaterThan(10);
       });
     });
+    // Completion message at the end of the test
+    cy.log("Test completed successfully.");
   });
 });

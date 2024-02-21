@@ -45,8 +45,8 @@ describe("Login, Update personal data, Logout", () => {
           });
       });
     //Getting total number of dropdown elements visible in te Personal data page
-    cy.get(".mat-form-field-wrapper")
-      .find(".mat-form-field-flex")
+    cy.get(".chameleon-form>div")
+      .find(".select-input")
       .then((a) => {
         const countDropdowns = Cypress.$(a).length;
         expect(a).to.have.length(countDropdowns);
@@ -54,13 +54,13 @@ describe("Login, Update personal data, Logout", () => {
       });
     //Iterating true all DropDownLists
     for (let i = 0; i < 6; i++) {
-      cy.get(".mat-form-field-flex").eq(i).click();
-      let tag = ".mat-autocomplete-panel"; // Dropdown list container (no 1st element)
+      cy.get(".chameleon-form>div>.select-input").eq(i).click();
+      let tag = ".mat-mdc-autocomplete-visible"; // Dropdown list container (no 1st element)
       if (i == 0) {
-        tag = "#mat-select-0-panel"; // Dropdown list container for 1st element
+        tag = ".mdc-menu-surface"; // Dropdown list container for 1st element
       }
       cy.get(tag)
-        .find(".mat-option")
+        .find(".mdc-list-item")
         .then((matOptionItems) => {
           const count = Cypress.$(matOptionItems).length; //Total number of items visible in dropdown
           expect(matOptionItems).to.have.length(count);
@@ -109,7 +109,8 @@ describe("Login, Update personal data, Logout", () => {
               ".chameleon-form>.two-col-grid-row>.two-col-grid-controls>.form-field"
             )
               .eq(index)
-              .type(" - My Data");
+              .clear()
+              .type("Testuser");
           }
           // Telephone nuumbers (mobile/landline) aria codes - 4 digits
           if (index == 2 || index == 4) {
@@ -155,6 +156,7 @@ describe("Login, Update personal data, Logout", () => {
     //   "app-personal-data-settings > app-settings-outlet-wrapper > .outlet-wrap > .settings-section-wrapper > .settings-section-buttons > sc-button > .button"
     // ).click();
     cy.wait(2000);
+    cy.log("Test completed successfully.");
   }); //end it
 
   //Logout  & Clear saved session

@@ -119,13 +119,12 @@ describe("Upload serviceLine pdf file and chec emails", () => {
     const expectedEmailText1 =
       "Guten Tag,Sie haben 0 Sendungen erfolgreich in des e-Gehaltszettel Portal eingeliefert.0 Sendungen konnten nicht zugestellt werden.1 Sendungen sind in der Warteschlange und werden demnächst verarbeitet.mit freundlichen Grüßen,Ihr e-Gehaltszettel Team";
     const expectedEmailText2 =
-      "Guten Tag,Sie haben 0 ServiceLine Sendungen erfolgreich in des e-Gehaltszettel Portal eingeliefert.3 Sendungen konnten nicht zugestellt werden.Folgende Personalnummern sind betroffen:ABBA000100279311ABBA234500123mit freundlichen Grüßen,Ihr e-Gehaltszettel Team";
-
+      "Guten Tag,Sie haben 2 ServiceLine Sendungen erfolgreich in des e-Gehaltszettel Portal eingeliefert.1 Sendungen konnten nicht zugestellt werden.Folgende Personalnummern sind betroffen:234500123mit freundlichen Grüßen,Ihr e-Gehaltszettel Team";
     cy.visit("https://yopmail.com/en/");
     cy.get("#login").clear();
     cy.get("#login").type("aqua.admin@yopmail.com");
     cy.get("#refreshbut > .md > .material-icons-outlined").click();
-    cy.wait(3000);
+    cy.wait(2000);
     cy.get("#refresh").click(); //Click on Refresh inbox icon
     cy.wait(1000);
     cy.iframe("#ifinbox")
@@ -139,7 +138,7 @@ describe("Upload serviceLine pdf file and chec emails", () => {
         // EmailText1 validation
         expect(emailText).to.contain(expectedEmailText1);
       });
-    cy.wait(20000);
+    cy.wait(50000);
     cy.get("#refresh").click(); //Click on Refresh inbox icon
     cy.wait(1000);
     // Email2 subject validation
