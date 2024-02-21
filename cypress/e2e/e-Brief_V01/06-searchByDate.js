@@ -38,7 +38,7 @@ describe("Search by date should work", () => {
     cy.get(".adv-menu>.mat-mdc-icon-button").click();
     cy.get('[name="startDate"]').click().type("invalid date format");
     cy.get('[name="endDate"]').click();
-    cy.get("#mat-mdc-error-0").should(
+    cy.get(".date-picker > :nth-child(1)>.error-message").should(
       "have.text",
       " Ungültiges Datumsformat. Bitte verwenden Sie dieses Format: TT.MM.JJJJ. "
     );
@@ -47,7 +47,7 @@ describe("Search by date should work", () => {
     //End date
     cy.get('[name="endDate"]').click().type("invalid date format");
     cy.get('[name="startDate"]').click();
-    cy.get("#mat-mdc-error-1").should(
+    cy.get(".date-picker > :nth-child(2)>.error-message").should(
       "have.text",
       " Ungültiges Datumsformat. Bitte verwenden Sie dieses Format: TT.MM.JJJJ. "
     );
