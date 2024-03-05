@@ -1,0 +1,244 @@
+PBRequest/2.0
+Type: FileSubmission
+PackageType: plain
+Timing: Synchronous
+UserID: aquaAdmin
+Password: Test1234!
+
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<PBCustomerCreationRequest>
+</PBCustomerCreationRequest>
+
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE PBCustomerCreationData PUBLIC "PBCustomerCreationData.dtd">
+<PBCustomerCreationData>
+  <LanguageCode>GER</LanguageCode>
+  <ProviderID>ATEBPP</ProviderID>
+  <Brand>ATEBPP</Brand>
+  <Application>BILL2C</Application>
+  <NewBusinessUnit>
+    <ContractNr>ExternalRegistration</ContractNr>
+    <Name>QA Testuser 1</Name>
+    <BusinessUnitType>Consumer</BusinessUnitType>
+    <Address>
+      <Street>Street 27/12</Street>
+      <ZIP>417</ZIP>
+      <Town>Town</Town>
+      <Country>AT</Country>
+      <Email>e.g.testuser1@yopmail.com</Email>
+    </Address>
+    <ProvisionCode>BNK</ProvisionCode>
+    <NotificationSettings>
+      <NotificationSubscription>
+        <LanguageCode>GER</LanguageCode>
+        <Event EventParameter="daily">InvoiceCreation</Event>
+        <Channel>Email</Channel>
+        <ReceiverAddress>e.g.testuser1@yopmail.com</ReceiverAddress>
+      </NotificationSubscription>
+    </NotificationSettings>
+  </NewBusinessUnit>
+  <NewUser>
+    <UserID>qaTestuser1</UserID>
+    <Password>Test1234!</Password>
+    <LastName>Testuser1</LastName>
+    <FirstName>QA</FirstName>
+    <DateOfBirth>19720212</DateOfBirth>
+    <Salutation>f</Salutation>
+    <Title></Title>
+    <Email>e.g.testuser1@yopmail.com</Email>
+  </NewUser>
+  <BillerRegistrationSettings>
+    <BillerRegistration>
+      <BillersInvoiceRecipientID>00000001</BillersInvoiceRecipientID>
+      <SystemsBillerID>WGGX8U</SystemsBillerID>
+    </BillerRegistration>
+  </BillerRegistrationSettings>
+</PBCustomerCreationData>
+
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE PBCustomerCreationData PUBLIC "PBCustomerCreationData.dtd">
+<PBCustomerCreationData>
+  <LanguageCode>GER</LanguageCode>
+  <ProviderID>ATEBPP</ProviderID>
+  <Brand>ATEBPP</Brand>
+  <Application>BILL2C</Application>
+  <NewBusinessUnit>
+    <ContractNr>ExternalRegistration</ContractNr>
+    <Name>QA Testuser 2</Name>
+    <BusinessUnitType>Consumer</BusinessUnitType>
+    <Address>
+      <Street>Street 27/12</Street>
+      <ZIP>417</ZIP>
+      <Town>Town</Town>
+      <Country>AT</Country>
+      <Email>e.g.testuser2@yopmail.com</Email>
+    </Address>
+    <ProvisionCode>BNK</ProvisionCode>
+    <NotificationSettings>
+      <NotificationSubscription>
+        <LanguageCode>GER</LanguageCode>
+        <Event EventParameter="daily">InvoiceCreation</Event>
+        <Channel>Email</Channel>
+        <ReceiverAddress>e.g.testuser2@yopmail.com</ReceiverAddress>
+      </NotificationSubscription>
+    </NotificationSettings>
+  </NewBusinessUnit>
+  <NewUser>
+    <UserID>qaTestuser2</UserID>
+    <Password>Test1234!</Password>
+    <LastName>Testuser2</LastName>
+    <FirstName>QA</FirstName>
+    <DateOfBirth>19720212</DateOfBirth>
+    <Salutation>f</Salutation>
+    <Title></Title>
+    <Email>e.g.testuser2@yopmail.com</Email>
+  </NewUser>
+  <BillerRegistrationSettings>
+    <BillerRegistration>
+      <BillersInvoiceRecipientID>00000002</BillersInvoiceRecipientID>
+      <SystemsBillerID>WGGX8U</SystemsBillerID>
+    </BillerRegistration>
+  </BillerRegistrationSettings>
+</PBCustomerCreationData>
+
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE PBCustomerCreationData PUBLIC "PBCustomerCreationData.dtd">
+<PBCustomerCreationData>
+  <LanguageCode>GER</LanguageCode>
+  <ProviderID>ATEBPP</ProviderID>
+  <Brand>ATEBPP</Brand>
+  <Application>BILL2C</Application>
+  <NewBusinessUnit>
+    <ContractNr>ExternalRegistration</ContractNr>
+    <Name>QA Testuser 3</Name>
+    <BusinessUnitType>Consumer</BusinessUnitType>
+    <Address>
+      <Street>Street 27/12</Street>
+      <ZIP>417</ZIP>
+      <Town>Town</Town>
+      <Country>AT</Country>
+      <Email>e.g.testuser3@yopmail.com</Email>
+    </Address>
+    <ProvisionCode>BNK</ProvisionCode>
+    <NotificationSettings>
+      <NotificationSubscription>
+        <LanguageCode>GER</LanguageCode>
+        <Event EventParameter="daily">InvoiceCreation</Event>
+        <Channel>Email</Channel>
+        <ReceiverAddress>e.g.testuser3@yopmail.com</ReceiverAddress>
+      </NotificationSubscription>
+    </NotificationSettings>
+  </NewBusinessUnit>
+  <NewUser>
+    <UserID>qaTestuser3</UserID>
+    <Password>Test1234!</Password>
+    <LastName>Testuser3</LastName>
+    <FirstName>QA</FirstName>
+    <DateOfBirth>19720212</DateOfBirth>
+    <Salutation>f</Salutation>
+    <Title></Title>
+    <Email>e.g.testuser3@yopmail.com</Email>
+  </NewUser>
+  <BillerRegistrationSettings>
+    <BillerRegistration>
+      <BillersInvoiceRecipientID>00000003</BillersInvoiceRecipientID>
+      <SystemsBillerID>WGGX8U</SystemsBillerID>
+    </BillerRegistration>
+  </BillerRegistrationSettings>
+</PBCustomerCreationData>
+
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE PBCustomerCreationData PUBLIC "PBCustomerCreationData.dtd">
+<PBCustomerCreationData>
+  <LanguageCode>GER</LanguageCode>
+  <ProviderID>ATEBPP</ProviderID>
+  <Brand>ATEBPP</Brand>
+  <Application>BILL2C</Application>
+  <NewBusinessUnit>
+    <ContractNr>ExternalRegistration</ContractNr>
+    <Name>QA Testuser 4</Name>
+    <BusinessUnitType>Consumer</BusinessUnitType>
+    <Address>
+      <Street>Street 27/12</Street>
+      <ZIP>417</ZIP>
+      <Town>Town</Town>
+      <Country>AT</Country>
+      <Email>e.g.testuser4@yopmail.com</Email>
+    </Address>
+    <ProvisionCode>BNK</ProvisionCode>
+    <NotificationSettings>
+      <NotificationSubscription>
+        <LanguageCode>GER</LanguageCode>
+        <Event EventParameter="daily">InvoiceCreation</Event>
+        <Channel>Email</Channel>
+        <ReceiverAddress>e.g.testuser5@yopmail.com</ReceiverAddress>
+      </NotificationSubscription>
+    </NotificationSettings>
+  </NewBusinessUnit>
+  <NewUser>
+    <UserID>qaTestuser4</UserID>
+    <Password>Test1234!</Password>
+    <LastName>Testuser4</LastName>
+    <FirstName>QA</FirstName>
+    <DateOfBirth>19720212</DateOfBirth>
+    <Salutation>f</Salutation>
+    <Title></Title>
+    <Email>e.g.testuser4@yopmail.com</Email>
+  </NewUser>
+  <BillerRegistrationSettings>
+    <BillerRegistration>
+      <BillersInvoiceRecipientID>00000004</BillersInvoiceRecipientID>
+      <SystemsBillerID>WGGX8U</SystemsBillerID>
+    </BillerRegistration>
+  </BillerRegistrationSettings>
+</PBCustomerCreationData>
+
+
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE PBCustomerCreationData PUBLIC "PBCustomerCreationData.dtd">
+<PBCustomerCreationData>
+  <LanguageCode>GER</LanguageCode>
+  <ProviderID>ATEBPP</ProviderID>
+  <Brand>ATEBPP</Brand>
+  <Application>BILL2C</Application>
+  <NewBusinessUnit>
+    <ContractNr>ExternalRegistration</ContractNr>
+    <Name>QA Testuser 4</Name>
+    <BusinessUnitType>Consumer</BusinessUnitType>
+    <Address>
+      <Street>Street 27/12</Street>
+      <ZIP>417</ZIP>
+      <Town>Town</Town>
+      <Country>AT</Country>
+      <Email>e.g.testuser5@yopmail.com</Email>
+    </Address>
+    <ProvisionCode>BNK</ProvisionCode>
+    <NotificationSettings>
+      <NotificationSubscription>
+        <LanguageCode>GER</LanguageCode>
+        <Event EventParameter="daily">InvoiceCreation</Event>
+        <Channel>Email</Channel>
+        <ReceiverAddress>e.g.testuser5@yopmail.com</ReceiverAddress>
+      </NotificationSubscription>
+    </NotificationSettings>
+  </NewBusinessUnit>
+  <NewUser>
+    <UserID>qaTestuserInvalid</UserID>
+    <Password>Test1234!</Password>
+    <LastName>TestuserInvalid</LastName>
+    <FirstName>QA</FirstName>
+    <DateOfBirth>19720212</DateOfBirth>
+    <Salutation>f</Salutation>
+    <Title></Title>
+    <Email>e.g.testuser5@yopmail.com</Email>
+  </NewUser>
+  <BillerRegistrationSettings>
+    <BillerRegistration>
+      <BillersInvoiceRecipientID></BillersInvoiceRecipientID>
+      <SystemsBillerID>WGGX8U</SystemsBillerID>
+    </BillerRegistration>
+  </BillerRegistrationSettings>
+</PBCustomerCreationData>
+
+
+

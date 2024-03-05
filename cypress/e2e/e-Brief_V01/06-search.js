@@ -6,12 +6,26 @@ describe("Search should work", () => {
       cy.loginToEBrief();
     });
   });
-  it("Verify search", () => {
+  it("Verify search, search items exists", () => {
     cy.visit("/deliveries");
     cy.get(".mat-mdc-form-field-infix>.mat-mdc-input-element")
       .click()
-      .type("hh{enter}"); // enter search word
+      .type("multiple{enter}"); // enter search word
     cy.wait(2000);
+    cy.get(".clear-search-padding > #undefined").click(); // clear search filter
+    cy.wait(1000);
+    cy.log("Test completed successfully.");
+  }); //end it
+  it("Verify search, search items does not exist", () => {
+    cy.visit("/deliveries");
+    cy.get(".mat-mdc-form-field-infix>.mat-mdc-input-element")
+      .click()
+      .type("delivery does not exisit{enter}"); // enter search word
+    cy.wait(2000);
+    cy.get(".no-results").should(
+      "contain",
+      " Keine Übereinstimmungen gefunden "
+    );
     cy.get(".clear-search-padding > #undefined").click(); // clear search filter
     cy.wait(1000);
     cy.log("Test completed successfully.");

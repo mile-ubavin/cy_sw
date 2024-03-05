@@ -43,17 +43,19 @@ describe("Verifying Socila medial links on Login page", () => {
     cy.wait(1000);
   });
   //Verify YouTube link, from the footer
-  it("Linkedin", () => {
+  it.only("Linkedin", () => {
     cy.visit("/");
     cy.url().should("include", "/"); //Validating url on the dashboard page
     cy.wait(1000);
-    cy.get("#onetrust-accept-btn-handler").click(); //Remove Cookie bar
+    //cy.get("#onetrust-accept-btn-handler").click(); //Remove Cookie bar
     cy.get(".footer__social-media>a")
       .eq(2)
       .invoke("removeAttr", "target")
       .click({ force: true }); //Remove target att
     cy.origin("https://at.linkedin.com/", () => {
       cy.wait(4000);
+      cy.get(".contextual-sign-in-modal__modal-dismiss").click();
+      cy.wait(1000);
       //cy.url().should("include", "https://www.linkedin.com"); // depricte
       cy.url().should("include", "https://at.linkedin.com/company/unserepost"); //Validate url
     });

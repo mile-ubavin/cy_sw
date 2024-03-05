@@ -152,9 +152,9 @@ describe("Login, Update personal data, Logout", () => {
       }); //end then
 
     //Click on Save button to SAVE changes
-    // cy.get(
-    //   "app-personal-data-settings > app-settings-outlet-wrapper > .outlet-wrap > .settings-section-wrapper > .settings-section-buttons > sc-button > .button"
-    // ).click();
+    cy.get(
+      "app-personal-data-settings > app-settings-outlet-wrapper > .outlet-wrap > .settings-section-wrapper > .settings-section-buttons > sc-button > .button"
+    ).click();
     cy.wait(2000);
     cy.log("Test completed successfully.");
   }); //end it

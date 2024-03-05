@@ -61,7 +61,7 @@ describe("Search by date picker should work", () => {
     });
 
     cy.get('[name="sender"]').click().type("e-brief upload");
-    cy.get('[name="subject"]').click().type("hh");
+    cy.get('[name="subject"]').click().type("multiple");
     cy.get('[color="primary"] > .button').click();
     cy.get('[name="subject"]').click().clear().type("not exist");
     cy.get('[color="primary"] > .button').click();
