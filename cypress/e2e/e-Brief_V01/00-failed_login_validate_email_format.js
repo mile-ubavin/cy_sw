@@ -26,7 +26,7 @@ describe("Failed Login to E-Brief using invalid email format", () => {
   };
 
   //Test Cases (I have added 5 loops so it will create 7 test cases)
-  //Change the test case count as much as you need
+  //Set the test case count
   for (let index = 0; index < 5; index++) {
     const TestEmail = emails(5);
     const EmailState = validateEmail(TestEmail);
