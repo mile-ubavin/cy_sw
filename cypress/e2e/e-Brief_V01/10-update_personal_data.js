@@ -149,8 +149,7 @@ describe("Login, Update personal data, Logout", () => {
               .type(randomTelephoneNumber);
           }
         }
-      }); //end then
-
+      }); //end than
     //Click on Save button to SAVE changes
     cy.get(
       "app-personal-data-settings > app-settings-outlet-wrapper > .outlet-wrap > .settings-section-wrapper > .settings-section-buttons > sc-button > .button"
