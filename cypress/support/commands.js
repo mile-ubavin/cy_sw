@@ -140,8 +140,8 @@ Cypress.Commands.add("loginToEBrief", () => {
   cy.visit("/"); //Taken from base url
   cy.url().should("include", "/"); //Validating url on the dashboard page
   cy.wait(1000);
-  cy.get("#onetrust-accept-btn-handler").click(); //Remove Cookie bar
-  cy.wait(1000);
+  // cy.get("#onetrust-accept-btn-handler").click(); //Remove Cookie bar
+  // cy.wait(1000);
   cy.get('button[type="submit"]').should("be.visible").and("be.enabled"); //3 Buttons should be visible and enabled in the landing page (Validation) - optional
   cy.get('button[type="submit"]').contains("Jetzt Anmelden").click();
   //Redirection to Kiam login page
