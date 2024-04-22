@@ -135,6 +135,11 @@ import "cypress-iframe";
 //     });
 // })
 
+
+
+
+//******************************************  E-Brief   ******************************/
+
 //Custom commands: Taken data from json file and login to E-Brief
 Cypress.Commands.add("loginToEBrief", () => {
   cy.visit("/"); //Taken from base url
@@ -268,7 +273,7 @@ Cypress.Commands.add("uploadDocument", function () {
 
 // ***************** EG-E-Box *****************
 
-//Custom commands: Taken data from json file and login to E-Brief
+//Custom commands: Taken data from json file 
 Cypress.Commands.add("loginToEgEbox", () => {
   //Import credentials (un/pw) from 'json' file
   cy.fixture("supportView.json").as("example_supportView");
@@ -284,7 +289,7 @@ Cypress.Commands.add("loginToEgEbox", () => {
   });
   cy.url().should("include", "/deliveries"); // => validate ebrief url (/deliveries page)
   cy.wait(1000);
-}); //end
+}); //end login
 
 // generateRandomUsername
 Cypress.Commands.add("generateRandomUsername", () => {
@@ -443,3 +448,74 @@ Cypress.Commands.add("deleteAllEmails", () => {
 
   cy.wait(1500);
 });
+
+
+
+//*******************************  DTAPART  *************************/
+
+
+
+
+//Custom commands: Taken data from json file 
+Cypress.Commands.add("loginToDatatpartEbox", () => {
+  //Import credentials (un/pw) from 'json' file
+  cy.fixture("datapart.json").as("datapart_json");
+  cy.get("datapart_json").then((usersJson) => {
+    cy.get('#mat-input-0').type(
+      usersJson.username_student
+    );
+    cy.get('#mat-input-1').type(
+      usersJson.password_student
+    );
+    cy.wait(1000);
+    cy.get('app-custom-icon-button').click(); //Click on Login button
+  });
+  cy.url().should("include", "/deliveries"); // => validate ebrief url (/deliveries page)
+  cy.wait(1000);
+}); //end
+
+
+
+//Custom commands: Taken data from json file
+Cypress.Commands.add("loginToDatapart", () => {
+  //Import credentials (un/pw) from 'supportView.json' file
+  cy.fixture("datapart.json").as("datapart");
+  cy.get("@datapart").then((datapartJson) => {
+    cy.visit(datapartJson.baseUrl); //Taken from base url
+    cy.url().should("include", "/login"); //Validating url on the login page
+    cy.get('#mat-input-0').type(datapart.username_student);
+    cy.get('#mat-input-1').type(datapart.password_student);
+    cy.wait(1000);
+    cy.get('app-custom-icon-button').click()
+    cy.url().should("include", "/dashboard/groups"); // => validate url
+    cy.wait(2000)
+  });
+  cy.wait(1000);
+}); //end
+
+
+
+//Custom commands: Taken data from json file 
+Cypress.Commands.add("loginToEgEboxAsStudent", () => {
+  // Load credentials from JSON file
+  cy.fixture("datapart.json").as("datapart");
+    
+  // Visit the base URL
+  cy.get("@datapart").then((datapartJson) => {
+    cy.visit(datapartJson.baseUrl);
+    cy.url().should("include", "/");
+    
+    // Enter username and password
+    cy.get('#mat-input-0').type(datapartJson.username_student);
+    cy.get('#mat-input-1').type(datapartJson.password_student);
+    
+    cy.wait(1000);
+    
+    // Click login button
+    cy.get('app-custom-icon-button').click();
+    
+    // Wait for dashboard page to load
+    cy.url().should("include", "/deliveries");
+    cy.wait(2000);
+  });
+}); //end login

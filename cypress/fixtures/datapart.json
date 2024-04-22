@@ -1,0 +1,11 @@
+{
+  "baseUrl": "https://datapart.post-business-solutions.at/pf.datapart/",
+  "username_student": "smile",
+  "password_student": "Test1234!",
+  "username_supportViewMaster": "e-gehaltszettelMaster",
+  "password_supportViewMaster": "Test1234!",
+  "company": "Aqua",
+  "username_supportViewAdmin": "aquaAdmin",
+  "password_supportViewAdmin": "Test1234!"
+ 
+}
