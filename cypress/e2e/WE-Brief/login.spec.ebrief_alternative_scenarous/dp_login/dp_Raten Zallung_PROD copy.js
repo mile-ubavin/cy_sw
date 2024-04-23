@@ -28,9 +28,6 @@ describe("Login/Logout to DATAPART E-Box", () => {
    cy.get('#mat-input-6').click().type("200.01")
    cy.get(".mat-mdc-form-field-error>.mat-mdc-form-field-error")
    .should("not.exist");
-
-//
-
 cy.get('.mat-mdc-select-placeholder').click()
 
 // Get the total number of items
@@ -52,15 +49,11 @@ cy.get('.ng-trigger-transformPanel > .mdc-list-item').then(($items) => {
 cy.wait(1000)
 cy.get(".submit-button").click()
 
-
-
-
-
   //Logout
-        // cy.get('.side-menu-section-desktop>.arrow-icon>button[aria-label="Benutzereinstellungen öffnen"]').click()
-        // cy.wait(3000)
-        // cy.get('.logout-title > a').click({ force: true });
-        // cy.url().should("include", "https://datapart.post-business-solutions.at/pf.datapart/"); // => true
+        cy.get('.side-menu-section-desktop>.arrow-icon>button[aria-label="Benutzereinstellungen öffnen"]').click()
+        cy.wait(3000)
+        cy.get('.logout-title > a').click({ force: true });
+        cy.url().should("include", "https://datapart.post-business-solutions.at/pf.datapart/"); // => true
         })
 });
 
