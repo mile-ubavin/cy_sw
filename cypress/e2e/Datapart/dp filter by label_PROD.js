@@ -1,6 +1,6 @@
-describe('Login/Logout to DATAPART E-Box', () => {
+describe('filter by label - DATAPART E-Box', () => {
   // Login and Logout
-  it('Login and Logout', function () {
+  it('filter by label', function () {
     cy.loginToEgEboxAsStudent();
 
     // Define the number of times to execute the code
