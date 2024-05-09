@@ -125,15 +125,16 @@ describe('Login/OPen delivery', () => {
       }
     });
 
-    //   // //Logout
+    //Logout
     cy.get(
       '.side-menu-section-desktop>.arrow-icon>button[aria-label="Benutzereinstellungen öffnen"]'
     ).click();
     cy.wait(3000);
     cy.get('.logout-title > a').click({ force: true });
-    cy.url().should(
-      'include',
-      'https://datapart.post-business-solutions.at/pf.datapart/'
-    ); // => true
+    cy.fixture('datapart.json').as('datapart');
+    cy.get('@datapart').then((datapartJson) => {
+      cy.visit(datapartJson.baseUrl); //Taken from base url
+      cy.url().should('include', datapartJson.baseUrl); //Validating url on the login page
+    });
   });
 });

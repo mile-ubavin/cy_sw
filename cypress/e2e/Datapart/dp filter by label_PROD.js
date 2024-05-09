@@ -46,9 +46,10 @@ describe('filter by label - DATAPART E-Box', () => {
     ).click();
     cy.wait(3000);
     cy.get('.logout-title > a').click({ force: true });
-    cy.url().should(
-      'include',
-      'https://datapart.post-business-solutions.at/pf.datapart/'
-    ); // url validation
+    cy.fixture('datapart.json').as('datapart');
+    cy.get('@datapart').then((datapartJson) => {
+      cy.visit(datapartJson.baseUrl); //Taken from base url
+      cy.url().should('include', datapartJson.baseUrl); //Validating url on the login page
+    });
   });
 });

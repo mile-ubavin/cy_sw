@@ -7,7 +7,9 @@
 //     },
 //   },
 // });
-const { defineConfig } = require("cypress");
+
+//OK
+const { defineConfig } = require('cypress');
 
 module.exports = defineConfig({
   defaultCommandTimeout: 6000,
@@ -17,12 +19,12 @@ module.exports = defineConfig({
     setupNodeEvents(on, config) {
       // implement node event listeners here
     },
-    specPattern: "cypress/e2e/**/*.{js,jsx,ts,tsx,feature}",
+    specPattern: 'cypress/e2e/**/*.{js,jsx,ts,tsx,feature}',
     chromeWebSecurity: false,
     headless: true,
     modifyObstructiveCode: false,
     // experimentalSessionAndOrigin: true,
     // experimentalSessionSupport: true,
-    baseUrl: "https://www.e-brief.at/fe_t",
+    baseUrl: 'https://www.e-brief.at/fe_t',
   },
 });
