@@ -49,6 +49,7 @@ describe('Invalid Login to DP', () => {
       } else {
         cy.get('#mat-mdc-error-4').should('not.be.visible');
       }
+      cy.log('Test completed successfully.');
     });
   }
 });

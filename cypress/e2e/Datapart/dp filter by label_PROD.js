@@ -8,6 +8,7 @@ describe('filter by label - DATAPART E-Box', () => {
 
     // Loop to execute the code multiple times
     for (let i = 0; i < numberOfExecutions; i++) {
+      cy.wait(1500);
       cy.get('.label-list-link > a').then(($labels) => {
         // Check if any labels are found
         if ($labels.length > 0) {

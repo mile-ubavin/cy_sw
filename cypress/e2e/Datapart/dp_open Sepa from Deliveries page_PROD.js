@@ -10,7 +10,7 @@ describe('Open SEPA from deliveries page DATAPART E-Box', () => {
         if ($btn.length > 0) {
           // Click on the element to open user settings
           cy.get('.sepa-payment-btn > #undefined > .mdc-button__label').click();
-          cy.wait(2500);
+          cy.wait(4500);
           // Read data from datapart.json file
           cy.fixture('datapart.json').then((datapart) => {
             // Fill the sepa form

@@ -16,7 +16,7 @@ describe('Open Sepa from Personal Datao DATAPART E-Box', () => {
     cy.wait(1500);
     //Open sepa in hs
     cy.get('#open-hybridsign').click();
-    cy.wait(2500);
+    cy.wait(4500);
     // Read data from datapart.json file
     cy.fixture('datapart.json').then((datapart) => {
       // Fill the sepa form
