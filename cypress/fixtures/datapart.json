@@ -16,5 +16,21 @@
   "bic": "GENODES1BBV",
   "city2": "Belgrade",
   "email": "datapart.test@yopmail.com",
-  "phone": "+381642826462"
+  "phone": "+381642826462",
+  "footerTitle": [
+    "Unternehmen",
+    "Kontakt",
+    "Datenschutzhinweis",
+    "Compliance",
+    "Impressum",
+    "Nutzungsbedingungen"
+  ],
+  "footerLinks": [
+    "ueber-uns/",
+    "kontakt-fahrschueler/",
+    "Datenschutzhinweis/",
+    "compliance/",
+    "impressum/",
+    "nutzungsbedingungen/"
+  ]
 }
