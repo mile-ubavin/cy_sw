@@ -1,45 +1,4 @@
-// describe('Invalid Login to DP', () => {
-//   it('Verify footer links', () => {
-//     //Get url from datapart.json / fixture folder
-//     cy.fixture('datapart.json').as('datapart');
-//     cy.get('@datapart').then((datapartJson) => {
-//       cy.visit(datapartJson.baseUrl); //Taken from base url
-//       cy.url().should('include', datapartJson.baseUrl); //Validating url on the login page
-//     });
-//     //Get tolal number of footer links, and validate total number (6 elements)
-//     let footerTitle = [];
-//     cy.get('.footer__wrapper > ul > li > a')
-//       .its('length')
-//       .should('eq', 6)
-//       .then((length) => {
-//         // length contains the total number of <a> elements
-//         cy.log('Total number of <a> elements:', length);
-//         cy.get('.footer__wrapper > ul > li > a')
-//           .each(($el, index, $list) => {
-//             footerTitle[index] = $el.text();
-//             cy.log('Footer title', footerTitle[index]);
-//           })
-//           //Validating footer titles
-//           .then(() => {
-//             for (let index = 0; index < length; index++) {
-//               cy.get('.footer__wrapper > ul > li > a')
-//                 .eq(index)
-//                 .invoke('text')
-//                 .as('footer__title');
-//               cy.get('@datapart').then((datapartJson) => {
-
-//                 cy.get('@footer__title').should(
-//                   'include',
-//                   datapartJson.footerTitle[index]
-//                 ); //Validate footerTitle
-//               });
-//             }
-//           });
-//       });
-//   }); //end it
-// });
-
-describe('Invalid Login to DP', () => {
+describe('Verify footer links', () => {
   it('Verify footer links', () => {
     // Get url from datapart.json / fixture folder
     cy.fixture('datapart.json').then((datapartJson) => {
