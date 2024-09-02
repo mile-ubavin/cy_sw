@@ -5,6 +5,7 @@
   "company": "Aqua",
   "username_supportViewAdmin": "aquaAdmin",
   "password_supportViewAdmin": "Test1234!",
+  "email_supportViewAdmin": "aqua.admin@yopmail.com",
   "username_egEbox": "000_qabilly",
   "password_egEbox": "Test1234!",
   "enableXML": [
@@ -18,7 +19,7 @@
     },
     {
       "id": "L103",
-      "name": "Wein & Co"
+      "name": "ISS"
     }
   ],
   "disableXML": [

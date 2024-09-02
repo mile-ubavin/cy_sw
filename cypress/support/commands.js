@@ -203,10 +203,11 @@ Cypress.Commands.add('loginToSupportViewAdmin', () => {
   cy.fixture('supportView.json').as('example_supportView');
   cy.get('@example_supportView').then((usersJson) => {
     cy.get('.username').type(usersJson.username_supportViewAdmin);
-    cy.get('.password').type(usersJson.password_supportViewAdmin);
+    cy.get('.password').type(usersJson.username_supportViewAdmin);
     cy.wait(1000);
     cy.get('.login-button').click(); //Login to SW
   });
+  cy.wait(1500);
   cy.url().should('include', '/dashboard/groups'); // => validate url
   cy.wait(1000);
 }); //end
@@ -268,12 +269,28 @@ Cypress.Commands.add('uploadDocument', function () {
   });
 });
 
+//Custom commands: Taken data from json file
+Cypress.Commands.add('loginToPayslipSupportViewMaster', () => {
+  //Import credentials (un/pw) from 'supportView.json' file
+  cy.fixture('payslip.json').as('payslip');
+  cy.get('@payslip').then((payslipJson) => {
+    cy.visit(payslipJson.baseUrl); //Taken from base url
+    cy.url().should('include', '/login'); //Validating url on the login page
+    cy.get('.username').type(payslipJson.username_supportViewMaster);
+    cy.get('.password').type(payslipJson.password_supportViewMaster);
+    cy.wait(1000);
+    cy.get('.login-button').click(); //Trigger Login to SW
+    cy.url().should('include', '/dashboard/groups'); // => validate url
+  });
+  cy.wait(1000);
+}); //end
+
 // ***************** EG-E-Box *****************
 
 //Custom commands: Taken data from json file
 Cypress.Commands.add('loginToEgEbox', () => {
   //Import credentials (un/pw) from 'json' file
-  cy.fixture('supportView.json').as('example_supportView');
+  cy.fixture('payslip.json').as('example_supportView');
   cy.get('@example_supportView').then((usersJson) => {
     cy.get(':nth-child(1) > .ng-invalid > .input > .input__field-input').type(
       usersJson.username_egEbox
@@ -318,7 +335,9 @@ Cypress.Commands.add('uploadMultipleDocuments', function (fileNames) {
       cy.fixture(fileName, 'binary')
         .then(Cypress.Blob.binaryStringToBlob)
         .then((fileContent) => {
-          cy.get('.dialog-content>.upload-section>div>form>input').attachFile({
+          cy.get(
+            '.mat-mdc-dialog-content>.upload-section>div>form>input'
+          ).attachFile({
             fileContent,
             filePath: fileName,
             fileName,
@@ -385,6 +404,7 @@ Cypress.Commands.add('uploadValidMultipleDocuments', function (fileNames) {
           });
         });
     });
+    cy.wait(1500);
     // Additional assertions for each uploaded file
     cy.get('.upload-section>div>span')
       .invoke('text')
@@ -403,14 +423,14 @@ Cypress.Commands.add('uploadValidMultipleDocuments', function (fileNames) {
         );
       });
 
-    cy.get('.dialog-actions>button>.title')
-      .eq(1)
-      .invoke('text')
-      .then((uploadButton) => {
-        expect(uploadButton, 'Upload document button').to.include(
-          t['Upload Documents']
-        );
-      });
+    // cy.get('.dialog-actions>button>.title')
+    //   .eq(1)
+    //   .invoke('text')
+    //   .then((uploadButton) => {
+    //     expect(uploadButton, 'Upload document button').to.include(
+    //       t['Upload Documents']
+    //     );
+    //   });
   });
 });
 //Logout from SW

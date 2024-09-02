@@ -1,0 +1,34 @@
+{
+  "baseUrl": "https://supportviewpayslip.edeja.com/fe/login",
+  "username_supportViewMaster": "e-gehaltszettelMaster",
+  "password_supportViewMaster": "Test1234!",
+  "company": "Aqua",
+  "username_supportViewAdmin": "aquaAdmin",
+  "password_supportViewAdmin": "Test1234!",
+  "accountOwner": "Test Account",
+  "street": "Test Street",
+  "houseNr": "17",
+  "postalCode": "8010",
+  "city": "Graz",
+  "iban": "DE26603900000059633000",
+  "bic": "GENODES1BBV",
+  "city2": "Belgrade",
+  "email": "datapart.test@yopmail.com",
+  "phone": "+381642826462",
+  "footerTitle": [
+    "Unternehmen",
+    "Kontakt",
+    "Datenschutzhinweis",
+    "Compliance",
+    "Impressum",
+    "Nutzungsbedingungen"
+  ],
+  "footerLinks": [
+    "ueber-uns/",
+    "kontakt-fahrschueler/",
+    "Datenschutzhinweis/",
+    "compliance/",
+    "impressum/",
+    "nutzungsbedingungen/"
+  ]
+}

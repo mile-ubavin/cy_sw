@@ -295,7 +295,7 @@
   "Activate": "Activate",
   "Deactivate": "Deactivate",
   "Unique id required": "Unique id required",
-  "Upload Documents": "Upload Documents",
+  "Upload Documents": "Upload Personal Document",
   "Loading document": "Loading document",
   "Document successfully uploaded": "Document successfully uploaded",
   "The fileformat will not be supported": "The fileformat will not be supported",
@@ -344,6 +344,7 @@
   "Group with provided prefix already exist": "Group with provided prefix already exist",
   "The hash value in the filename does not match the expected hash": "The hash value in the filename does not match the expected hash",
   "Minimal length is 2": "Minimal length is 2",
+  "E-mail address / user name": "E-mail address / user name",
   "Admin Users": "Admin Users",
   "User from": "User from",
   "Admin Users from": "Admin Users from",
@@ -374,6 +375,7 @@
   "Company Name": "Company Name",
   "Company Admin": "Company Admin",
   "Edit Company": "Edit Company",
+  "Forgot Password": "Forgot Password",
   "Company UID": "Company UID",
   "Company-Specific User ID": "Company-Specific User ID",
   "User assignment for company administration was successfully taken over": "User assignment for company administration was successfully taken over",
@@ -408,5 +410,7 @@
   "CSV file does not contain required fields and/or values": "CSV file does not contain required fields and/or values",
   "A problem occurred during processing. Please try again later": "A problem occurred during processing. Please try again later",
   "The file is invalid and could not be processed": "The file is invalid and could not be processed",
-  "XML template not supported for current tenant": "XML template not supported for current tenant"
+  "XML template not supported for current tenant": "XML template not supported for current tenant",
+  "E-Mail for resetting the password was sent": "E-Mail for resetting the password was sent",
+  "Password successfully reset": "Password successfully reset"
 }
