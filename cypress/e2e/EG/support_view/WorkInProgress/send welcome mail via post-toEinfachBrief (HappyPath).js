@@ -195,7 +195,6 @@ describe('Send welcome mail via post / EinfachBrief (HappyPath)', () => {
             // Click the link if it's found
             cy.get('.header__navigation-menu>li>a').eq(index).click();
           }
-          cy.get('app-root>.container').scrollTo(top);
           cy.wait(2000);
         });
         //Open latest received item
