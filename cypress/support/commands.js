@@ -208,7 +208,7 @@ Cypress.Commands.add('loginToSupportViewAdmin', () => {
     cy.get('.login-button').click(); //Login to SW
   });
   cy.wait(1500);
-  cy.url().should('include', '/dashboard/groups'); // => validate url
+  cy.url().should('include', '/dashboard/groups'); // => validate urlS
   cy.wait(1000);
 }); //end
 
@@ -326,6 +326,21 @@ Cypress.Commands.add('getOppositeLanguage', (currentLanguage) => {
 //CC TEST
 Cypress.Commands.add('loadTranslate', (language) => {
   cy.fixture(`${language}.json`).as('t');
+});
+
+//Upload CSV file
+
+Cypress.Commands.add('upload_csv', function () {
+  cy.fixture('SendCredentialsToPrint(2persons).csv', 'binary')
+    .then(Cypress.Blob.binaryStringToBlob)
+    .then((fileContent) => {
+      cy.get('.dialog-content>.upload-section>div>form>input').attachFile({
+        fileContent,
+        filePath: 'SendCredentialsToPrint(2persons).csv',
+        fileName: 'SendCredentialsToPrint(2persons).csv',
+        mimeType: 'text/csv',
+      });
+    });
 });
 
 // Upload Multiple Attachments
@@ -466,7 +481,7 @@ Cypress.Commands.add('deleteAllEmails', () => {
   cy.wait(1500);
 });
 
-//*******************************  DTAPART  *************************/
+//*******************************  DATAPART  *************************/
 
 //Custom commands: Taken data from json file
 Cypress.Commands.add('loginToDatatpartEbox', () => {
@@ -523,3 +538,26 @@ Cypress.Commands.add('loginToEgEboxAsStudent', () => {
     cy.wait(2000);
   });
 }); //end login
+
+//dowload doc
+require('cypress-downloadfile/lib/downloadFileCommand');
+
+Cypress.Commands.add('openDownloadedFile', (fileName) => {
+  const filePath = `cypress/downloads/${fileName}`;
+  const openCommand = Cypress.platform === 'win32' ? 'start' : 'open'; // Windows or Mac
+
+  // cy.exec(`${openCommand} ${filePath}`).then((result) => {
+  //   // Optional: Check for successful execution
+  //   if (result.code !== 0) {
+  //     throw new Error(`Failed to open file: ${result.stderr}`);
+  //   }
+  // });
+
+  cy.readFile(filePath).then((fileContent) => {
+    const pdfBlob = new Blob([fileContent], { type: 'application/pdf' });
+    const pdfURL = URL.createObjectURL(pdfBlob);
+    cy.window().then((win) => {
+      win.location.href = pdfURL; // Opens the PDF in the same tab
+    });
+  });
+});
