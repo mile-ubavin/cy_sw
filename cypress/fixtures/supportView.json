@@ -32,5 +32,35 @@
       "id": "T102",
       "name": "Beiersdorfer"
     }
+  ],
+
+  "createUserNoAddress": [
+    {
+      "firstName": "No Address",
+      "lastName": "Manual",
+      "username": "manualNoAddress",
+      "email": "manual.no-address@yopmail.com",
+      "countryCodePhoneNum": "+43",
+      "netNumberPhoneNum": "64",
+      "subscriberNumberPhoneNum": "706360",
+      "prefixedTitle": "No Address Data - Title"
+    }
+  ],
+  "createUser": [
+    {
+      "firstName": "Address Data",
+      "lastName": "Manual",
+      "username": "manualAddress",
+      "email": "manual.addres-data@yopmail.com",
+      "countryCodePhoneNum": "+43",
+      "netNumberPhoneNum": "64",
+      "subscriberNumberPhoneNum": "707777",
+      "streetName": "Test Strasse",
+      "streetNumber": "17",
+      "doorNumber": "7",
+      "zipCode": "8010",
+      "city": "Graz",
+      "prefixedTitle": "Address Data - Title"
+    }
   ]
 }
