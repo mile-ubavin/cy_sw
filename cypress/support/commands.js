@@ -145,7 +145,9 @@ Cypress.Commands.add('loginToEBrief', () => {
   // cy.get("#onetrust-accept-btn-handler").click(); //Remove Cookie bar
   // cy.wait(1000);
   cy.get('button[type="submit"]').should('be.visible').and('be.enabled'); //3 Buttons should be visible and enabled in the landing page (Validation) - optional
-  cy.get('button[type="submit"]').contains('Jetzt Anmelden').click();
+  cy.get('.login-form > sc-button > .button')
+    .contains('Jetzt Anmelden')
+    .click();
   //Redirection to Kiam login page
   //cy.url().should("include", "https://login.post.at/kiamprod.onmicrosoft.com"); //Validating KiamProd url
   cy.url().should('include', 'https://kiamabn.b2clogin.com/'); //Validating KiamTest url

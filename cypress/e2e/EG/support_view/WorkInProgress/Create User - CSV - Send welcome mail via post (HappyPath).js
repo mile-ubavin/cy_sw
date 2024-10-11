@@ -8,6 +8,7 @@ describe('Send welcome mail via post / EinfachBrief (HappyPath)', () => {
     cy.get('@payslipSW').then((payslipJson) => {
       cy.visit(payslipJson.baseUrl); //Taken from base url
       cy.url().should('include', payslipJson.baseUrl); //Validating url on the login page
+      cy.pause();
       //Login to sw
       cy.fixture('supportView.json').as('payslipSW');
       cy.get('@payslipSW').then((payslipJson) => {
@@ -50,6 +51,7 @@ describe('Send welcome mail via post / EinfachBrief (HappyPath)', () => {
       } else {
         // If the checkbox is already enabled
         cy.log('Checkbox is already enabled.');
+        cy.pause();
       }
       cy.wait(3000);
       //Close Edit Company dialog
@@ -109,7 +111,7 @@ describe('Send welcome mail via post / EinfachBrief (HappyPath)', () => {
         })
         .click({ force: true });
       cy.wait(1500);
-
+      cy.pause();
       //Click on Upload CSV button
       cy.get('.create_user_dialog_content>.buttons-wrapper>button')
         .filter((index, el) => {
@@ -227,13 +229,14 @@ describe('Send welcome mail via post / EinfachBrief (HappyPath)', () => {
             .should('be.visible') // Wait for the element to be visible
             .click({ force: true });
           cy.wait(3000);
-          // cy.pause();
+
           //Close document preview dialog
           cy.get(
             ':nth-child(7) > .dialog > .dialog__inner > .dialog__close-button'
           ).click();
         });
         cy.wait(2000);
+        cy.pause();
       });
 
       // Switch to history table and download the PDF
@@ -272,6 +275,7 @@ describe('Send welcome mail via post / EinfachBrief (HappyPath)', () => {
       });
     });
     cy.wait(3500);
+    cy.pause();
   }); //end it
 
   //Y O P M A I L
@@ -320,7 +324,7 @@ describe('Send welcome mail via post / EinfachBrief (HappyPath)', () => {
     emailBody(); // Validate email body
 
     // Wait to ensure the email content is loaded
-    cy.wait(3500);
+    cy.wait(4500);
 
     // Switch to the second email
     cy.iframe('#ifinbox').find('.mctn > .m > button > .lms').eq(1).click();
@@ -329,7 +333,7 @@ describe('Send welcome mail via post / EinfachBrief (HappyPath)', () => {
     cy.wait(1500);
     emailBody(); // Validate second email body
 
-    cy.wait(2500);
+    cy.wait(4500);
   });
 
   // M A S T E R    U S E R - DELETE ALREADY CREATED USERS
