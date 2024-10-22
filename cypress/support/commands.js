@@ -85,6 +85,8 @@ import 'cypress-file-upload';
 import 'cypress-keycloak-commands';
 import 'cypress-iframe';
 
+// import '@4tw/cypress-drag-drop';
+
 //Custom commands: Take a data from json file and login to E-Brief via Kiam
 // Cypress.Commands.add("loginToEBrief_1", () => {
 //     cy.visit("https://www.e-brief.at/fe_t");
@@ -219,7 +221,12 @@ Cypress.Commands.add('loginToSupportViewMaster', () => {
   //Import credentials (un/pw) from 'supportView.json' file
   cy.fixture('supportView.json').as('example_supportView');
   cy.get('@example_supportView').then((usersJson) => {
-    cy.visit(usersJson.baseUrl); //Taken from base url
+    //cy.visit(usersJson.baseUrl); //Taken from base url
+
+    cy.visit(usersJson.baseUrl_04, {
+      failOnStatusCode: false,
+    });
+
     cy.url().should('include', '/login'); //Validating url on the login page
     cy.get('.username').type(usersJson.username_supportViewMaster);
     cy.get('.password').type(usersJson.password_supportViewMaster);
@@ -328,6 +335,46 @@ Cypress.Commands.add('getOppositeLanguage', (currentLanguage) => {
 //CC TEST
 Cypress.Commands.add('loadTranslate', (language) => {
   cy.fixture(`${language}.json`).as('t');
+});
+
+//Upload JPG file to a Quill editor using the attachFile command
+
+Cypress.Commands.add('uploadValidImage', function () {
+  cy.fixture('SampleJPGImage_under_1mb.jpg', 'base64').then((fileContent) => {
+    // Click on the image button to open file input
+    cy.wait(500); // Wait for 500 milliseconds
+    cy.get('.ql-image').trigger('mouseover').click({ force: true });
+
+    cy.get('input[type="file"]', { timeout: 20000 }).should('exist'); // Wait for the file input to appear
+    cy.pause();
+
+    // Wait for the input field to appear and then upload the file
+    cy.get('input[type="file"]', { timeout: 10000 }) // Ensure that the file input field is rendered
+      .should('exist')
+      .attachFile({
+        fileContent: Cypress.Blob.base64StringToBlob(fileContent, 'image/jpeg'),
+        fileName: 'SampleJPGImage_under_1mb.jpg',
+        mimeType: 'image/jpeg',
+        encoding: 'utf-8',
+      });
+
+    // Optionally, you can add assertions here to confirm the image was uploaded.
+  });
+});
+
+//Upload CSV file
+
+Cypress.Commands.add('upload_csv', function () {
+  cy.fixture('SendCredentialsToPrint(2persons).csv', 'binary')
+    .then(Cypress.Blob.binaryStringToBlob)
+    .then((fileContent) => {
+      cy.get('.dialog-content>.upload-section>div>form>input').attachFile({
+        fileContent: Cypress.Blob.base64StringToBlob(fileContent, 'image/jpeg'),
+        fileName: 'SampleJPGImage_under_1mb.jpg',
+        mimeType: 'image/jpeg',
+        encoding: 'utf-8',
+      });
+    });
 });
 
 //Upload CSV file
@@ -523,7 +570,10 @@ Cypress.Commands.add('loginToEgEboxAsStudent', () => {
 
   // Visit the base URL
   cy.get('@datapart').then((datapartJson) => {
-    cy.visit(datapartJson.baseUrl);
+    // cy.visit(datapartJson.baseUrl);
+    cy.visit(usersJson.baseUrl_04, {
+      failOnStatusCode: false,
+    });
     cy.url().should('include', datapartJson.baseUrl);
 
     // Enter username and password
@@ -563,3 +613,6 @@ Cypress.Commands.add('openDownloadedFile', (fileName) => {
     });
   });
 });
+
+//Drag and Drop
+// import 'cypress-drag-drop';

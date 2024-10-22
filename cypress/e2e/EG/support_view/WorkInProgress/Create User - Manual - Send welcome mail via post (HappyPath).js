@@ -1,5 +1,3 @@
-/// <reference types="Cypress" />
-
 describe('Send welcome mail via post / EinfachBrief (HappyPath)', () => {
   // M A S T E R    U S E R - CHECK DOES 'SEND TO EBRIEF' IS ENABLED
   it('Login As Master User - Check does eGehaltszettelEnabled is set to true', () => {

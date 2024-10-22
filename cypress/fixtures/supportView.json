@@ -1,5 +1,6 @@
 {
   "baseUrl": "https://supportviewpayslip.edeja.com/fe/login",
+  "baseUrl_04": "https://e-gehaltszettel-t.post-business-solutions.at/fe.e-gehaltszettel_t/login",
   "username_supportViewMaster": "e-gehaltszettelMaster",
   "password_supportViewMaster": "Test1234!",
   "company": "Aqua",

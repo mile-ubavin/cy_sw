@@ -1,5 +1,3 @@
-/// <reference types="Cypress" />
-
 describe('crate user from SW', () => {
   // Generate a 3-character random string
   function generateRandomString(length) {
