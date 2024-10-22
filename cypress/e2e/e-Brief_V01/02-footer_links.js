@@ -1,4 +1,4 @@
-/// <reference types="Cypress" />
+/// <reference types="cypress" />
 describe('Verifying Footer links', () => {
   it('Verifying Footer links', () => {
     //Handling non CY errors

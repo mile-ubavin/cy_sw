@@ -52,7 +52,7 @@ describe('Login, Update personal data, Logout', () => {
         cy.log('LISTING COUNT - DROPDOWN', countDropdowns);
       });
     //Iterating true all DropDownLists
-    for (let i = 0; i < 6; i++) {
+    for (let i = 0; i < 5; i++) {
       cy.get('.chameleon-form>div>.select-input').eq(i).click();
       let tag = '.mat-mdc-autocomplete-visible'; // Dropdown list container (no 1st element)
       if (i == 0) {

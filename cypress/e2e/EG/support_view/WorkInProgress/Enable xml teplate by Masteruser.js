@@ -1,5 +1,3 @@
-/// <reference types="Cypress" />
-
 describe('Enable XML template by Masteruser', () => {
   // Custom command to load t based on the selected language
   Cypress.Commands.add('loadTranslate', (language) => {

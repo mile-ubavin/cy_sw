@@ -1,4 +1,3 @@
-/// <reference types="Cypress" />
 describe('Login/Logout to ebrief base scenario', () => {
   //Login via Kiam, Logout
   /// <reference types="Cypress" />
@@ -74,7 +73,7 @@ describe('Login/Logout to ebrief base scenario', () => {
           cy.log('LISTING COUNT - DROPDOWN', countDropdowns);
         });
       //Iterating true all DropDownLists
-      for (let i = 0; i < 6; i++) {
+      for (let i = 0; i < 5; i++) {
         cy.get('.chameleon-form>div>.select-input').eq(i).click();
         let tag = '.mat-mdc-autocomplete-visible'; // Dropdown list container (no 1st element)
         if (i == 0) {

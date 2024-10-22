@@ -1,12 +1,12 @@
-/// <reference types="Cypress" />
+/// <reference types="cypress" />
 
-describe("Search by date should work", () => {
+describe('Search by date should work', () => {
   beforeEach(() => {
     cy.loginToEBrief();
   });
   //Filter by date
-  it("Flter by date", () => {
-    cy.get(".adv-menu>.mat-mdc-icon-button").click();
+  it('Flter by date', () => {
+    cy.get('.adv-menu>.mat-mdc-icon-button').click();
 
     var date = new Date();
     date.setDate(date.getDate() - 360);
@@ -15,9 +15,9 @@ describe("Search by date should work", () => {
     var month = date.getMonth() + 1;
     var day = date.getDate();
 
-    cy.log("Picked year: " + year);
-    cy.log("Picked month: " + month);
-    cy.log("Picked day: " + day);
+    cy.log('Picked year: ' + year);
+    cy.log('Picked month: ' + month);
+    cy.log('Picked day: ' + day);
 
     cy.get('[name="startDate"]').click().type(`${day}.${month}.${year}`);
     cy.wait(1000);
@@ -34,35 +34,35 @@ describe("Search by date should work", () => {
     cy.wait(1000);
   }); //end it
   //Verify invalid date format
-  it("Verify invalid date format", () => {
-    cy.get(".adv-menu>.mat-mdc-icon-button").click();
-    cy.get('[name="startDate"]').click().type("invalid date format");
+  it('Verify invalid date format', () => {
+    cy.get('.adv-menu>.mat-mdc-icon-button').click();
+    cy.get('[name="startDate"]').click().type('invalid date format');
     cy.get('[name="endDate"]').click();
-    cy.get(".date-picker > :nth-child(1)>.error-message").should(
-      "have.text",
-      " Ungültiges Datumsformat. Bitte verwenden Sie dieses Format: TT.MM.JJJJ. "
+    cy.get('.date-picker > :nth-child(1)>.error-message').should(
+      'have.text',
+      ' Ungültiges Datumsformat. Bitte verwenden Sie dieses Format: TT.MM.JJJJ. '
     );
     cy.get('[name="startDate"]').clear();
     cy.wait(500);
     //End date
-    cy.get('[name="endDate"]').click().type("invalid date format");
+    cy.get('[name="endDate"]').click().type('invalid date format');
     cy.get('[name="startDate"]').click();
-    cy.get(".date-picker > :nth-child(2)>.error-message").should(
-      "have.text",
-      " Ungültiges Datumsformat. Bitte verwenden Sie dieses Format: TT.MM.JJJJ. "
+    cy.get('.date-picker > :nth-child(2)>.error-message').should(
+      'have.text',
+      ' Ungültiges Datumsformat. Bitte verwenden Sie dieses Format: TT.MM.JJJJ. '
     );
-    cy.log("Test completed successfully.");
+    cy.log('Test completed successfully.');
   }); //end it
   //Logout and clear session
-  it("Logout & Clear saved session", function () {
-    cy.visit("/deliveries");
-    cy.url().should("include", "/deliveries"); //Validate URL /on deliveries page
-    cy.get(".user-title").click();
+  it('Logout & Clear saved session', function () {
+    cy.visit('/deliveries');
+    cy.url().should('include', '/deliveries'); //Validate URL /on deliveries page
+    cy.get('.user-title').click();
     cy.wait(2000);
-    cy.contains("Logout").click();
+    cy.contains('Logout').click();
     Cypress.session.clearAllSavedSessions(); //Clear all session
-    cy.url().should("include", "/"); // Validate url
+    cy.url().should('include', '/'); // Validate url
     // Completion message at the end of the test
-    cy.log("Test completed successfully.");
+    cy.log('Test completed successfully.');
   }); //end it
 });

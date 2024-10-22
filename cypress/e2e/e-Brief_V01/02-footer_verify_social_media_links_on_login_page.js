@@ -1,4 +1,4 @@
-/// <reference types="Cypress" />
+/// <reference types="cypress" />
 describe('Verifying Socila medial links on Login page', () => {
   //Verify Facebook link, from the footer
   it('Facebook', () => {

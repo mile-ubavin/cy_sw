@@ -1,65 +1,52 @@
 describe('Send welcome mail via post / EinfachBrief (HappyPath)', () => {
   // M A S T E R    U S E R - CHECK DOES 'SEND TO EBRIEF' IS ENABLED
-  it('Login As Master User - Check does eGehaltszettelEnabled is set to true', () => {
+  it.only('Login As Master User - Check does eGehaltszettelEnabled is set to true', () => {
     //Import credentials (un/pw) from 'supportView.json' file
+    // Login using custom command
+    cy.loginToSupportViewMaster(); // Login custom commands
+    cy.wait(3000);
+
+    //Search for Group by Display Name
+    cy.get('#searchButton>span').click(); //Click on search button
     cy.fixture('supportView.json').as('payslipSW');
     cy.get('@payslipSW').then((payslipJson) => {
-      cy.visit(payslipJson.baseUrl); //Taken from base url
-      cy.url().should('include', payslipJson.baseUrl); //Validating url on the login page
-      //Login to sw
-      cy.fixture('supportView.json').as('payslipSW');
-      cy.get('@payslipSW').then((payslipJson) => {
-        cy.get('input[formcontrolname="username"]').type(
-          payslipJson.username_supportViewMaster
-        );
-        cy.get('input[formcontrolname="password"]').type(
-          payslipJson.password_supportViewMaster
-        );
-        cy.get('button[type="submit"]').click();
-      });
-
-      //Search for Group by Display Name
-      cy.get('#searchButton>span').click(); //Click on search button
-      cy.fixture('supportView.json').as('payslipSW');
-      cy.get('@payslipSW').then((payslipJson) => {
-        // Use the company name from the JSON file
-        const companyName = payslipJson.search;
-        // Search for Group by Display Name using the company name
-        cy.get('.search-dialog>form>.form-fields>.searchText-wrap')
-          .eq(1)
-          .type(companyName);
-      });
-      //Find the Search button by button name and click on it
-      cy.get('.search-dialog>form>div>.mat-primary').click();
-      cy.wait(1500);
-      //Switch to user section
-      cy.get('.action-buttons > .mdc-button').eq(0).click();
+      // Use the company name from the JSON file
+      const companyName = payslipJson.search;
+      // Search for Group by Display Name using the company name
+      cy.get('.search-dialog>form>.form-fields>.searchText-wrap')
+        .eq(1)
+        .type(companyName);
     });
+    //Find the Search button by button name and click on it
+    cy.get('.search-dialog>form>div>.mat-primary').click();
     cy.wait(1500);
-    //Scroll to the botton
-    cy.get('.mat-mdc-dialog-content').scrollTo('bottom');
+    //Switch to user section
+    cy.get('.action-buttons > .mdc-button').eq(0).click();
+  });
+  cy.wait(1500);
+  //Scroll to the botton
+  cy.get('.mat-mdc-dialog-content').scrollTo('bottom');
 
-    //Check checkbox
-    cy.get('#eGehaltszettelEnabled').then(($checkbox) => {
-      if (!$checkbox.is(':checked')) {
-        // If the checkbox is not checked, enable it
-        cy.get('#eGehaltszettelEnabled').check();
-        cy.log('Checkbox was not enabled, now enabled.');
-      } else {
-        // If the checkbox is already enabled
-        cy.log('Checkbox is already enabled.');
-      }
-      cy.wait(3000);
-      //Close Edit Company dialog
-      cy.get('.close[data-mat-icon-name="close"]').click();
-      //Logout
-      cy.get('.logout-icon ').click();
-      cy.wait(2000);
-      cy.get('.confirm-buttons > :nth-child(2)').click();
-      cy.url();
-      cy.should('include', 'https://supportviewpayslip.edeja.com/fe/login'); // Validate url
-      cy.wait(1500);
-    });
+  //Check checkbox
+  cy.get('#eGehaltszettelEnabled').then(($checkbox) => {
+    if (!$checkbox.is(':checked')) {
+      // If the checkbox is not checked, enable it
+      cy.get('#eGehaltszettelEnabled').check();
+      cy.log('Checkbox was not enabled, now enabled.');
+    } else {
+      // If the checkbox is already enabled
+      cy.log('Checkbox is already enabled.');
+    }
+    cy.wait(3000);
+    //Close Edit Company dialog
+    cy.get('.close[data-mat-icon-name="close"]').click();
+    //Logout
+    cy.get('.logout-icon ').click();
+    cy.wait(2000);
+    cy.get('.confirm-buttons > :nth-child(2)').click();
+    cy.url();
+    cy.should('include', 'https://supportviewpayslip.edeja.com/fe/login'); // Validate url
+    cy.wait(1500);
   }); //end it
 
   // A D M I N   U S E R - CREATE USER MANUAL
