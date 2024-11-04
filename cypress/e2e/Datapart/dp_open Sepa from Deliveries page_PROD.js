@@ -10,7 +10,7 @@ describe('Open SEPA from deliveries page DATAPART E-Box', () => {
         if ($btn.length > 0) {
           // Click on the element to open user settings
           cy.get('.sepa-payment-btn > #undefined > .mdc-button__label').click();
-          cy.wait(4500);
+          cy.wait(6500);
           // Read data from datapart.json file
           cy.fixture('datapart.json').then((datapart) => {
             // Fill the sepa form
@@ -55,7 +55,7 @@ describe('Open SEPA from deliveries page DATAPART E-Box', () => {
           }); //end - Fill the sepa form
           //Submit SEPA form
           cy.get('.submit-button').click({ force: true });
-          cy.wait(2500);
+          cy.wait(4500);
           //Sign Sepa using Touch Signature
           cy.get('.touch-signature-button > .mdc-button__label').click({
             force: true,
@@ -92,9 +92,9 @@ describe('Open SEPA from deliveries page DATAPART E-Box', () => {
           cy.get('.exit > .mdc-button__label').click();
           cy.wait(2000);
           //Confirm Cancel dialog
-          cy.get(
-            '.mdc-dialog__container>.mat-mdc-dialog-surface>.mat-mdc-dialog-component-host>.mat-mdc-dialog-actions>.mat-accent'
-          ).click({ force: true });
+          cy.get('.mat-mdc-dialog-actions>.mdc-button')
+            .last()
+            .click({ force: true });
         }
         //Logout
         cy.get(

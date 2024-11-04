@@ -55,9 +55,11 @@ describe('Login/Logout to DATAPART E-Box', () => {
 
     cy.get('input[formcontrolname="newPassword"]').type(randomValue);
     //Click on show/hide icon
-    cy.get(
-      '.mat-mdc-form-field.ng-tns-c2608167813-15 > .mat-mdc-text-field-wrapper > .mat-mdc-form-field-flex > .mat-mdc-form-field-icon-suffix > .mat-icon'
-    ).click();
+
+    cy.get('mat-icon[data-mat-icon-name="login_username-password_invisible"]')
+      .eq(0)
+      .click();
+
     cy.get('#mat-mdc-error-8').should(
       'have.text',
       ' Die minimale Länge ist 8. Die Passwörter müssen übereinstimmen.'
@@ -68,9 +70,9 @@ describe('Login/Logout to DATAPART E-Box', () => {
     );
     cy.get('input[formcontrolname="newPasswordConfirm"]').type(randomValue);
     //Click on show/hide icon
-    cy.get(
-      '.mat-mdc-form-field.ng-tns-c2608167813-16 > .mat-mdc-text-field-wrapper > .mat-mdc-form-field-flex > .mat-mdc-form-field-icon-suffix > .mat-icon'
-    ).click();
+    cy.get('mat-icon[data-mat-icon-name="login_username-password_invisible"]')
+      .eq(0)
+      .click();
     cy.get('#mat-mdc-error-12').should(
       'have.text',
       ' Die minimale Länge ist 8. '
