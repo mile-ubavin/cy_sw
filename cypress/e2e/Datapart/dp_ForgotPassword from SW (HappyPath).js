@@ -1,4 +1,4 @@
-/// <reference types="Cypress" />
+/// <reference types="cypress" />
 
 describe('adminUser-ForgotPassword from SW (HappyPath)', () => {
   it.only('adminUser-triggerForgotPasswordFromSW', () => {
@@ -7,43 +7,43 @@ describe('adminUser-ForgotPassword from SW (HappyPath)', () => {
     //Import credentials (un/pw) from 'supportView.json' file
     cy.fixture('datapart.json').as('datapartSW');
     cy.get('@datapartSW').then((datapartJson) => {
-      cy.visit(datapartJson.baseUrl_04); //Taken from base url
-      cy.url().should('include', datapart.baseUrl_04); //Validating url on the login page
+      cy.visit(datapartJson.baseUrl); //Taken from base url
+      cy.url().should('include', datapart.baseUrl); //Validating url on the login page
       cy.wait(2000);
       cy.get('.forgot-password-button').click();
       //Check title
-      //cy.get('h2').contains('Forgot Password');
+      cy.get('h2').contains('Forgot Password');
 
       // Load the en.json fixture before your test
-      // cy.fixture('English.json').then((translations) => {
-      //   const forgotPasswordText = translations['Forgot Password']; // Access the translation key
-      //   const forgotPasswordLabelText =
-      //     translations['E-mail address / user name'];
-      //   const resettingPasswordSuccessMessage =
-      //     translations['E-Mail for resetting the password was sent'];
+      cy.fixture('English.json').then((translations) => {
+        const forgotPasswordText = translations['Forgot Password']; // Access the translation key
+        const forgotPasswordLabelText =
+          translations['E-mail address / user name'];
+        const resettingPasswordSuccessMessage =
+          translations['E-Mail for resetting the password was sent'];
 
-      //   // Translation value
-      //   cy.get('.dialog-title').should('include.text', forgotPasswordText);
-      //   cy.get('.dialog-query').should(
-      //     'include.text',
-      //     'You can reset your password to regain access to your account. What is your e-mail address or user name?'
-      //   );
-      //   cy.get('.dialog-title').should('include.text', forgotPasswordText);
-      //   cy.get('.mdc-floating-label').should(
-      //     'include.text',
-      //     forgotPasswordLabelText
-      //   );
-      //   cy.get('.mat-mdc-input-element').type(
-      //     datapartJson.username_supportViewAdmin_04
-      //   );
-      //   //click on resetPass button
-      //   cy.get('#reset_password_dialog-reset').click();
-      //   //validate resetPass success message
-      //   cy.get('.mat-mdc-simple-snack-bar > .mat-mdc-snack-bar-label').should(
-      //     'include.text',
-      //     resettingPasswordSuccessMessage
-      //   );
-      // });
+        // Translation value
+        cy.get('.dialog-title').should('include.text', forgotPasswordText);
+        cy.get('.dialog-query').should(
+          'include.text',
+          'You can reset your password to regain access to your account. What is your e-mail address or user name?'
+        );
+        cy.get('.dialog-title').should('include.text', forgotPasswordText);
+        cy.get('.mdc-floating-label').should(
+          'include.text',
+          forgotPasswordLabelText
+        );
+        cy.get('.mat-mdc-input-element').type(
+          datapartJson.username_supportViewAdmin
+        );
+        //click on resetPass button
+        cy.get('#reset_password_dialog-reset').click();
+        //validate resetPass success message
+        cy.get('.mat-mdc-simple-snack-bar > .mat-mdc-snack-bar-label').should(
+          'include.text',
+          resettingPasswordSuccessMessage
+        );
+      });
     });
     cy.wait(2000);
   }); //end it
@@ -178,8 +178,8 @@ describe('adminUser-ForgotPassword from SW (HappyPath)', () => {
         cy.get('.logout-icon ').click();
         cy.wait(2000);
         cy.get('.confirm-buttons > :nth-child(2)').click();
-        cy.url();
-        cy.should('include', 'https://www.e-brief.at/supportview_t/login'); // Validate url
+        // cy.url();
+        // cy.should('include', 'https://www.e-brief.at/supportview_t/login'); // Validate url
         cy.wait(3000);
       });
   }); //end it

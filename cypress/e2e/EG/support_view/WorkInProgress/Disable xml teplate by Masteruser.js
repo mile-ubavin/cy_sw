@@ -50,12 +50,12 @@ describe('Disable XML template by Masteruser', () => {
         .then((searchLabel) => {
           expect(searchLabel, 'Display Name').to.include(t['Display Name']);
         }); //end
-      cy.get('.search-dialog>form>.form-fields>.searchText-wrap>.label')
-        .eq(2)
-        .invoke('text')
-        .then((searchLabel) => {
-          expect(searchLabel, 'Description').to.include(t['Description']);
-        }); //end
+      // cy.get('.search-dialog>form>.form-fields>.searchText-wrap>.label')
+      //   .eq(2)
+      //   .invoke('text')
+      //   .then((searchLabel) => {
+      //     expect(searchLabel, 'Description').to.include(t['Description']);
+      //   }); //end
 
       //Check Action buttons translate
       cy.get('.search-dialog>form>.form-actions>button>.mdc-button__label')

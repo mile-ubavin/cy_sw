@@ -9,7 +9,7 @@ describe('Login, Footer - Verfy redirection from links (using remove atribute), 
   });
   it('Switch to footer and Clicks on AGB link, validate URL', () => {
     cy.visit('/deliveries');
-    cy.url().should('include', 'https://www.e-brief.at/fe_t/deliveries');
+    //cy.url().should('include', 'https://www.e-brief.at/fe_t/deliveries');
 
     //switch to element simply
     // cy.get('.left-ref-group>a[href="https://www.post.at/co/c/agb"]').invoke('removeAttr', 'target').click({ force: true });

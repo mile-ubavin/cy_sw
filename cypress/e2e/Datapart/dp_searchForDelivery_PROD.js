@@ -14,13 +14,13 @@ describe('search for delivery', () => {
         // Click on the penultimate element
         cy.get('.mat-mdc-button-touch-target')
           .eq(length - 2)
-          .click();
+          .click({ force: true });
         cy.wait(1500);
         cy.get('.mat-mdc-button-touch-target')
           .eq(length - 1)
-          .click();
+          .click({ force: true });
       });
-    cy.get('.table-pagination>button').click();
+    cy.get('.table-pagination>button').click({ force: true });
     const paginationTitle = [];
     cy.get('.mat-mdc-menu-content>button>.mat-mdc-menu-item-text')
       .each(($el) => {
@@ -54,6 +54,7 @@ describe('search for delivery', () => {
         const selectedDelivery = deliveryTitle[randomIndex];
         cy.log('Randomly selected label: ', selectedDelivery);
         cy.get('#mat-input-2')
+          .click({ force: true })
           .clear()
           .type(selectedDelivery + '{enter}');
       });
@@ -61,11 +62,12 @@ describe('search for delivery', () => {
 
     cy.get(
       '.filter-clear > .mat-mdc-tooltip-trigger > #undefined > .mat-mdc-button-touch-target'
-    ).click();
+    ).click({ force: true });
+
     //Logout
     cy.get(
       '.side-menu-section-desktop>.arrow-icon>button[aria-label="Benutzereinstellungen öffnen"]'
-    ).click();
+    ).click({ force: true });
     cy.wait(3000);
     cy.get('.logout-title > a').click({ force: true });
     cy.fixture('datapart.json').as('datapart');

@@ -1,12 +1,11 @@
 describe('Send welcome mail via post / EinfachBrief (HappyPath)', () => {
-  // M A S T E R    U S E R - CHECK DOES 'SEND TO EBRIEF' IS ENABLED
+  // M A S T E R    U S E R - CHECK DOES 'SEND TO EINFACHBRIEF' IS ENABLED
   it('Login As Master User - Check does eGehaltszettelEnabled is set to true', () => {
     //Import credentials (un/pw) from 'supportView.json' file
     cy.fixture('supportView.json').as('payslipSW');
     cy.get('@payslipSW').then((payslipJson) => {
       cy.visit(payslipJson.baseUrl); //Taken from base url
       cy.url().should('include', payslipJson.baseUrl); //Validating url on the login page
-
       //Login to sw
       cy.fixture('supportView.json').as('payslipSW');
       cy.get('@payslipSW').then((payslipJson) => {
@@ -65,93 +64,220 @@ describe('Send welcome mail via post / EinfachBrief (HappyPath)', () => {
     });
   }); //end it
 
-  // A D M I N   U S E R - CREATE USER FROM CSV FILE
+  // A D M I N   U S E R - CREATE USER MANUAL FROM SW
 
-  it('Login As AdminUser - Create Users from CSV file', () => {
-    //Import credentials (un/pw) from 'supportView.json' file
+  it('Login As AdminUser - Create 2 Users Manually', () => {
+    // Load credentials (un/pw) and user data from 'supportView.json'
     cy.fixture('supportView.json').as('payslipSW');
     cy.get('@payslipSW').then((payslipJson) => {
-      cy.visit(payslipJson.baseUrl); //Taken from base url
-      cy.url().should('include', payslipJson.baseUrl); //Validating url on the login page
-      //Login to sw
-      cy.fixture('supportView.json').as('payslipSW');
-      cy.get('@payslipSW').then((payslipJson) => {
-        cy.get('input[formcontrolname="username"]').type(
-          payslipJson.username_supportViewAdmin
-        );
-        cy.get('input[formcontrolname="password"]').type(
-          payslipJson.password_supportViewAdmin
-        );
-        cy.get('button[type="submit"]').click();
-      });
+      cy.visit(payslipJson.baseUrl); // Visit base URL from fixture
+      cy.url().should('include', payslipJson.baseUrl); // Validate the URL
 
-      //Search for Group by Display Name
-      cy.get('#searchButton>span').click(); //Click on search button
-      cy.fixture('supportView.json').as('payslipSW');
-      cy.get('@payslipSW').then((payslipJson) => {
-        // Use the company name from the JSON file
-        const companyName = payslipJson.search;
-        // Search for Group by Display Name using the company name
-        cy.get('.search-dialog>form>.form-fields>.searchText-wrap')
-          .eq(1)
-          .type(companyName);
-      });
-      //Find the Search button by button name and click on it
+      // Login to SW as Admin User
+      cy.get('input[formcontrolname="username"]').type(
+        payslipJson.username_supportViewAdmin
+      );
+      cy.get('input[formcontrolname="password"]').type(
+        payslipJson.password_supportViewAdmin
+      );
+      cy.get('button[type="submit"]').click();
 
-      cy.get('.search-dialog>form>div>.mat-primary').click();
-      //Switch to user section
+      // Wait for login to complete
+      cy.wait(1500);
+
+      // Search for Group by Display Name
+      cy.get('#searchButton>span').click(); // Click search button
+      cy.get('.search-dialog>form>.form-fields>.searchText-wrap')
+        .eq(1)
+        .type(payslipJson.search); // Enter search keyword
+      cy.get('.search-dialog>form>div>.mat-primary').click(); // Confirm search
+
+      // Switch to User section
       cy.get('.mdc-button > .mdc-button__label').eq(4).click();
 
-      //Click on create button
-      cy.get('button > .mdc-button__label')
-        .filter((index, el) => {
-          const text = Cypress.$(el).text().trim();
-          return text === 'Create user' || text === 'Neuen Benutzer Anlegen';
+      // Function to create a user
+      function createUser(user) {
+        // Click 'Create User' button
+        cy.get('button > .mdc-button__label')
+          .filter((index, el) => {
+            const text = Cypress.$(el).text().trim();
+            return text === 'Create user' || text === 'Neuen Benutzer Anlegen';
+          })
+          .click({ force: true });
+
+        cy.wait(1500);
+
+        // Click on Manual Creation
+        cy.get('.create_user_dialog_content>.buttons-wrapper>button')
+          .filter((index, el) => {
+            const text = Cypress.$(el).text().trim();
+            return text === 'Manuel Creation' || text === 'Manuelle Anlage';
+          })
+          .click();
+
+        // Fill in user details
+        cy.get('mat-select[formControlName="salutation"]').click();
+        cy.get('mat-option').eq(0).click({ force: true });
+
+        cy.get('input[formcontrolname="firstName"]').type(user.firstName);
+        cy.get('input[formcontrolname="lastName"]').type(user.lastName);
+        cy.get('input')
+          .filter((index, input) => {
+            const placeholder = Cypress.$(input).attr('placeholder');
+            return (
+              placeholder &&
+              (placeholder.trim() === 'Account Number *' ||
+                placeholder.trim() === 'Personalnummer *')
+            );
+          })
+          .click()
+          .type(user.username);
+
+        cy.get('input[formcontrolname="email"]').type(user.email);
+
+        // Select phone number prefix
+        cy.get(
+          ':nth-child(4) > .mat-mdc-form-field-type-mat-select > .mat-mdc-text-field-wrapper > .mat-mdc-form-field-flex > .mat-mdc-form-field-infix'
+        ).click();
+        cy.wait(500);
+        cy.get('.mdc-list-item').eq(0).click();
+
+        // Fill phone number fields
+        cy.get('input[formcontrolname="countryCodePhoneNum"]')
+          .click({ force: true })
+          .type(user.countryCodePhoneNum);
+        cy.get('input[formcontrolname="netNumberPhoneNum"]').type(
+          user.netNumberPhoneNum
+        );
+        cy.get('input[formcontrolname="subscriberNumberPhoneNum"]').type(
+          user.subscriberNumberPhoneNum
+        );
+
+        // Fill in address if available
+        if (user.streetName) {
+          cy.get('input[formcontrolname="streetName"]').type(user.streetName);
+          cy.get('input[formcontrolname="streetNumber"]').type(
+            user.streetNumber
+          );
+          cy.get('input[formcontrolname="doorNumber"]').type(user.doorNumber);
+          cy.get('input[formcontrolname="zipCode"]').type(user.zipCode);
+          cy.get('input[formcontrolname="city"]').type(user.city);
+        }
+
+        // Fill in title
+        cy.get('input[formcontrolname="prefixedTitle"]').type(
+          user.prefixedTitle
+        );
+
+        // Enable 'Send Credentials to Print'
+        cy.get('input[type="checkbox"]').eq(1).click();
+
+        //cy.get('button[type="submit"]').click({ force: true });
+        cy.wait(1500);
+        // Submit the form
+        cy.get('button[color="primary"]>.mdc-button__label')
+          .filter((index, button) => {
+            return (
+              Cypress.$(button).text().trim() === 'Submit' ||
+              Cypress.$(button).text().trim() === 'Absenden'
+            );
+          })
+          .click({ force: true });
+        cy.wait(1500);
+      }
+
+      // Create the first user (with address)
+      createUser(payslipJson.createUser[0]);
+
+      // Validate Confirm Address dialog
+      cy.wait(1500);
+      cy.get('send-to-print-promt .ng-star-inserted').then((elements) => {
+        const extractedValues = Array.from(elements).map((el) =>
+          el.innerText.trim()
+        );
+        cy.log('Extracted Values:', extractedValues);
+
+        // Validate the extracted values match the address data from the fixture
+        expect(extractedValues[0]).to.contain(
+          payslipJson.createUser[0].streetName
+        );
+        expect(extractedValues[1]).to.contain(
+          payslipJson.createUser[0].streetNumber
+        );
+        expect(extractedValues[2]).to.contain(
+          payslipJson.createUser[0].doorNumber
+        );
+        expect(extractedValues[3]).to.contain(
+          payslipJson.createUser[0].zipCode
+        );
+        expect(extractedValues[4]).to.contain(payslipJson.createUser[0].city);
+        expect(extractedValues[5]).to.satisfy(
+          (value) => value.includes('Austria') || value.includes('Österreich')
+        );
+      });
+      cy.wait(1500);
+      // Confirm-close Address in the dialog
+      cy.get(
+        'app-confirmation-dialog>.dialog-container>.dialog-footer>.dialog-actions>button>.title'
+      )
+        .filter((index, buttonTitle) => {
+          return (
+            Cypress.$(buttonTitle).text().trim() === 'Confirm' ||
+            Cypress.$(buttonTitle).text().trim() === 'Bestätigen'
+          );
         })
         .click({ force: true });
-      cy.wait(1500);
 
-      //Click on Upload CSV button
-      cy.get('.create_user_dialog_content>.buttons-wrapper>button')
-        .filter((index, el) => {
-          const text = Cypress.$(el).text().trim();
-          return text === 'CSV uploading' || text === 'CSV Anlage';
-        })
-        .click();
+      // Wait for user creation process
+      cy.wait(2000);
 
-      //Upload CSV file
-      cy.upload_csv();
-      cy.get('#mat-select-value-3 > .mat-mdc-select-placeholder').click();
-      cy.get('div.cdk-overlay-pane').should('exist'); // Ensure the overlay pane is present
-      cy.get('div.cdk-overlay-pane mat-option').should(
-        'have.length.greaterThan',
-        0
-      ); // Check options are loaded
+      // Create the second user (without address)
+      createUser(payslipJson.createUserNoAddress[0]);
 
-      //Select Company prefix
+      cy.get('send-to-print-promt .ng-star-inserted').then((elements) => {
+        const extractedValues = Array.from(elements).map((el) =>
+          el.innerText.trim()
+        );
+        cy.log('Extracted Values:', extractedValues);
+
+        // Assuming the order is Street, House Number, Door Number, etc.
+        expect(extractedValues[0]).to.contain('');
+        expect(extractedValues[1]).to.contain('');
+        expect(extractedValues[2]).to.contain('');
+        expect(extractedValues[3]).to.contain('');
+        expect(extractedValues[4]).to.contain('');
+        expect(extractedValues[5]).to.contain('');
+      });
+
+      // Validate and confirm second user creation
       cy.wait(1500);
-      cy.get('mat-option').eq(0).click();
-      cy.wait(1500);
-      //Click on  Create Users button
       cy.get(
-        '.dialog-container>.dialog-footer>.controls>button>.button__footer>.button__icon>mat-icon[data-mat-icon-name="icon-right"]'
-      ).click();
+        'app-confirmation-dialog>.dialog-container>.dialog-footer>.dialog-actions>button>.title'
+      )
+        .filter((index, buttonTitle) => {
+          return (
+            Cypress.$(buttonTitle).text().trim() === 'Confirm' ||
+            Cypress.$(buttonTitle).text().trim() === 'Bestätigen'
+          );
+        })
+        .click({ force: true });
 
-      //Validate success message
+      // Validate success message
       cy.get('sv-multiple-notifications>.messages>p')
         .invoke('text')
         .then((text) => {
           const trimmedText = text.trim();
 
-          // Check if the text matches either English or German message
+          // Check if the text matches either English or German success message
           expect(trimmedText).to.be.oneOf([
-            '2 Users were created', // English
-            '2 Benutzer wurden erstellt', // German
+            'User created', // English
+            'Benutzer angelegt', // German
           ]);
         });
+
       cy.wait(2500);
     });
-  }); //end it
+  });
 
   //D O W L O A D    P D F
 
@@ -161,7 +287,7 @@ describe('Send welcome mail via post / EinfachBrief (HappyPath)', () => {
       cy.visit(einfachbriefJson.baseUrl);
       cy.url().should('include', einfachbriefJson.baseUrl);
 
-      cy.wait(2000);
+      cy.wait(1500);
       // Log in to the system
       cy.get('tp-input[formcontrolname="username"]').type(
         einfachbriefJson.email_supportViewAdmin
@@ -256,7 +382,7 @@ describe('Send welcome mail via post / EinfachBrief (HappyPath)', () => {
       cy.task('getDownloadedPdf', downloadsDir).then((filePath) => {
         expect(filePath).to.not.be.null; // Assert the file exists
         cy.log(`Latest PDF File Path: ${filePath}`);
-
+        cy.wait(3000);
         // Read the PDF content and open in the same tab using a Blob
         cy.readFile(filePath, 'binary').then((pdfBinary) => {
           const pdfBlob = Cypress.Blob.binaryStringToBlob(
@@ -321,7 +447,7 @@ describe('Send welcome mail via post / EinfachBrief (HappyPath)', () => {
     emailBody(); // Validate email body
 
     // Wait to ensure the email content is loaded
-    cy.wait(4500);
+    cy.wait(3500);
 
     // Switch to the second email
     cy.iframe('#ifinbox').find('.mctn > .m > button > .lms').eq(1).click();
@@ -330,7 +456,7 @@ describe('Send welcome mail via post / EinfachBrief (HappyPath)', () => {
     cy.wait(1500);
     emailBody(); // Validate second email body
 
-    cy.wait(4500);
+    cy.wait(2500);
   });
 
   // M A S T E R    U S E R - DELETE ALREADY CREATED USERS
@@ -369,7 +495,7 @@ describe('Send welcome mail via post / EinfachBrief (HappyPath)', () => {
       cy.get('.action-buttons > .mdc-button').eq(4).click();
 
       // Array of users to delete
-      const usersToDelete = ['otto', 'emma']; // Add more usernames as needed
+      const usersToDelete = ['manualAddress', 'manualNoAddress']; // Add more usernames as needed
 
       usersToDelete.forEach((userName, index) => {
         // Function to search for and delete a user

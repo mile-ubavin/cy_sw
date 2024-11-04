@@ -20,13 +20,21 @@
   "city2": "Belgrade",
   "email": "datapart.test@yopmail.com",
   "phone": "+381642826462",
-  "footerTitle": [
+  "footerTitle_de": [
     "Unternehmen",
     "Kontakt",
     "Datenschutzhinweis",
     "Compliance",
     "Impressum",
     "Nutzungsbedingungen"
+  ],
+  "footerTitle": [
+    "Company",
+    "Kontakt",
+    "Privacy Notice",
+    "Compliance",
+    "Impressum",
+    "Terms of Use"
   ],
   "footerLinks": [
     "ueber-uns/",

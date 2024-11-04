@@ -15,7 +15,7 @@ describe('Open Sepa from Personal Datao DATAPART E-Box', () => {
     cy.scrollTo('bottom', { ensureScrollable: false, duration: 1000 });
     cy.wait(1500);
     //Open sepa in hs
-    cy.get('#open-hybridsign').click();
+    cy.get('#open-hybridsign').click({ force: true });
     cy.wait(4500);
     // Read data from datapart.json file
     cy.fixture('datapart.json').then((datapart) => {
@@ -91,13 +91,24 @@ describe('Open Sepa from Personal Datao DATAPART E-Box', () => {
       .should('be.visible')
       .should('have.text', ' Signatur wurde erfolgreich erstellt. ');
     cy.wait(2000);
-    //Cancel saving Sepa
-    cy.get('.exit > .mdc-button__label').click();
-    cy.wait(2000);
-    //Confirm Cancel dialog
+    //Click on Save button - (Save sepa)
+    //cy.get('mat-icon[data-mat-icon-name="save"]').click({ force: true });
     cy.get(
-      '.mdc-dialog__container>.mat-mdc-dialog-surface>.mat-mdc-dialog-component-host>.mat-mdc-dialog-actions>.mat-accent'
-    ).click({ force: true });
+      '.mat-mdc-dialog-actions > .mat-accent > .mat-mdc-button-touch-target'
+    ).click();
+    cy.wait(1500);
+    //Confirm Save dialog
+    cy.get('.mdc-dialog__actions>button>.mdc-button__ripple').click({
+      multiple: true,
+    });
+    cy.wait(4000);
+    // //Cancel saving Sepa
+    // cy.get('.exit > .mdc-button__label').click();
+    // cy.wait(2000);
+    // //Confirm Cancel dialog
+    // cy.get(
+    //   '.mdc-dialog__container>.mat-mdc-dialog-surface>.mat-mdc-dialog-component-host>.mat-mdc-dialog-actions>.mat-accent'
+    // ).click({ force: true });
 
     //Logout
     cy.get(

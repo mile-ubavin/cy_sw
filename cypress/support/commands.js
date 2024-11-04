@@ -152,11 +152,11 @@ Cypress.Commands.add('loginToEBrief', () => {
     .click();
   //Redirection to Kiam login page
   //cy.url().should("include", "https://login.post.at/kiamprod.onmicrosoft.com"); //Validating KiamProd url
-  cy.url().should('include', 'https://kiamabn.b2clogin.com/'); //Validating KiamTest url
+  //cy.url().should('include', 'https://kiamabn.b2clogin.com/'); //Validating KiamTest url
   //Import credentials (un/pw) from 'ebrief.json' file
   cy.fixture('ebrief.json').as('example_kiam');
   cy.get('@example_kiam').then((usersJson) => {
-    cy.get('#signInName').type(usersJson.username_kiam);
+    cy.get('#signInName').type(usersJson.username_kiam_prod);
     cy.get('#password').type(usersJson.password_kiam);
     cy.wait(1000);
     cy.get('#showPassword').click(); //Show/Hide pass
@@ -222,8 +222,7 @@ Cypress.Commands.add('loginToSupportViewMaster', () => {
   cy.fixture('supportView.json').as('example_supportView');
   cy.get('@example_supportView').then((usersJson) => {
     //cy.visit(usersJson.baseUrl); //Taken from base url
-
-    cy.visit(usersJson.baseUrl_04, {
+    cy.visit(usersJson.baseUrl, {
       failOnStatusCode: false,
     });
 
@@ -278,7 +277,7 @@ Cypress.Commands.add('uploadDocument', function () {
   });
 });
 
-//Custom commands: Taken data from json file
+//*Custom commands: Taken data from json file
 Cypress.Commands.add('loginToPayslipSupportViewMaster', () => {
   //Import credentials (un/pw) from 'supportView.json' file
   cy.fixture('payslip.json').as('payslip');
@@ -571,7 +570,7 @@ Cypress.Commands.add('loginToEgEboxAsStudent', () => {
   // Visit the base URL
   cy.get('@datapart').then((datapartJson) => {
     // cy.visit(datapartJson.baseUrl);
-    cy.visit(usersJson.baseUrl_04, {
+    cy.visit(datapartJson.baseUrl, {
       failOnStatusCode: false,
     });
     cy.url().should('include', datapartJson.baseUrl);

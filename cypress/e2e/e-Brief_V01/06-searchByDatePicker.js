@@ -22,7 +22,7 @@ describe('Search by date picker should work', () => {
     cy.get('@currentDay').then(($el) => {
       const currentDayValue = $el.text().trim(); // trimming the space before the date
 
-      cy.get('@currentDay').click(); //clicking on the current date that is preselected
+      cy.get('@currentDay').click({ force: true }); //clicking on the current date that is preselected
 
       // cy.get("@startDate")
       //   .invoke("val")
@@ -45,7 +45,7 @@ describe('Search by date picker should work', () => {
     cy.get(
       ':nth-child(2) > .mat-mdc-form-field > .mat-mdc-text-field-wrapper > .mat-mdc-form-field-flex > .mat-mdc-form-field-icon-suffix > .mat-datepicker-toggle > .mdc-icon-button > .mat-mdc-button-touch-target'
     ).as('endDatePicker');
-    cy.get('@endDatePicker').click();
+    cy.get('@endDatePicker').click({ force: true });
 
     cy.get('@currentDay').then(($el) => {
       const currentDayValue = $el.text().trim(); // trimming the space before the date
@@ -57,7 +57,7 @@ describe('Search by date picker should work', () => {
         .should('not.be.empty')
         .should('contain', currentDayValue); // assertion for selected day
 
-      cy.get('[color="primary"] > .button').click();
+      cy.get('[color="primary"] > .button').click({ force: true });
     });
 
     cy.get('[name="sender"]').click().type('e-brief upload');

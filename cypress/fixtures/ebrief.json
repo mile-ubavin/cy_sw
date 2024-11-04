@@ -1,6 +1,8 @@
 {
   "username_kiam": "kiam.t.mile@yopmail.com",
   "password_kiam": "Test1234!",
+  "username_kiam_prod": "anna.testuser@yopmail.com",
+  "password_kiam_prod": "Test1234!",
 
   "baseUrl": "https://www.e-brief.at/supportview_t/login",
   "username_supportViewMaster": "e-gehaltszettelMaster",

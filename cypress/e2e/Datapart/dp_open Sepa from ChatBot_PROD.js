@@ -27,7 +27,7 @@ describe('Open SEPA from deliveries page DATAPART E-Box', () => {
           cy.wait(1500);
           cy.get('.joe-radio-list-btn > :nth-child(2)').click();
           //Open sepa in hs
-          cy.wait(5500);
+          cy.wait(7500);
           // Read data from datapart.json file
           cy.fixture('datapart.json').then((datapart) => {
             // Fill the sepa form

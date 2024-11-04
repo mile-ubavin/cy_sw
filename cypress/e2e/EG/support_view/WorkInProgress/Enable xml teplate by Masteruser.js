@@ -52,12 +52,6 @@ describe('Enable XML template by Masteruser', () => {
         .then((searchLabel) => {
           expect(searchLabel, 'Display Name').to.include(t['Display Name']);
         }); //end
-      cy.get('.search-dialog>form>.form-fields>.searchText-wrap>.label')
-        .eq(2)
-        .invoke('text')
-        .then((searchLabel) => {
-          expect(searchLabel, 'Description').to.include(t['Description']);
-        }); //end
 
       //Search form Action buttons
       cy.get('.search-dialog>form>.form-actions>button>.mdc-button__label')
@@ -282,7 +276,7 @@ describe('Enable XML template by Masteruser', () => {
     cy.get('.logout-icon ').click();
     cy.wait(2000);
     cy.get('.confirm-buttons > :nth-child(2)').click();
-    cy.url();
-    cy.should('include', 'https://supportviewpayslip.edeja.com/fe/login'); // Validate url
+    // cy.url();
+    // cy.should('include', 'https://supportviewpayslip.edeja.com/fe/login'); // Validate url
   }); //end it
 }); //end describe

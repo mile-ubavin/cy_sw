@@ -1,4 +1,4 @@
-/// <reference types="Cypress" />
+/// <reference types="cypress" />
 describe('Login/Logout to ebrief base scenario', () => {
   //Login via Kiam, Logout
   /// <reference types="Cypress" />

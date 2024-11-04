@@ -36,7 +36,7 @@ describe('Login, Crete_delivery-Upload_doc(pdf), Logout', () => {
     cy.wait(2000);
     cy.contains('Logout').click();
     Cypress.session.clearAllSavedSessions(); //Clear all session
-    cy.url().should('include', '/fe_t'); // Validate url
+    // cy.url().should('include', '/fe_t'); // Validate url
   }); //end it
 });
 

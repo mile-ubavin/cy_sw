@@ -8,7 +8,8 @@
   "username_supportViewAdmin": "aquaAdmin",
   "password_supportViewAdmin": "Test1234!",
   "email_supportViewAdmin": "aqua.admin@yopmail.com",
-  "username_egEbox": "000_qabilly",
+  "baseUrl_egEbox": "https://eboxpayslip.edeja.com/fe.e-box_t/",
+  "username_egEbox": "aquaABBA000100279311",
   "password_egEbox": "Test1234!",
   "enableXML": [
     {
