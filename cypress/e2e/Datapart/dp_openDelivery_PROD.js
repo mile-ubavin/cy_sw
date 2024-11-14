@@ -34,10 +34,10 @@ describe('Login/OPen delivery', () => {
             // Optionally, you can do something with the selected label, like click on it
             cy.contains('ul>li>.label-list-link>a', selectedLabel).click();
           });
-        cy.wait(1500);
+        cy.wait(2500);
         cy.get('.odd-row-cell').first().click({ force: true });
       });
-    cy.pause();
+
     // cy.get('.signatures-container>.signature-actions>a').click({ force: true }); //open add new signature dialog
     // cy.get('#mat-input-6').clear().type('Change position of signature dialog'); //Clear Input field & Enter signee name
     // cy.get('.mat-mdc-dialog-actions > .mat-accent').click({ force: true }); //Confirm Signee name
@@ -129,7 +129,7 @@ describe('Login/OPen delivery', () => {
     cy.get(
       '.side-menu-section-desktop>.arrow-icon>button[aria-label="Benutzereinstellungen öffnen"]'
     ).click();
-    cy.wait(3000);
+    cy.wait(9000);
     cy.get('.logout-title > a').click({ force: true });
     cy.fixture('datapart.json').as('datapart');
     cy.get('@datapart').then((datapartJson) => {

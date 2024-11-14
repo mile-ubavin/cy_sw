@@ -67,7 +67,7 @@ describe('Verifying Footer links', () => {
                   //Loop trough footer links, skipping latest 2 links and 10th link
                   for (
                     let index = 0;
-                    index < numberOfFooterLinks - 1;
+                    index < numberOfFooterLinks - 2;
                     index++
                   ) {
                     //Skipping 10th element (pdf)

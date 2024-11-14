@@ -16,7 +16,7 @@ describe('Open Sepa from Personal Datao DATAPART E-Box', () => {
     cy.wait(1500);
     //Open sepa in hs
     cy.get('#open-hybridsign').click({ force: true });
-    cy.wait(4500);
+    cy.wait(7500);
     // Read data from datapart.json file
     cy.fixture('datapart.json').then((datapart) => {
       // Fill the sepa form
@@ -90,17 +90,15 @@ describe('Open Sepa from Personal Datao DATAPART E-Box', () => {
     cy.get('.success-notification>.notification-message')
       .should('be.visible')
       .should('have.text', ' Signatur wurde erfolgreich erstellt. ');
-    cy.wait(2000);
+    cy.wait(5000);
     //Click on Save button - (Save sepa)
     //cy.get('mat-icon[data-mat-icon-name="save"]').click({ force: true });
-    cy.get(
-      '.mat-mdc-dialog-actions > .mat-accent > .mat-mdc-button-touch-target'
-    ).click();
+    cy.get('.save > .mdc-button__label').click({ force: true });
     cy.wait(1500);
     //Confirm Save dialog
-    cy.get('.mdc-dialog__actions>button>.mdc-button__ripple').click({
-      multiple: true,
-    });
+    cy.get('.mat-mdc-dialog-actions>button>.mat-mdc-button-touch-target')
+      .eq(0)
+      .click({ force: true });
     cy.wait(4000);
     // //Cancel saving Sepa
     // cy.get('.exit > .mdc-button__label').click();

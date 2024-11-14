@@ -144,6 +144,7 @@ module.exports = defineConfig({
     specPattern: 'cypress/e2e/**/*.{js,jsx,ts,tsx}', // Ensure this matches your structure
     chromeWebSecurity: false,
     headless: false, // Turn off headless mode for debugging
-    baseUrl: 'https://www.e-brief.at/fe',
+    baseUrl: 'https://www.e-brief.at/fe_t',
+    //baseUrl: 'https://www.e-brief.at/fe',
   },
 });

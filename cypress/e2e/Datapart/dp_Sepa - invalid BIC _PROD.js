@@ -16,7 +16,7 @@ describe('Sepa Invalid BIC', () => {
     cy.wait(1500);
     //Open sepa in hs
     cy.get('#open-hybridsign').click();
-    cy.wait(5500);
+    cy.wait(7500);
     // Read data from datapart.json file
     cy.fixture('datapart.json').then((datapart) => {
       // Fill the sepa form

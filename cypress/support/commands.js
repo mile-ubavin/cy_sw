@@ -156,7 +156,7 @@ Cypress.Commands.add('loginToEBrief', () => {
   //Import credentials (un/pw) from 'ebrief.json' file
   cy.fixture('ebrief.json').as('example_kiam');
   cy.get('@example_kiam').then((usersJson) => {
-    cy.get('#signInName').type(usersJson.username_kiam_prod);
+    cy.get('#signInName').type(usersJson.username_kiam);
     cy.get('#password').type(usersJson.password_kiam);
     cy.wait(1000);
     cy.get('#showPassword').click(); //Show/Hide pass

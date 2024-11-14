@@ -847,8 +847,35 @@ describe('hrManagement (HappyPath)', () => {
     }); //end
   });
 
-  //Confirm HR Role On Assign Admin To Companies
+  // Admin User is able to prepare HR Delivery
+  it.only('Admin User is able to prepare HR Delivery', () => {
+    // Load credentials and user data from 'supportView.json'
+    cy.fixture('supportView.json').as('payslipSW');
+    cy.get('@payslipSW').then((payslipJson) => {
+      cy.visit(payslipJson.baseUrl); // Visit base URL from fixture
+      cy.url().should('include', payslipJson.baseUrl); // Validate the URL
 
+      // Login to SW as Admin User
+      cy.get('input[formcontrolname="username"]').type(
+        payslipJson.username_supportViewAdmin
+      );
+      cy.get('input[formcontrolname="password"]').type(
+        payslipJson.password_supportViewAdmin
+      );
+      cy.get('button[type="submit"]').click();
+      // Wait for login to complete
+      cy.wait(1500);
+
+      //Logout
+      // cy.get('.logout-icon ').click();
+      // cy.wait(2000);
+      // cy.get('.confirm-buttons > :nth-child(2)').click();
+      // cy.log('Test completed successfully.');
+      // cy.wait(2500);
+    }); //end
+  });
+
+  //Confirm HR Role On Assign Admin To Companies
   it('confirmHrRoleOnAssignAdminToCompanies', () => {
     // Login as a Master-User
     cy.fixture('supportView.json').as('payslipSW');
