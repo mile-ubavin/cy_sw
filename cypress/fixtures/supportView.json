@@ -64,5 +64,11 @@
       "city": "Graz",
       "prefixedTitle": "Address Data - Title"
     }
+  ],
+  "companyData": [
+    {
+      "companyDispayName": "Gmbh",
+      "description": "Description"
+    }
   ]
 }

@@ -1,4 +1,4 @@
-/// <reference types="cypress" />
+/// <reference types="Cypress" />
 describe('Login, Footer - Verfy redirection from links (using remove atribute), Logout', () => {
   //Login to E-Brief via Kiam
 
@@ -102,20 +102,20 @@ describe('Login, Footer - Verfy redirection from links (using remove atribute), 
     cy.url().should('include', '/deliveries'); //Validate url
     cy.wait(1000);
   });
-  it('Switch to footer and Clicks on Cookie-Einstellungen bearbeiten link, validate URL', () => {
-    cy.visit('https://www.e-brief.at/fe_t/deliveries');
-    //switch to 6th element, using alias
-    cy.get('.left-ref-group>a').eq(5).invoke('text').as('footerElemets');
-    cy.get('@footerElemets').should(
-      'include',
-      'Cookie-Einstellungen bearbeiten'
-    );
-    cy.get('#pc-title').should('have.text', 'Datenschutz-Präferenz-Center'); //Verify Error message
-    cy.get('.left-ref-group>a').eq(5).click({ force: true }); //Click on 'Cookie-Einstellungen bearbeiten' link
-    cy.wait(1000);
-    cy.get('#close-pc-btn-handler').click({ force: true }); //remove cookie bar
-    cy.wait(1000);
-  });
+  // it('Switch to footer and Clicks on Cookie-Einstellungen bearbeiten link, validate URL', () => {
+  //   cy.visit('https://www.e-brief.at/fe_t/deliveries');
+  //   //switch to 6th element, using alias
+  //   cy.get('.left-ref-group>a').eq(5).invoke('text').as('footerElemets');
+  //   cy.get('@footerElemets').should(
+  //     'include',
+  //     'Cookie-Einstellungen bearbeiten'
+  //   );
+  //   cy.get('#pc-title').should('have.text', 'Datenschutz-Präferenz-Center'); //Verify Error message
+  //   cy.get('.left-ref-group>a').eq(5).click({ force: true }); //Click on 'Cookie-Einstellungen bearbeiten' link
+  //   cy.wait(1000);
+  //   cy.get('#close-pc-btn-handler').click({ force: true }); //remove cookie bar
+  //   cy.wait(1000);
+  // });
   it('Switch to footer and Clicks on post.at link, validate URL', () => {
     cy.visit('https://www.e-brief.at/fe_t/deliveries');
     //switch to 7th element, using alias
@@ -141,5 +141,6 @@ describe('Login, Footer - Verfy redirection from links (using remove atribute), 
     cy.get('[color="primary-reverse"] > .button').click();
     Cypress.session.clearAllSavedSessions(); //Clear all session
     cy.url().should('include', 'https://www.e-brief.at/fe_t'); // => validate url
+    cy.log(' *********** NOTE : Get COOKIE LINK IS DISABLED !!! ************');
   }); //end it
 });

@@ -1,5 +1,3 @@
-/// <reference types="Cypress" />
-
 describe('Upload serviceLine pdf file and chec emails', () => {
   // Custom command to load t based on the selected language
   Cypress.Commands.add('loadTranslate', (language) => {

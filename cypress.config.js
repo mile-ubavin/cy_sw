@@ -145,6 +145,5 @@ module.exports = defineConfig({
     chromeWebSecurity: false,
     headless: false, // Turn off headless mode for debugging
     baseUrl: 'https://www.e-brief.at/fe_t',
-    //baseUrl: 'https://www.e-brief.at/fe',
   },
 });

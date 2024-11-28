@@ -1,27 +1,27 @@
-/// <reference types="cypress" />
+/// <reference types="Cypress" />
 /// <reference types="cypress-xpath" />
 
-describe("Login, Crete_delivery-Upload_doc(pdf), Logout", () => {
+describe('Login, Crete_delivery-Upload_doc(pdf), Logout', () => {
   beforeEach(() => {
-    cy.session("login_data", () => {
+    cy.session('login_data', () => {
       cy.loginToEBrief();
     });
   });
 
   // Creating delivery
-  it("Crete_delivery-Upload_doc(pdf)", function () {
-    cy.visit("/deliveries");
-    cy.get("#toolbar-toggle_upload").click();
+  it('Crete_delivery-Upload_doc(pdf)', function () {
+    cy.visit('/deliveries');
+    cy.get('#toolbar-toggle_upload').click();
     cy.upload_attachment(); //upload pdf documents from fixtures folder - custom command
     cy.wait(2000);
 
     let randomString = Math.random().toString(15).substring(2); //Generating random string
-    const title = "Upload pdf - " + randomString;
-    cy.get("#mat-input-5").type(title);
+    const title = 'Upload pdf - ' + randomString;
+    cy.get('#mat-input-5').type(title);
     cy.wait(2000);
-    cy.contains(" Speichern ").click({ force: true });
+    cy.contains(' Speichern ').click({ force: true });
     cy.wait(1500);
-    cy.log("Test completed successfully.");
+    cy.log('Test completed successfully.');
   }); //end it
 
   //Open doc in hs and sign pdf using Touch-Signatur sign. method
@@ -62,22 +62,22 @@ describe("Login, Crete_delivery-Upload_doc(pdf), Logout", () => {
   // });
 
   //Open doc in hs, change position of signature dilog, sign it and Save changes
-  it("Open doc in hs, Change position of signature dilog, Sign pdf using Touch-Signatur sign. method and Save changes", () => {
-    cy.visit("/deliveries");
-    cy.get(":nth-child(1) > .documents-cell > .full-cell-text-content").click({
+  it('Open doc in hs, Change position of signature dilog, Sign pdf using Touch-Signatur sign. method and Save changes', () => {
+    cy.visit('/deliveries');
+    cy.get(':nth-child(1) > .documents-cell > .full-cell-text-content').click({
       force: true,
     }); //select first delivery, open document details
-    cy.get(".delivery-document").first().click({ force: true }); //open document in hs (from doc. details)
+    cy.get('.delivery-document').first().click({ force: true }); //open document in hs (from doc. details)
     cy.wait(4000);
-    cy.get(".signatures-container>.signature-actions>a").click({ force: true }); //open add new signature dialog
-    cy.get("#mat-input-5").clear().type("Change position of signature dialog"); //Clear Input field & Enter signee name
-    cy.get(".mat-mdc-dialog-actions > .mat-accent").click({ force: true }); //Confirm Signee name
+    cy.get('.signatures-container>.signature-actions>a').click({ force: true }); //open add new signature dialog
+    cy.get('#mat-input-5').clear().type('Change position of signature dialog'); //Clear Input field & Enter signee name
+    cy.get('.mat-mdc-dialog-actions > .mat-accent').click({ force: true }); //Confirm Signee name
 
     //Change position of siganture dialog
-    cy.get(".signature-methods")
-      .trigger("mouseover")
-      .trigger("mousedown", { which: 1, eventConstructor: "MouseEvent" })
-      .trigger("mousemove", {
+    cy.get('.signature-methods')
+      .trigger('mouseover')
+      .trigger('mousedown', { which: 1, eventConstructor: 'MouseEvent' })
+      .trigger('mousemove', {
         which: 1,
         screenX: 920,
         screenY: 220,
@@ -85,24 +85,24 @@ describe("Login, Crete_delivery-Upload_doc(pdf), Logout", () => {
         clientY: 220,
         pageX: 920,
         pageY: 220,
-        eventConstructor: "MouseEvent",
+        eventConstructor: 'MouseEvent',
       });
     //.trigger('mouseup', { force: true })
     //Scroll to the top
-    cy.get(".scrollbar-thumb")
-      .trigger("mouseover")
-      .trigger("mousedown", { which: 1, eventConstructor: "MouseEvent" })
-      .trigger("mousemove", {
+    cy.get('.scrollbar-thumb')
+      .trigger('mouseover')
+      .trigger('mousedown', { which: 1, eventConstructor: 'MouseEvent' })
+      .trigger('mousemove', {
         which: 1,
         screenY: 220,
         clientY: 220,
         pageY: 220,
-        eventConstructor: "MouseEvent",
+        eventConstructor: 'MouseEvent',
       })
-      .trigger("mouseup", { force: true }); //End scroll
+      .trigger('mouseup', { force: true }); //End scroll
     cy.wait(2000);
     cy.get(
-      ".placer-actions > .mat-accent > .mat-mdc-button-touch-target"
+      '.placer-actions > .mat-accent > .mat-mdc-button-touch-target'
     ).click({
       force: true,
     });
@@ -110,7 +110,7 @@ describe("Login, Crete_delivery-Upload_doc(pdf), Logout", () => {
     cy.get('.sign-methods-container>button[title="Touch-Signatur"]').click({
       force: true,
     });
-    cy.get(".sign-canvas").then((res) =>
+    cy.get('.sign-canvas').then((res) =>
       console.log(res[0].getBoundingClientRect())
     );
     // cy.get(".sign-canvas")
@@ -162,16 +162,16 @@ describe("Login, Crete_delivery-Upload_doc(pdf), Logout", () => {
 
     // cy.get(".sign-canvas").trigger("mouseup", { force: true });
     // cy.wait(2000);
-    cy.get(".sign-canvas")
-      .trigger("mouseover")
-      .trigger("mousedown", { which: 1, eventConstructor: "MouseEvent" });
+    cy.get('.sign-canvas')
+      .trigger('mouseover')
+      .trigger('mousedown', { which: 1, eventConstructor: 'MouseEvent' });
 
     // Simulate movement to draw a wave shape without lines
     // Adjust the parameters to customize the wave
     for (let i = 0; i <= 360; i += 10) {
       const x = 520 + i; // Adjust X-coordinate
       const y = 620 + Math.sin((i * Math.PI) / 180) * 50; // Adjust amplitude and frequency
-      cy.get(".sign-canvas").trigger("mousemove", {
+      cy.get('.sign-canvas').trigger('mousemove', {
         which: 1,
         screenX: x,
         screenY: y,
@@ -179,30 +179,30 @@ describe("Login, Crete_delivery-Upload_doc(pdf), Logout", () => {
         clientY: y,
         pageX: x,
         pageY: y,
-        eventConstructor: "MouseEvent",
+        eventConstructor: 'MouseEvent',
       });
     }
 
-    cy.get(".sign-canvas").trigger("mouseup", { force: true });
+    cy.get('.sign-canvas').trigger('mouseup', { force: true });
     cy.wait(2000);
     cy.get(
-      ".mat-sign-actions-desktop > .mat-accent > .mat-mdc-button-touch-target"
+      '.mat-sign-actions-desktop > .mat-accent > .mat-mdc-button-touch-target'
     ).click({ force: true }); //Click on confirm button
     //Click on Save button
-    cy.get(".saveSessionTemp").click(); //Select signed placeholder
+    cy.get('.saveSessionTemp').click(); //Select signed placeholder
     //Validate notification-message
-    cy.get(".success-notification>.notification-message")
-      .should("be.visible")
-      .should("have.text", " Signatur wurde erfolgreich erstellt. ");
+    cy.get('.success-notification>.notification-message')
+      .should('be.visible')
+      .should('have.text', ' Signatur wurde erfolgreich erstellt. ');
   });
 
   //Logout  & Clear saved session
-  it("Logout & Clear saved session", function () {
-    cy.visit("/deliveries");
-    cy.get(".user-title").click();
+  it('Logout & Clear saved session', function () {
+    cy.visit('/deliveries');
+    cy.get('.user-title').click();
     cy.wait(3000);
     cy.get('[color="primary-reverse"] > .button').click();
     Cypress.session.clearAllSavedSessions(); //Clear saved session
-    cy.url().should("include", "/"); // => validate url after logout
+    cy.url().should('include', '/'); // => validate url after logout
   }); //end it
 });

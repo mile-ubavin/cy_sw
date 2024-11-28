@@ -156,8 +156,8 @@ Cypress.Commands.add('loginToEBrief', () => {
   //Import credentials (un/pw) from 'ebrief.json' file
   cy.fixture('ebrief.json').as('example_kiam');
   cy.get('@example_kiam').then((usersJson) => {
-    cy.get('#signInName').type(usersJson.username_kiam);
-    cy.get('#password').type(usersJson.password_kiam);
+    cy.get('#signInName').type(usersJson.username_kiam_prod);
+    cy.get('#password').type(usersJson.password_kiam_prod);
     cy.wait(1000);
     cy.get('#showPassword').click(); //Show/Hide pass
     cy.wait(1000);
@@ -201,7 +201,9 @@ Cypress.Commands.add('upload_attachment1', function () {
 
 //Custom commands: Taken data from json file, and login to SW as a AdminUser
 Cypress.Commands.add('loginToSupportViewAdmin', () => {
-  cy.visit('https://supportviewpayslip.edeja.com/fe/login'); //Taken from base url
+  cy.visit(
+    'https://e-gehaltszettel.post-business-solutions.at/fe.e-gehaltszettel/login'
+  ); //Taken from base url
   cy.url().should('include', '/login'); //Validating url on the Login page
   //Import credentials (un/pw) from 'supportView.json' file
   cy.fixture('supportView.json').as('example_supportView');
@@ -334,6 +336,32 @@ Cypress.Commands.add('getOppositeLanguage', (currentLanguage) => {
 //CC TEST
 Cypress.Commands.add('loadTranslate', (language) => {
   cy.fixture(`${language}.json`).as('t');
+});
+
+//Upload A4 PDF - Mass Upload
+Cypress.Commands.add('massUpload', function () {
+  cy.fixture('Mass_A4.pdf', 'binary')
+    .then(Cypress.Blob.binaryStringToBlob)
+    .then((fileContent) => {
+      cy.get('#input-file').attachFile({
+        fileContent,
+        filePath: 'Mass_A4.pdf',
+        fileName: 'Mass_A4.pdf',
+      });
+    });
+});
+
+//Upload 305 Dictionary PDF - For AQUA ABBA000100279311
+Cypress.Commands.add('upload305Dictionary', function () {
+  cy.fixture('305_Dictionary_(AQUA_ABBA000100279311).pdf', 'binary')
+    .then(Cypress.Blob.binaryStringToBlob)
+    .then((fileContent) => {
+      cy.get('#input-file').attachFile({
+        fileContent,
+        filePath: '305_Dictionary_(AQUA_ABBA000100279311).pdf',
+        fileName: '305_Dictionary_(AQUA_ABBA000100279311).pdf',
+      });
+    });
 });
 
 //Upload JPG file to a Quill editor using the attachFile command
