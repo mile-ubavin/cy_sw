@@ -149,20 +149,21 @@ Cypress.Commands.add('loginToEBrief', () => {
   cy.get('button[type="submit"]').should('be.visible').and('be.enabled'); //3 Buttons should be visible and enabled in the landing page (Validation) - optional
   cy.get('.login-form > sc-button > .button')
     .contains('Jetzt Anmelden')
-    .click();
+    .click({ force: true });
   //Redirection to Kiam login page
   //cy.url().should("include", "https://login.post.at/kiamprod.onmicrosoft.com"); //Validating KiamProd url
   //cy.url().should('include', 'https://kiamabn.b2clogin.com/'); //Validating KiamTest url
   //Import credentials (un/pw) from 'ebrief.json' file
   cy.fixture('ebrief.json').as('example_kiam');
   cy.get('@example_kiam').then((usersJson) => {
-    cy.get('#signInName').type(usersJson.username_kiam_prod);
-    cy.get('#password').type(usersJson.password_kiam_prod);
+    cy.get('#signInName').type(usersJson.username_kiam);
+    cy.get('#password').type(usersJson.password_kiam);
     cy.wait(1000);
     cy.get('#showPassword').click(); //Show/Hide pass
     cy.wait(1000);
     cy.get('#next').click(); //Login to E-Brief
   });
+  cy.wait(4500);
   cy.url().should('include', '/deliveries'); // => validate ebrief url (/deliveries page)
   cy.wait(1000);
 }); //end
@@ -200,21 +201,40 @@ Cypress.Commands.add('upload_attachment1', function () {
 //EG-Login to SW (34)
 
 //Custom commands: Taken data from json file, and login to SW as a AdminUser
+// Cypress.Commands.add('loginToSupportViewAdmin', () => {
+//   cy.visit(
+//     'https://e-gehaltszettel.post-business-solutions.at/fe.e-gehaltszettel/login'
+//   ); //Taken from base url
+//   cy.url().should('include', '/login'); //Validating url on the Login page
+//   //Import credentials (un/pw) from 'supportView.json' file
+//   cy.fixture('supportView.json').as('example_supportView');
+//   cy.get('@example_supportView').then((usersJson) => {
+//     cy.get('.username').type(usersJson.username_supportViewAdmin);
+//     cy.get('.password').type(usersJson.username_supportViewAdmin);
+//     cy.wait(1000);
+//     cy.get('.login-button').click(); //Login to SW
+//   });
+//   cy.wait(1500);
+//   cy.url().should('include', '/dashboard/groups'); // => validate urlS
+//   cy.wait(1000);
+// }); //end
+
+//Custom commands: Taken data from json file, and login to SW as a Master User
 Cypress.Commands.add('loginToSupportViewAdmin', () => {
-  cy.visit(
-    'https://e-gehaltszettel.post-business-solutions.at/fe.e-gehaltszettel/login'
-  ); //Taken from base url
-  cy.url().should('include', '/login'); //Validating url on the Login page
   //Import credentials (un/pw) from 'supportView.json' file
   cy.fixture('supportView.json').as('example_supportView');
   cy.get('@example_supportView').then((usersJson) => {
+    //cy.visit(usersJson.baseUrl); //Taken from base url
+    cy.visit(usersJson.baseUrl, {
+      failOnStatusCode: false,
+    });
+    cy.url().should('include', '/login'); //Validating url on the login page
     cy.get('.username').type(usersJson.username_supportViewAdmin);
-    cy.get('.password').type(usersJson.username_supportViewAdmin);
+    cy.get('.password').type(usersJson.password_supportViewAdmin);
     cy.wait(1000);
-    cy.get('.login-button').click(); //Login to SW
+    cy.get('.login-button').click(); //Trigger Login to SW
+    cy.url().should('include', '/dashboard/groups'); // => validate url
   });
-  cy.wait(1500);
-  cy.url().should('include', '/dashboard/groups'); // => validate urlS
   cy.wait(1000);
 }); //end
 
@@ -227,7 +247,6 @@ Cypress.Commands.add('loginToSupportViewMaster', () => {
     cy.visit(usersJson.baseUrl, {
       failOnStatusCode: false,
     });
-
     cy.url().should('include', '/login'); //Validating url on the login page
     cy.get('.username').type(usersJson.username_supportViewMaster);
     cy.get('.password').type(usersJson.password_supportViewMaster);

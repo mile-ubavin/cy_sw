@@ -1,4 +1,4 @@
-/// <reference types="Cypress" />
+/// <reference types="cypress" />
 /// <reference types="cypress-xpath" />
 
 describe('Login, Crete_delivery-Upload_doc(pdf), Logout', () => {

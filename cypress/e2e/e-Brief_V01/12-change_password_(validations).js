@@ -7,7 +7,7 @@ describe('Login, Change password, Logout', () => {
     });
   });
   //update personal data
-  it.only('Change password, check validation', function () {
+  it('Change password, check validation', function () {
     cy.visit('/deliveries');
     cy.wait(2500);
     cy.get('.user-title').click(); //switch to Persons tab

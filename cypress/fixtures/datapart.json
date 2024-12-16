@@ -1,5 +1,5 @@
 {
-  "baseUrl": "https://my-datapart.de/pf.datapart",
+  "baseUrl": "http://10.53.5.101:8025/pf.datapart_t/",
   "baseUrl_04": "https://services.sendhybrid.com/pf.datapart_t_supportView/login",
   "baseUrl_prod": "https://my-datapart.de/pf.datapart",
   "username_student": "smile",

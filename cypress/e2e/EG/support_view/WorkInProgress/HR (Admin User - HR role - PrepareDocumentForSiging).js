@@ -347,7 +347,7 @@ describe('hrManagement - prepare doc for signing (HappyPath)', () => {
         cy.get('button[type="submit"]').click();
       });
 
-      //Search for Group by Display Name
+      //Search for Company by Display Name
       cy.get('#searchButton>span').click(); //Click on search button
       cy.wait(1000);
       cy.fixture('supportView.json').as('payslipSW');
@@ -2141,7 +2141,7 @@ describe('hrManagement - prepare doc for signing (HappyPath)', () => {
   });
 
   //Activate E-Box user
-  it.skip('Activate E-Box User', () => {
+  it.only('Activate E-Box User', () => {
     // Login as a Master-User
     cy.fixture('supportView.json').as('payslipSW');
     cy.get('@payslipSW').then((payslipJson) => {

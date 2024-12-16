@@ -91,10 +91,17 @@ describe('Send welcome mail via post / EinfachBrief (HappyPath)', () => {
         .eq(1)
         .type(payslipJson.search); // Enter search keyword
       cy.get('.search-dialog>form>div>.mat-primary').click(); // Confirm search
-
+      cy.pause();
       // Switch to User section
-      cy.get('.mdc-button > .mdc-button__label').eq(4).click();
+      //cy.get('.mdc-button > .mdc-button__label').eq(4).click();
 
+      cy.get('.action-buttons>.mdc-button>.mdc-button__label')
+        .filter((index, el) => {
+          const text = Cypress.$(el).text().trim();
+          return text === 'User' || text === 'Benutzer';
+        })
+        .click({ force: true });
+      cy.pause();
       // Function to create a user
       function createUser(user) {
         // Click 'Create User' button

@@ -27,16 +27,174 @@ describe('Send Welcome Mail letter', () => {
           })
           .click();
         cy.wait(1500);
-
-        // Fill out the "Create Company" form using companyData from JSON
         const companyData = payslipJson.companyData[0];
-        cy.get('input[formcontrolname="name"]').type(
-          companyData.companyDispayName
-        );
+        // Generate a random two-character string (alphabet + number)
+        const randomValue =
+          String.fromCharCode(65 + Math.floor(Math.random() * 26)) + // Random uppercase letter
+          Math.floor(Math.random() * 10); // Random digit (0-9)
 
-        cy.get('input[formcontrolname="description"]').type(
-          companyData.companyDispayName
-        );
+        // Convert random Value to uppercase/lowercase
+        const randomValueUpperCase = randomValue.toUpperCase();
+        const randomValueLowerCase = randomValue.toLowerCase();
+        //Add Company Prefix
+        cy.get('.prefix-bttn').click();
+
+        //User Prefix
+        cy.get('.mat-mdc-form-field-infix>label')
+          .filter((index, el) => {
+            const text = Cypress.$(el).text().trim();
+            return (
+              text === 'User Prefix' || text === 'Präfix für Benutzernamen'
+            );
+          })
+          .click()
+          .type(`${companyData.userPrefix}-${randomValue}`); // Add the randomValue
+        cy.wait(1500);
+        // Subcompany Prefix
+        cy.get('.mat-mdc-form-field-infix>label')
+          .filter((index, el) => {
+            const text = Cypress.$(el).text().trim();
+            return (
+              text === 'Subcompany Prefix' ||
+              text === 'Präfix für Personalnummer'
+            );
+          })
+          .click()
+          .type(`${companyData.subcompanyPrefix}-${randomValue}`); // Add the randomValue
+        cy.wait(1500);
+        // Subcompany Name
+        cy.get('.mat-mdc-form-field-infix>label')
+          .filter((index, el) => {
+            const text = Cypress.$(el).text().trim();
+            return (
+              text === 'Subcompany Name' ||
+              text === 'Anzeigename der Unterfirma'
+            );
+          })
+          .click()
+          .type(`${companyData.subcompanyName}-${randomValue}`); // Add the randomValue
+        cy.wait(1500);
+
+        // Prefix Length
+        cy.get('.mat-mdc-form-field-infix>label')
+          .filter((index, el) => {
+            const text = Cypress.$(el).text().trim();
+            return (
+              text === 'Prefix Length' ||
+              text === 'Anz. Stellen, auf die Personalnummer aufgefüllt wird'
+            );
+          })
+          .click()
+          .type(`${companyData.prefixLength}-${randomValue}`); // Add the randomValue
+        cy.wait(1500);
+
+        //Save Prefixes
+        cy.get('.mdc-button__label')
+          .filter((index, el) => {
+            const text = Cypress.$(el).text().trim();
+            return text === 'Save' || text === 'Übernehmen';
+          })
+          .click();
+        cy.wait(2500);
+
+        // Ensure the "group-prefixes-dialog" is not visible before proceeding
+        cy.get('.group-prefixes-dialog')
+          .should('not.exist') // Wait until the dialog disappears
+          .then(() => {
+            // Fill out the "Create Company" form using companyData from JSON
+            cy.get('input[formcontrolname="name"]').type('Gmbh' + randomValue); // Add the randomValue
+
+            cy.get('input[formcontrolname="description"]').type(
+              `${companyData.description}-${randomValue}`
+            ); // Add the randomValue
+            cy.get('input[formcontrolname="email"]').type(
+              'gmbh-' + randomValueLowerCase + '@yopmail.com'
+            );
+
+            cy.get('input[formcontrolname="sapCustomerNumber"]').type(
+              `${companyData.sapCustomerNumber}-${randomValue}`
+            ); // Add the randomValue
+            // Trigger opening the Material Number dropdown
+            cy.get('.mat-mdc-form-field-infix>label>mat-label')
+              .filter((index, el) => {
+                const text = Cypress.$(el).text().trim();
+                return text === 'Material Number' || text === 'Materialnummer';
+              })
+              .click({ force: true });
+            cy.wait(1500);
+
+            // Select a random option from the dropdown
+            cy.get('#mat-select-2-panel>mat-option') // Target the dropdown options
+              .then((options) => {
+                const randomIndex = Math.floor(Math.random() * options.length); // Generate a random index
+                cy.wrap(options[randomIndex]).click({ force: true }); // Select and click a random option
+              });
+
+            // Trigger opening the Accounting Model dropdown
+            cy.get('.mat-mdc-form-field-infix>label>mat-label')
+              .filter((index, el) => {
+                const text = Cypress.$(el).text().trim();
+                return (
+                  text === 'Accounting Model' || text === 'Verrechnungsmodell'
+                );
+              })
+              .click({ force: true });
+            cy.wait(1500);
+
+            // Select a random option from the dropdown
+            cy.get('#mat-select-4-panel>mat-option') // Target the dropdown options
+              .then((options) => {
+                const randomIndex = Math.floor(Math.random() * options.length); // Generate a random index
+                cy.wrap(options[randomIndex]).click({ force: true }); // Select and click a random option
+              });
+
+            cy.get('input[formcontrolname="streetName"]').type(
+              companyData.streetName
+            );
+
+            cy.get('input[formcontrolname="doorNumber"]').type(
+              `${companyData.doorNumber}-${randomValue}`
+            ); // Add the randomValue
+
+            cy.get('input[formcontrolname="zipCode"]').type(
+              companyData.zipCode
+            );
+
+            cy.get('input[formcontrolname="city"]').type(
+              `${companyData.city}-${randomValue}`
+            ); // Add the randomValue
+            //"einfachBriefEnabled"
+            cy.get('#einfachBriefEnabled').click();
+
+            // Generate a random 10-digit postSapNumber
+            const postSapNumber =
+              Math.floor(Math.random() * 9000000000) + 1000000000; // Ensures a 10-digit number
+
+            // Fill the postSapNumber field with the generated value
+            cy.get('input[formcontrolname="postSapNumber"]').type(
+              postSapNumber.toString()
+            );
+            //Submit Company Dialog
+            cy.get('.mdc-button__label')
+              .filter((index, el) => {
+                const text = Cypress.$(el).text().trim();
+                return text === 'Submit' || text === 'Absenden';
+              })
+              .click();
+            cy.wait(4500);
+          });
+        //Search for Company by Display Name
+        cy.get('#searchButton>span').click(); //Click on search button
+        cy.wait(1000);
+
+        cy.get('.search-dialog>form>.form-fields>.searchText-wrap')
+          .eq(1)
+          .type('Gmbh' + randomValue);
+
+        //Find the Search button by button name and click on it
+        cy.wait(1500);
+        cy.get('.search-dialog>form>div>.mat-primary').click();
+        cy.wait(1500);
 
         // const companyData = payslipJson.companyData[1];
         // cy.get('input[formcontrolname="description"]').type(

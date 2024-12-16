@@ -1,14 +1,17 @@
 {
   "baseUrl": "https://supportviewpayslip.edeja.com/fe/login",
   "baseUrl_04": "https://e-gehaltszettel-t.post-business-solutions.at/fe.e-gehaltszettel_t/login",
+  "baseUrl_prod": "https://e-gehaltszettel.post-business-solutions.at/fe.e-gehaltszettel/login",
   "username_supportViewMaster": "e-gehaltszettelMaster",
   "password_supportViewMaster": "Test1234!",
+  "password_supportViewMaster_prod": "%7axX~mc@4q>KhADF",
   "company": "Aqua",
   "search": "Android",
   "username_supportViewAdmin": "aquaAdmin",
   "password_supportViewAdmin": "Test1234!",
   "email_supportViewAdmin": "aqua.admin@yopmail.com",
   "baseUrl_egEbox": "https://eboxpayslip.edeja.com/fe.e-box_t/",
+  "baseUrl_04_egEbox": "https://e-gehaltszettel-t.post-business-solutions.at/fe.e-box_t/",
   "username_egEbox": "aquaABBA000100279311",
   "password_egEbox": "Test1234!",
   "enableXML": [
@@ -35,7 +38,14 @@
       "name": "Beiersdorfer"
     }
   ],
-
+  "createAdminUser": [
+    {
+      "firstName": "Mustermann",
+      "lastName": "Admin",
+      "username": "maxmustermannAdmin",
+      "email": "max-mustermann@yopmail.com"
+    }
+  ],
   "createUserNoAddress": [
     {
       "firstName": "No Address",
@@ -68,7 +78,17 @@
   "companyData": [
     {
       "companyDispayName": "Gmbh",
-      "description": "Description"
+      "description": "Description GmbH",
+      "email": "gmbh.sw@yopmail.com",
+      "sapCustomerNumber": "0000000777",
+      "streetName": "Maine Strasse",
+      "doorNumber": "doorNumber/17",
+      "zipCode": "8010",
+      "city": "Maresse",
+      "userPrefix": "uPr",
+      "subcompanyPrefix": "sPr",
+      "subcompanyName": "sNm",
+      "prefixLength": "10"
     }
   ]
 }
