@@ -67,7 +67,7 @@ describe('Send welcome mail via post / EinfachBrief (HappyPath)', () => {
 
   // A D M I N   U S E R - CREATE USER FROM CSV FILE
 
-  it('Login As AdminUser - Create Users from CSV file', () => {
+  it.only('Login As AdminUser - Create Users from CSV file', () => {
     //Import credentials (un/pw) from 'supportView.json' file
     cy.fixture('supportView.json').as('payslipSW');
     cy.get('@payslipSW').then((payslipJson) => {
@@ -99,11 +99,20 @@ describe('Send welcome mail via post / EinfachBrief (HappyPath)', () => {
       //Find the Search button by button name and click on it
 
       cy.get('.search-dialog>form>div>.mat-primary').click();
-      //Switch to user section
-      cy.get('.mdc-button > .mdc-button__label').eq(4).click();
 
-      //Click on create button
-      cy.get('button > .mdc-button__label')
+      //Switch to user section
+      //cy.get('.mdc-button > .mdc-button__label').eq(4).click();
+      cy.wait(4500);
+      cy.get('.action-buttons>button>.mdc-button__label')
+        .filter((index, el) => {
+          const text = Cypress.$(el).text().trim();
+          return text === 'User' || text === 'Benutzer';
+        })
+        .click({ multiple: true });
+      cy.wait(4500);
+
+      //Click on create User button
+      cy.get('.button-wraper>button > .mdc-button__label')
         .filter((index, el) => {
           const text = Cypress.$(el).text().trim();
           return text === 'Create user' || text === 'Neuen Benutzer Anlegen';

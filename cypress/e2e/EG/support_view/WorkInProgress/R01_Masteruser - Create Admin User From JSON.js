@@ -77,7 +77,7 @@ describe('Masteruser - Create Admin User From JSON', () => {
 
       // Submit the form
       cy.get('button[type="submit"]').click();
-
+      cy.wait(8000);
       // Verify the success message
       cy.get('.mat-mdc-simple-snack-bar > .mat-mdc-snack-bar-label')
         .should('be.visible') // Ensure it's visible first
@@ -112,7 +112,7 @@ describe('Masteruser - Create Admin User From JSON', () => {
       cy.get('input[formcontrolname="email"]').type(adminUser.email); // Email
       // Submit the form
       cy.get('button[type="submit"]').click();
-
+      cy.wait(8000);
       // Verify Error message
       cy.get('.mat-mdc-simple-snack-bar > .mat-mdc-snack-bar-label')
         .should('be.visible') // Ensure it's visible first
@@ -159,6 +159,12 @@ describe('Masteruser - Create Admin User From JSON', () => {
       cy.get('mat-checkbox .mdc-form-field .mdc-label')
         .contains(/Customer Creator|Nutzeranlage/) // Match either of the two labels
         .click(); // Click to select
+
+      // Select the "Data Submitter" role
+      cy.get('mat-checkbox .mdc-form-field .mdc-label')
+        .contains(/Data Submitter|Versand/) // Match either of the two labels
+        .click(); // Click to select
+
       cy.wait(1500);
       //Save Roles
       cy.get('button[type="submit"]').click({ force: true });
@@ -321,21 +327,44 @@ describe('Masteruser - Create Admin User From JSON', () => {
           // Wait for login to complete
           cy.wait(3500);
 
-          // Check if the 'User | Benutzer' button is visible and click it
-          cy.get('button > .mdc-button__label')
-            .should('be.visible') // Ensure the button is visible
-            .then(($button) => {
-              const text = $button.text().trim(); // Extract and trim the text
-              expect(text).to.match(/User|Benutzer/); // Validate the text matches either 'User' or 'Benutzer'
+          //Check visibility of buttons depend of selected Roles on the Companies page
+          const buttonLabelsCompaniesPage = [
+            { en: 'Upload Document', de: 'Dokument hochladen' },
+            { en: 'Mass Upload', de: 'Massensendung hochladen' },
+            { en: 'User', de: 'Benutzer' },
+          ];
+          cy.get('button > .mdc-button__label').each(($button) => {
+            cy.wrap($button)
+              .invoke('text')
+              .then((text) => {
+                const trimmedText = text.trim();
+                const isValid = buttonLabelsCompaniesPage.some(
+                  (label) =>
+                    label.en === trimmedText || label.de === trimmedText
+                );
 
-              // Click the button
-              cy.wrap($button).click();
-            });
+                // Assert that the button text matches one of the expected labels
+                expect(isValid, `Unexpected button label: "${trimmedText}"`).to
+                  .be.true;
+              });
+          });
+          // Click on the 'User | Benutzer' button
+          cy.get('button > .mdc-button__label')
+            .filter((index, el) => {
+              const text = Cypress.$(el).text().trim();
+              return text === 'User' || text === 'Benutzer';
+            })
+            .click();
+          cy.wait(1500);
 
           cy.wait(2500); // Optional wait, not recommended unless necessary
 
-          //Check visibility of buttons depend of selected Roles
+          //Check visibility of buttons depend of selected Roles on User page
           const buttonLabels = [
+            {
+              en: 'Select users to deliver documents',
+              de: 'Benutzer für die Zustellung von Dokumenten auswählen',
+            },
             { en: 'Create User', de: 'Neuen Benutzer Anlegen' },
             { en: 'Edit', de: 'Bearbeiten' },
             { en: 'Password reset', de: 'Passwort wiederherstellen' },
@@ -397,7 +426,6 @@ describe('Masteruser - Create Admin User From JSON', () => {
             force: true,
           });
 
-          cy.pause();
           //Logout
           cy.get('.logout-icon ').click();
           cy.wait(2000);
@@ -498,6 +526,7 @@ describe('Masteruser - Create Admin User From JSON', () => {
       cy.get('.confirm-buttons > :nth-child(2)').click();
       cy.log('Test completed successfully.');
       cy.wait(2500);
-    }); //******************************************************payslipJson******************************************************************************* */
+      cy.log('Test is successfully executed.');
+    }); //end payslipJson
   }); //end it
 }); //end describe
