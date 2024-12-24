@@ -152,7 +152,7 @@ describe('hrManagement - prepare doc for signing (HappyPath)', () => {
   //   //   cy.visit(payslipJson.baseUrl); // Visit base URL from fixture
   //   //   cy.url().should('include', payslipJson.baseUrl); // Validate the URL
   //   cy.get('@payslipSW').then((payslipJson) => {
-  //     cy.visit(payslipJson.baseUrl_04, {
+  //     cy.visit(payslipJson.baseUrl, {
   //       failOnStatusCode: false,
   //     });
 
@@ -346,7 +346,7 @@ describe('hrManagement - prepare doc for signing (HappyPath)', () => {
     cy.fixture('supportView.json').as('payslipSW');
 
     cy.get('@payslipSW').then((payslipJson) => {
-      cy.visit(payslipJson.baseUrl_04, {
+      cy.visit(payslipJson.baseUrl, {
         failOnStatusCode: false,
       });
 
@@ -626,7 +626,7 @@ describe('hrManagement - prepare doc for signing (HappyPath)', () => {
         cy.get('.logout-icon ').click();
         cy.wait(2000);
         cy.get('.confirm-buttons > :nth-child(2)').click();
-        cy.url().should('include', payslipJson.baseUrl_04); // Validate url'
+        cy.url().should('include', payslipJson.baseUrl); // Validate url'
         cy.log('Test completed successfully.');
         cy.wait(2500);
       }); //end
@@ -681,7 +681,7 @@ describe('hrManagement - prepare doc for signing (HappyPath)', () => {
       cy.get('.logout-icon ').click();
       cy.wait(2000);
       cy.get('.confirm-buttons > :nth-child(2)').click();
-      cy.url().should('include', payslipJson.baseUrl_04); // Validate url'
+      cy.url().should('include', payslipJson.baseUrl); // Validate url'
       cy.log('Test completed successfully.');
       cy.wait(2500);
     });
@@ -697,7 +697,7 @@ describe('hrManagement - prepare doc for signing (HappyPath)', () => {
 
     cy.fixture('supportView.json').as('payslipSW');
     cy.get('@payslipSW').then((payslipJson) => {
-      cy.visit(payslipJson.baseUrl_04, {
+      cy.visit(payslipJson.baseUrl, {
         failOnStatusCode: false,
       });
 
@@ -863,7 +863,7 @@ describe('hrManagement - prepare doc for signing (HappyPath)', () => {
       cy.get('.logout-icon ').click();
       cy.wait(2000);
       cy.get('.confirm-buttons > :nth-child(2)').click();
-      cy.url().should('include', payslipJson.baseUrl_04); // Validate url'
+      cy.url().should('include', payslipJson.baseUrl); // Validate url'
       cy.log('Test completed successfully.');
       cy.wait(2500);
     });
@@ -873,8 +873,8 @@ describe('hrManagement - prepare doc for signing (HappyPath)', () => {
   it('Ebox user signing HR delivery_1 Signature', () => {
     cy.fixture('supportView.json').as('payslipSW');
     cy.get('@payslipSW').then((payslipJson) => {
-      cy.visit(payslipJson.baseUrl_04_egEbox); // Taken from base URL
-      cy.url().should('include', payslipJson.baseUrl_04_egEbox); // Validate URL on the login page
+      cy.visit(payslipJson.baseUrl_egEbox); // Taken from base URL
+      cy.url().should('include', payslipJson.baseUrl_egEbox); // Validate URL on the login page
       cy.wait(2000);
 
       //Remove Cookie
@@ -912,7 +912,7 @@ describe('hrManagement - prepare doc for signing (HappyPath)', () => {
         });
       cy.wait(3500);
       //Click on latest created deivery
-
+      cy.pause();
       cy.intercept(
         'GET',
         '**/hybridsign/backend_t/document/v1/getDocument/**'
@@ -1032,7 +1032,7 @@ describe('hrManagement - prepare doc for signing (HappyPath)', () => {
       cy.get('.user-title').click();
       cy.wait(1500);
       cy.get('.logout-title > a').click();
-      cy.url().should('include', payslipJson.baseUrl_04_egEbox); // Validate url
+      cy.url().should('include', payslipJson.baseUrl_egEbox); // Validate url
       cy.log('Test completed successfully.');
     });
   });

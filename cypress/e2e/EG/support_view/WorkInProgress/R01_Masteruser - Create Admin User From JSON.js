@@ -34,7 +34,7 @@ describe('Masteruser - Create Admin User From JSON', () => {
     // Login as Master User using a custom command
     cy.loginToSupportViewMaster();
     cy.wait(3500);
-
+    //Search for Company by Display Name
     cy.get('#searchButton>span').click(); //Click on search button
     cy.wait(1000);
     cy.fixture('supportView.json').as('payslipSW');
@@ -75,9 +75,26 @@ describe('Masteruser - Create Admin User From JSON', () => {
       cy.get('input[formcontrolname="username"]').type(adminUser.username); // Username
       cy.get('input[formcontrolname="email"]').type(adminUser.email); // Email
 
-      // Submit the form
+      // //Submit the form
+      // cy.get('button[type="submit"]').click();
+      // cy.wait(8000);
+
+      cy.intercept('POST', '**/supportView/v1/person/editXUser**').as(
+        'editXUser'
+      );
       cy.get('button[type="submit"]').click();
-      cy.wait(8000);
+
+      cy.wait(['@editXUser'], { timeout: 20000 }).then((interception) => {
+        // Log the intercepted response
+        cy.log('Intercepted response:', interception.response);
+
+        // Optional: Assert the response status code
+        expect(interception.response.statusCode).to.eq(201);
+
+        // Optional: Assert response body or other properties
+        // Example: expect(interception.response.body).to.have.property('key', 'value');
+      });
+
       // Verify the success message
       cy.get('.mat-mdc-simple-snack-bar > .mat-mdc-snack-bar-label')
         .should('be.visible') // Ensure it's visible first
@@ -113,6 +130,7 @@ describe('Masteruser - Create Admin User From JSON', () => {
       // Submit the form
       cy.get('button[type="submit"]').click();
       cy.wait(8000);
+
       // Verify Error message
       cy.get('.mat-mdc-simple-snack-bar > .mat-mdc-snack-bar-label')
         .should('be.visible') // Ensure it's visible first
@@ -288,22 +306,12 @@ describe('Masteruser - Create Admin User From JSON', () => {
               });
           }
 
-          // Delete all emails from Admin user's inbox
-
-          // Check if the "Delete all" button is enabled
-          cy.get('.menu>div>#delall').then(($button) => {
-            if (!$button.prop('disabled')) {
-              //$button.click(); // Click and delete all emails
-              cy.wait(1000);
-              cy.wrap($button).click({ force: true }); // Click and delete all emails
-              cy.get('.bl').click(); // Back to home page
-            } else {
-              // If the button is disabled, navigate back to the home page
-              cy.get('.bl').click(); // Back to home page
-            }
-          });
+          // Delete all emails if the button is not disabled
+          cy.get('.menu>div>#delall')
+            .should('not.be.disabled')
+            .click({ force: true });
+          cy.wait(2500);
         });
-      cy.wait(2500);
 
       // *************New Admin is Logging into SW using Credentials taken from emails
       cy.fixture('supportView.json').as('example_supportView');
@@ -330,6 +338,7 @@ describe('Masteruser - Create Admin User From JSON', () => {
           //Check visibility of buttons depend of selected Roles on the Companies page
           const buttonLabelsCompaniesPage = [
             { en: 'Upload Document', de: 'Dokument hochladen' },
+            //{ en: 'Upload Documet', de: 'Personalisierte Dokumente hochladen' },
             { en: 'Mass Upload', de: 'Massensendung hochladen' },
             { en: 'User', de: 'Benutzer' },
           ];

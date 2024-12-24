@@ -156,7 +156,7 @@ Cypress.Commands.add('loginToEBrief', () => {
   //Import credentials (un/pw) from 'ebrief.json' file
   cy.fixture('ebrief.json').as('example_kiam');
   cy.get('@example_kiam').then((usersJson) => {
-    cy.get('#signInName').type(usersJson.username_kiam);
+    cy.get('#signInName').type(usersJson.username_kiam_prod);
     cy.get('#password').type(usersJson.password_kiam);
     cy.wait(1000);
     cy.get('#showPassword').click(); //Show/Hide pass
@@ -244,7 +244,7 @@ Cypress.Commands.add('loginToSupportViewMaster', () => {
   cy.fixture('supportView.json').as('example_supportView');
   cy.get('@example_supportView').then((usersJson) => {
     //cy.visit(usersJson.baseUrl); //Taken from base url
-    cy.visit(usersJson.baseUrl, {
+    cy.visit(usersJson.baseUrl + '/login', {
       failOnStatusCode: false,
     });
     cy.url().should('include', '/login'); //Validating url on the login page
@@ -303,7 +303,7 @@ Cypress.Commands.add('loginToPayslipSupportViewMaster', () => {
   //Import credentials (un/pw) from 'supportView.json' file
   cy.fixture('payslip.json').as('payslip');
   cy.get('@payslip').then((payslipJson) => {
-    cy.visit(payslipJson.baseUrl); //Taken from base url
+    cy.visit(usersJson.baseUrl + '/login'); //Taken from base url
     cy.url().should('include', '/login'); //Validating url on the login page
     cy.get('.username').type(payslipJson.username_supportViewMaster);
     cy.get('.password').type(payslipJson.password_supportViewMaster);

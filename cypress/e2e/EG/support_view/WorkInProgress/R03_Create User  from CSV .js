@@ -1,89 +1,12 @@
-describe('Send welcome mail via post / EinfachBrief (HappyPath)', () => {
-  // M A S T E R    U S E R - CHECK DOES 'SEND TO EBRIEF' IS ENABLED
-  it('Login As Master User - Check does eGehaltszettelEnabled is set to true', () => {
-    //Import credentials (un/pw) from 'supportView.json' file
-    cy.fixture('supportView.json').as('payslipSW');
-    cy.get('@payslipSW').then((payslipJson) => {
-      cy.visit(payslipJson.baseUrl); //Taken from base url
-      cy.url().should('include', payslipJson.baseUrl); //Validating url on the login page
-
-      //Login to sw
-      cy.fixture('supportView.json').as('payslipSW');
-      cy.get('@payslipSW').then((payslipJson) => {
-        cy.get('input[formcontrolname="username"]').type(
-          payslipJson.username_supportViewMaster
-        );
-        cy.get('input[formcontrolname="password"]').type(
-          payslipJson.password_supportViewMaster
-        );
-        cy.get('button[type="submit"]').click();
-      });
-
-      //Search for Group by Display Name
-      cy.get('#searchButton>span').click(); //Click on search button
-      cy.fixture('supportView.json').as('payslipSW');
-      cy.get('@payslipSW').then((payslipJson) => {
-        // Use the company name from the JSON file
-        const companyName = payslipJson.search;
-        // Search for Group by Display Name using the company name
-        cy.get('.search-dialog>form>.form-fields>.searchText-wrap')
-          .eq(1)
-          .type(companyName);
-      });
-      //Find the Search button by button name and click on it
-      cy.get('.search-dialog>form>div>.mat-primary').click();
-      cy.wait(1500);
-      //Switch to user section
-      cy.get('.action-buttons > .mdc-button').eq(0).click();
-    });
-    cy.wait(1500);
-    //Scroll to the botton
-    cy.get('.mat-mdc-dialog-content').scrollTo('bottom');
-
-    //Check checkbox
-    cy.get('#eGehaltszettelEnabled').then(($checkbox) => {
-      if (!$checkbox.is(':checked')) {
-        // If the checkbox is not checked, enable it
-        cy.get('#hrManagementEnabled').check();
-        cy.log('Checkbox was not enabled, now enabled.');
-        //Save Edit Company dialog
-        cy.get('button[type="submit"]').click();
-      } else {
-        // If the checkbox is already enabled
-        cy.log('Checkbox is already enabled.');
-        cy.get('.close[data-mat-icon-name="close"]').click();
-      }
-      //Close Edit Company dialog
-      cy.wait(3000);
-      //Logout
-      cy.get('.logout-icon ').click();
-      cy.wait(2000);
-      cy.get('.confirm-buttons > :nth-child(2)').click();
-      cy.url();
-      cy.should('include', 'https://supportviewpayslip.edeja.com/fe/login'); // Validate url
-      cy.wait(1500);
-    });
-  }); //end it
-
+describe('Master - Create User from CSV', () => {
   // A D M I N   U S E R - CREATE USER FROM CSV FILE
 
-  it('Login As AdminUser - Create Users from CSV file', () => {
+  it.only('Login As AdminUser - Create Users from CSV file', () => {
     //Import credentials (un/pw) from 'supportView.json' file
     cy.fixture('supportView.json').as('payslipSW');
     cy.get('@payslipSW').then((payslipJson) => {
-      cy.visit(payslipJson.baseUrl); //Taken from base url
-      cy.url().should('include', payslipJson.baseUrl); //Validating url on the login page
-      //Login to sw
-      cy.fixture('supportView.json').as('payslipSW');
-      cy.get('@payslipSW').then((payslipJson) => {
-        cy.get('input[formcontrolname="username"]').type(
-          payslipJson.username_supportViewAdmin
-        );
-        cy.get('input[formcontrolname="password"]').type(
-          payslipJson.password_supportViewAdmin
-        );
-        cy.get('button[type="submit"]').click();
-      });
+      cy.loginToSupportViewMaster();
+      cy.wait(3500);
 
       //Search for Group by Display Name
       cy.get('#searchButton>span').click(); //Click on search button

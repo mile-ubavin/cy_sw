@@ -1,11 +1,12 @@
 {
-  "baseUrl": "https://supportviewpayslip.edeja.com/fe/login",
+  "baseUrl": "https://supportviewpayslip.edeja.com/fe",
   "baseUrl_04": "https://e-gehaltszettel-t.post-business-solutions.at/fe.e-gehaltszettel_t",
   "baseUrl_prod": "https://e-gehaltszettel.post-business-solutions.at/fe.e-gehaltszettel",
   "username_supportViewMaster": "e-gehaltszettelMaster",
   "password_supportViewMaster": "Test1234!",
   "password_supportViewMaster_prod": "%7axX~mc@4q>KhADF",
   "company": "Aqua",
+  "company_prod": "madovTest",
   "search": "Android",
   "username_supportViewAdmin": "aquaAdmin",
   "password_supportViewAdmin": "Test1234!",

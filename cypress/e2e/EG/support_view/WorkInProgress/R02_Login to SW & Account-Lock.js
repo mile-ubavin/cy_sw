@@ -13,10 +13,10 @@ describe('Invalid Login Attempts and Account Lock Test', () => {
   const invalidPassword = `Invalid-password - ${randomString}`;
 
   // Scenario 1: Lock the user after 5 invalid login attempts to SW
-  it.skip('Lock the user after 5 invalid login attempts', () => {
+  it('Lock the user after 5 invalid login attempts', () => {
     cy.fixture('supportView.json').as('example_supportView');
     cy.get('@example_supportView').then((usersJson) => {
-      cy.visit(usersJson.baseUrl_prod, { failOnStatusCode: false });
+      cy.visit(usersJson.baseUrl, { failOnStatusCode: false });
       cy.url().should('include', '/login');
 
       cy.intercept('POST', '**/user').as('apiRequest');
@@ -58,7 +58,7 @@ describe('Invalid Login Attempts and Account Lock Test', () => {
   it('Verify trimming password prevents login', () => {
     cy.fixture('supportView.json').as('example_supportView');
     cy.get('@example_supportView').then((usersJson) => {
-      cy.visit(usersJson.baseUrl_prod, { failOnStatusCode: false });
+      cy.visit(usersJson.baseUrl, { failOnStatusCode: false });
       cy.url().should('include', '/login');
 
       const trimmedPassword = `           ${usersJson.password_supportViewMaster}              `; // Add extra spaces
@@ -83,7 +83,7 @@ describe('Invalid Login Attempts and Account Lock Test', () => {
   it('Try login with valid password in camelCase -> fail login', () => {
     cy.fixture('supportView.json').as('example_supportView');
     cy.get('@example_supportView').then((usersJson) => {
-      cy.visit(usersJson.baseUrl_prod, { failOnStatusCode: false });
+      cy.visit(usersJson.baseUrl, { failOnStatusCode: false });
       cy.url().should('include', '/login');
 
       // Convert username to a combination of upper and lower case letters
@@ -113,7 +113,7 @@ describe('Invalid Login Attempts and Account Lock Test', () => {
   it('Masteruser -> Verify trimmed And mixedCase username allows login', () => {
     cy.fixture('supportView.json').as('example_supportView');
     cy.get('@example_supportView').then((usersJson) => {
-      cy.visit(usersJson.baseUrl_prod, { failOnStatusCode: false });
+      cy.visit(usersJson.baseUrl, { failOnStatusCode: false });
       cy.url().should('include', '/login');
 
       // Convert username to a combination of upper and lower case letters
@@ -127,12 +127,12 @@ describe('Invalid Login Attempts and Account Lock Test', () => {
       // Add 10 spaces at the beginning and end of the username
       const trimmedAndmixedCaseUsername = `          ${mixedCaseUsername}          `;
       cy.get('.username').type(trimmedAndmixedCaseUsername);
-      cy.get('.password').type(usersJson.password_supportViewMaster_prod);
+      cy.get('.password').type(usersJson.password_supportViewMaster);
       cy.wait(2500);
       cy.get('.login-button').click();
 
       // Validate successful login
-      cy.url().should('include', usersJson.baseUrl_prod + '/dashboard/groups');
+      cy.url().should('include', usersJson.baseUrl + '/dashboard/groups');
       cy.log('User was able to log in after trimming username.');
     });
     cy.wait(3500);
@@ -148,11 +148,11 @@ describe('Invalid Login Attempts and Account Lock Test', () => {
   it('Masteruser -> Login to sw', () => {
     cy.fixture('supportView.json').as('example_supportView');
     cy.get('@example_supportView').then((usersJson) => {
-      cy.visit(usersJson.baseUrl_prod, { failOnStatusCode: false });
+      cy.visit(usersJson.baseUrl, { failOnStatusCode: false });
       cy.url().should('include', '/login');
 
       cy.get('.username').type(usersJson.username_supportViewMaster);
-      cy.get('.password').type(usersJson.password_supportViewMaster_prod);
+      cy.get('.password').type(usersJson.password_supportViewMaster);
       cy.get('.login-button').click();
 
       cy.url().should('include', '/dashboard/groups'); // Validate successful login
@@ -170,7 +170,7 @@ describe('Invalid Login Attempts and Account Lock Test', () => {
   it('Admin User -> Verify trimmed And mixedCase username allows login', () => {
     cy.fixture('supportView.json').as('example_supportView');
     cy.get('@example_supportView').then((usersJson) => {
-      cy.visit(usersJson.baseUrl_prod, { failOnStatusCode: false });
+      cy.visit(usersJson.baseUrl, { failOnStatusCode: false });
       cy.url().should('include', '/login');
 
       // Convert username to a combination of upper and lower case letters
@@ -190,7 +190,7 @@ describe('Invalid Login Attempts and Account Lock Test', () => {
 
       // Validate successful login
       cy.url().should('include', '/dashboard/groups');
-      cy.url().should('include', usersJson.baseUrl_prod + '/dashboard/groups');
+      cy.url().should('include', usersJson.baseUrl + '/dashboard/groups');
     });
     cy.wait(3500);
     // Logout
@@ -205,14 +205,14 @@ describe('Invalid Login Attempts and Account Lock Test', () => {
   it('Adminu user -> Login to sw', () => {
     cy.fixture('supportView.json').as('example_supportView');
     cy.get('@example_supportView').then((usersJson) => {
-      cy.visit(usersJson.baseUrl_prod, { failOnStatusCode: false });
+      cy.visit(usersJson.baseUrl, { failOnStatusCode: false });
       cy.url().should('include', '/login');
 
       cy.get('.username').type(usersJson.username_supportViewAdmin);
       cy.get('.password').type(usersJson.password_supportViewAdmin);
       cy.get('.login-button').click();
       cy.wait(2500);
-      cy.url().should('include', usersJson.baseUrl_prod + '/dashboard/groups'); // Validate successful login
+      cy.url().should('include', usersJson.baseUrl + '/dashboard/groups'); // Validate successful login
       cy.wait(1500);
 
       // Logout
