@@ -220,17 +220,27 @@ Cypress.Commands.add('upload_attachment1', function () {
 // }); //end
 
 //Custom commands: Taken data from json file, and login to SW as a Master User
-Cypress.Commands.add('loginToSupportViewAdmin', () => {
+// import { getTestData } from '../e2e/EG/support_view/environment/environment';
+// let testData;
+// before(async () => {
+//   testData = await getTestData(); // Fetch the data inside an async context
+// });
+//cy.visit(Cypress.env("baseUrl"));
+
+//Custom commands: Taken data from json file, and login to SW as a Master User
+Cypress.Commands.add('loginToSupportViewMaster', () => {
+  //cy.visit(Cypress.env("baseUrl"));
+
   //Import credentials (un/pw) from 'supportView.json' file
   cy.fixture('supportView.json').as('example_supportView');
   cy.get('@example_supportView').then((usersJson) => {
     //cy.visit(usersJson.baseUrl); //Taken from base url
-    cy.visit(usersJson.baseUrl, {
+    cy.visit(Cypress.env('baseUrl'), {
       failOnStatusCode: false,
     });
     cy.url().should('include', '/login'); //Validating url on the login page
-    cy.get('.username').type(usersJson.username_supportViewAdmin);
-    cy.get('.password').type(usersJson.password_supportViewAdmin);
+    cy.get('.username').type(Cypress.env('username_supportViewMaster'));
+    cy.get('.password').type(Cypress.env('password_supportViewMaster'));
     cy.wait(1000);
     cy.get('.login-button').click(); //Trigger Login to SW
     cy.url().should('include', '/dashboard/groups'); // => validate url
@@ -238,22 +248,24 @@ Cypress.Commands.add('loginToSupportViewAdmin', () => {
   cy.wait(1000);
 }); //end
 
-//Custom commands: Taken data from json file, and login to SW as a Master User
-Cypress.Commands.add('loginToSupportViewMaster', () => {
+Cypress.Commands.add('loginToSupportViewAdmin', () => {
+  //   const environment = await getTestData();
+  // console.log(environment);
+
   //Import credentials (un/pw) from 'supportView.json' file
-  cy.fixture('supportView.json').as('example_supportView');
-  cy.get('@example_supportView').then((usersJson) => {
-    //cy.visit(usersJson.baseUrl); //Taken from base url
-    cy.visit(usersJson.baseUrl + '/login', {
-      failOnStatusCode: false,
-    });
-    cy.url().should('include', '/login'); //Validating url on the login page
-    cy.get('.username').type(usersJson.username_supportViewMaster);
-    cy.get('.password').type(usersJson.password_supportViewMaster);
-    cy.wait(1000);
-    cy.get('.login-button').click(); //Trigger Login to SW
-    cy.url().should('include', '/dashboard/groups'); // => validate url
+  // cy.fixture('supportView.json').as('example_supportView');
+  // cy.get('@example_supportView').then((usersJson) => {
+  //cy.visit(usersJson.baseUrl); //Taken from base url
+  cy.visit(Cypress.env('baseUrl'), {
+    failOnStatusCode: false,
   });
+  cy.url().should('include', '/login'); //Validating url on the login page
+  cy.get('.username').type(Cypress.env('username_supportViewAdmin'));
+  cy.get('.password').type(Cypress.env('password_supportViewAdmin'));
+  cy.wait(1000);
+  cy.get('.login-button').click(); //Trigger Login to SW
+  cy.url().should('include', '/dashboard/groups'); // => validate url
+  // });
   cy.wait(1000);
 }); //end
 
