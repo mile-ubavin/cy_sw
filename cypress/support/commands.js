@@ -198,64 +198,23 @@ Cypress.Commands.add('upload_attachment1', function () {
 
 // ***************** EG ***********************
 
-//EG-Login to SW (34)
-
-//Custom commands: Taken data from json file, and login to SW as a AdminUser
-// Cypress.Commands.add('loginToSupportViewAdmin', () => {
-//   cy.visit(
-//     'https://e-gehaltszettel.post-business-solutions.at/fe.e-gehaltszettel/login'
-//   ); //Taken from base url
-//   cy.url().should('include', '/login'); //Validating url on the Login page
-//   //Import credentials (un/pw) from 'supportView.json' file
-//   cy.fixture('supportView.json').as('example_supportView');
-//   cy.get('@example_supportView').then((usersJson) => {
-//     cy.get('.username').type(usersJson.username_supportViewAdmin);
-//     cy.get('.password').type(usersJson.username_supportViewAdmin);
-//     cy.wait(1000);
-//     cy.get('.login-button').click(); //Login to SW
-//   });
-//   cy.wait(1500);
-//   cy.url().should('include', '/dashboard/groups'); // => validate urlS
-//   cy.wait(1000);
-// }); //end
-
-//Custom commands: Taken data from json file, and login to SW as a Master User
-// import { getTestData } from '../e2e/EG/support_view/environment/environment';
-// let testData;
-// before(async () => {
-//   testData = await getTestData(); // Fetch the data inside an async context
-// });
-//cy.visit(Cypress.env("baseUrl"));
-
-//Custom commands: Taken data from json file, and login to SW as a Master User
+//Login to EG SW as a Master user
 Cypress.Commands.add('loginToSupportViewMaster', () => {
-  //cy.visit(Cypress.env("baseUrl"));
-
-  //Import credentials (un/pw) from 'supportView.json' file
-  cy.fixture('supportView.json').as('example_supportView');
-  cy.get('@example_supportView').then((usersJson) => {
-    //cy.visit(usersJson.baseUrl); //Taken from base url
-    cy.visit(Cypress.env('baseUrl'), {
-      failOnStatusCode: false,
-    });
-    cy.url().should('include', '/login'); //Validating url on the login page
-    cy.get('.username').type(Cypress.env('username_supportViewMaster'));
-    cy.get('.password').type(Cypress.env('password_supportViewMaster'));
-    cy.wait(1000);
-    cy.get('.login-button').click(); //Trigger Login to SW
-    cy.url().should('include', '/dashboard/groups'); // => validate url
+  //Import credentials (un/pw) from json file
+  cy.visit(Cypress.env('baseUrl'), {
+    failOnStatusCode: false,
   });
+  cy.url().should('include', '/login'); //Validating url on the login page
+  cy.get('.username').type(Cypress.env('username_supportViewMaster'));
+  cy.get('.password').type(Cypress.env('password_supportViewMaster'));
+  cy.wait(1000);
+  cy.get('.login-button').click(); //Trigger Login to SW
+  cy.url().should('include', '/dashboard/groups'); // => validate url
   cy.wait(1000);
 }); //end
 
+//Login to EG SW as a Admin user
 Cypress.Commands.add('loginToSupportViewAdmin', () => {
-  //   const environment = await getTestData();
-  // console.log(environment);
-
-  //Import credentials (un/pw) from 'supportView.json' file
-  // cy.fixture('supportView.json').as('example_supportView');
-  // cy.get('@example_supportView').then((usersJson) => {
-  //cy.visit(usersJson.baseUrl); //Taken from base url
   cy.visit(Cypress.env('baseUrl'), {
     failOnStatusCode: false,
   });
@@ -268,6 +227,49 @@ Cypress.Commands.add('loginToSupportViewAdmin', () => {
   // });
   cy.wait(1000);
 }); //end
+
+//Login to E-Box
+Cypress.Commands.add('loginToEgEbox', () => {
+  cy.visit(Cypress.env('baseUrl_egEbox'), {
+    failOnStatusCode: false,
+  });
+  cy.wait(3500);
+  // Validate URL on the login page
+  cy.url().should('include', Cypress.env('baseUrl_egEbox'));
+
+  //Remove Cookie
+  cy.get('body').then(($body) => {
+    if ($body.find('#onetrust-policy-title').is(':visible')) {
+      // If the cookie bar is visible, click on it and remove it
+      cy.get('#onetrust-accept-btn-handler').click();
+    } else {
+      // Log that the cookie bar was not visible
+      cy.log('Cookie bar not visible');
+    }
+  }); //End Remove Cookie
+
+  //Import credentials (un/pw) from 'cypress config' file
+  cy.get('input[placeholder="Benutzername"]').type(
+    Cypress.env('username_egEbox')
+  );
+  cy.wait(1000);
+  cy.get('input[type="password"]').type(Cypress.env('password_egEbox'));
+
+  cy.wait(1000);
+
+  cy.intercept('POST', '**/rest/v2/deliveries**').as('getDeliveries');
+  cy.get('button[type="submit"]').click(); //Login
+
+  cy.wait(['@getDeliveries'], { timeout: 20000 }).then((interception) => {
+    // Log the intercepted response
+    cy.log('Intercepted response:', interception.response);
+
+    // Assert the response status code
+    expect(interception.response.statusCode).to.eq(200);
+  });
+  cy.url().should('include', '/deliveries'); // => validate url (/deliveries page)
+  cy.wait(2000);
+}); //end login
 
 // Upload Attachment
 Cypress.Commands.add('uploadDocument', function () {
@@ -311,40 +313,24 @@ Cypress.Commands.add('uploadDocument', function () {
 });
 
 //*Custom commands: Taken data from json file
-Cypress.Commands.add('loginToPayslipSupportViewMaster', () => {
-  //Import credentials (un/pw) from 'supportView.json' file
-  cy.fixture('payslip.json').as('payslip');
-  cy.get('@payslip').then((payslipJson) => {
-    cy.visit(usersJson.baseUrl + '/login'); //Taken from base url
-    cy.url().should('include', '/login'); //Validating url on the login page
-    cy.get('.username').type(payslipJson.username_supportViewMaster);
-    cy.get('.password').type(payslipJson.password_supportViewMaster);
-    cy.wait(1000);
-    cy.get('.login-button').click(); //Trigger Login to SW
-    cy.url().should('include', '/dashboard/groups'); // => validate url
-  });
-  cy.wait(1000);
-}); //end
+// Cypress.Commands.add('loginToPayslipSupportViewMaster', () => {
+//   //Import credentials (un/pw) from 'supportView.json' file
+//   cy.fixture('payslip.json').as('payslip');
+//   cy.get('@payslip').then((payslipJson) => {
+//     cy.visit(usersJson.baseUrl + '/login'); //Taken from base url
+//     cy.url().should('include', '/login'); //Validating url on the login page
+//     cy.get('.username').type(payslipJson.username_supportViewMaster);
+//     cy.get('.password').type(payslipJson.password_supportViewMaster);
+//     cy.wait(1000);
+//     cy.get('.login-button').click(); //Trigger Login to SW
+//     cy.url().should('include', '/dashboard/groups'); // => validate url
+//   });
+//   cy.wait(1000);
+// }); //end
 
 // ***************** EG-E-Box *****************
 
 //Custom commands: Taken data from json file
-Cypress.Commands.add('loginToEgEbox', () => {
-  //Import credentials (un/pw) from 'json' file
-  cy.fixture('payslip.json').as('example_supportView');
-  cy.get('@example_supportView').then((usersJson) => {
-    cy.get(':nth-child(1) > .ng-invalid > .input > .input__field-input').type(
-      usersJson.username_egEbox
-    );
-    cy.get('.ng-invalid > .input > .input__field-input').type(
-      usersJson.password_egEbox
-    );
-    cy.wait(1000);
-    cy.get('button[type="submit"]').click(); //Login to E-Brief
-  });
-  cy.url().should('include', '/deliveries'); // => validate ebrief url (/deliveries page)
-  cy.wait(1000);
-}); //end login
 
 // generateRandomUsername
 Cypress.Commands.add('generateRandomUsername', () => {

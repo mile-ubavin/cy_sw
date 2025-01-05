@@ -14,127 +14,129 @@ describe('Invalid Login Attempts and Account Lock Test', () => {
 
   // Scenario 1: Lock the user after 5 invalid login attempts to SW
   it('Lock the user after 5 invalid login attempts', () => {
-    cy.fixture('supportView.json').as('example_supportView');
-    cy.get('@example_supportView').then((usersJson) => {
-      cy.visit(usersJson.baseUrl, { failOnStatusCode: false });
-      cy.url().should('include', '/login');
+    // cy.fixture('supportView.json').as('example_supportView');
+    // cy.get('@example_supportView').then((usersJson) => {
+    //   cy.visit(usersJson.baseUrl, { failOnStatusCode: false });
+    //   cy.url().should('include', '/login');
 
-      cy.intercept('POST', '**/user').as('apiRequest');
+    cy.visit(Cypress.env('baseUrl'), {
+      failOnStatusCode: false,
+    });
 
-      // Simulate 4 invalid login attempts
-      cy.get('.username').type(username);
-      for (let attempt = 1; attempt <= 4; attempt++) {
-        cy.get('.password').type(invalidPassword);
-        cy.get('.btn').click();
+    cy.intercept('POST', '**/user').as('apiRequest');
 
-        cy.wait('@apiRequest', { timeout: 10000 }).then((interception) => {
-          expect(interception.response.statusCode).to.eq(404);
-          expect(interception.response.body)
-            .to.have.property('message')
-            .and.equal('Account is locked!');
-        });
-        cy.get('.password').clear();
-      }
-
-      // Attempt login after 4 invalid attempts
+    // Simulate 4 invalid login attempts
+    cy.get('.username').type(username);
+    for (let attempt = 1; attempt <= 4; attempt++) {
       cy.get('.password').type(invalidPassword);
       cy.get('.btn').click();
-      cy.get('form>.error-text').should(
-        'include.text',
-        'This account is locked, please try again in 5 minutes.'
-      );
 
       cy.wait('@apiRequest', { timeout: 10000 }).then((interception) => {
-        expect(interception.response.statusCode).to.eq(403);
+        expect(interception.response.statusCode).to.eq(404);
         expect(interception.response.body)
           .to.have.property('message')
-          .and.equal('5');
+          .and.equal('Account is locked!');
       });
+      cy.get('.password').clear();
+    }
+
+    // Attempt login after 4 invalid attempts
+    cy.get('.password').type(invalidPassword);
+    cy.get('.btn').click();
+    cy.get('form>.error-text').should(
+      'include.text',
+      'This account is locked, please try again in 5 minutes.'
+    );
+
+    cy.wait('@apiRequest', { timeout: 10000 }).then((interception) => {
+      expect(interception.response.statusCode).to.eq(403);
+      expect(interception.response.body)
+        .to.have.property('message')
+        .and.equal('5');
     });
+    // });//end fixture
     cy.wait(2500);
   }); //end it
 
   // Scenario 2: Verify trimming password - fail login
   it('Verify trimming password prevents login', () => {
-    cy.fixture('supportView.json').as('example_supportView');
-    cy.get('@example_supportView').then((usersJson) => {
-      cy.visit(usersJson.baseUrl, { failOnStatusCode: false });
-      cy.url().should('include', '/login');
-
-      const trimmedPassword = `           ${usersJson.password_supportViewMaster}              `; // Add extra spaces
-      cy.get('.username').type(usersJson.username_supportViewMaster);
-      cy.get('.password').type(trimmedPassword);
-      cy.wait(2500);
-      cy.get('.login-button').click();
-      cy.get('.login-form-wrapper>.has-error>.error-text')
-        .invoke('text')
-        .then((text) => {
-          const trimmedText = text.trim();
-          expect(trimmedText).to.match(
-            /Username and password are incorrect.|Benutzername und Passwort sind falsch./
-          );
-        });
-      cy.log('User was not able to log in after trimming password.');
-      cy.wait(3500);
+    cy.visit(Cypress.env('baseUrl'), {
+      failOnStatusCode: false,
     });
+    cy.url().should('include', '/login');
+
+    const trimmedPassword = `           ${Cypress.env(
+      'password_supportViewMaster'
+    )}              `; // Add extra spaces
+    cy.get('.username').type(Cypress.env('username_supportViewMaster'));
+    cy.get('.password').type(trimmedPassword);
+    cy.wait(2500);
+    cy.get('.login-button').click();
+    cy.get('.login-form-wrapper>.has-error>.error-text')
+      .invoke('text')
+      .then((text) => {
+        const trimmedText = text.trim();
+        expect(trimmedText).to.match(
+          /Username and password are incorrect.|Benutzername und Passwort sind falsch./
+        );
+      });
+    cy.log('User was not able to log in after trimming password.');
+    cy.wait(3500);
   });
 
   // Scenario 3: Enter valid password using camelCase letters -> fail login
   it('Try login with valid password in camelCase -> fail login', () => {
-    cy.fixture('supportView.json').as('example_supportView');
-    cy.get('@example_supportView').then((usersJson) => {
-      cy.visit(usersJson.baseUrl, { failOnStatusCode: false });
-      cy.url().should('include', '/login');
-
-      // Convert username to a combination of upper and lower case letters
-      const mixedCasePassword = usersJson.password_supportViewMaster
-        .split('')
-        .map((char, index) =>
-          index % 2 === 0 ? char.toUpperCase() : char.toLowerCase()
-        )
-        .join('');
-
-      cy.get('.username').type(usersJson.username_supportViewMaster);
-      cy.get('.password').type(mixedCasePassword);
-      cy.get('.login-button').click();
-
-      // Validate unsuccessful login
-      cy.get('form>.error-text').should(
-        'include.text',
-        'Username and password are incorrect.'
-      );
-      cy.log('Login failed when using camelCase password.');
+    cy.visit(Cypress.env('baseUrl'), {
+      failOnStatusCode: false,
     });
+    cy.url().should('include', '/login');
 
+    // Convert username to a combination of upper and lower case letters
+    const mixedCasePassword = Cypress.env('password_supportViewMaster')
+      .split('')
+      .map((char, index) =>
+        index % 2 === 0 ? char.toUpperCase() : char.toLowerCase()
+      )
+      .join('');
+
+    cy.get('.username').type(Cypress.env('username_supportViewMaster'));
+    cy.get('.password').type(mixedCasePassword);
+    cy.get('.login-button').click();
+
+    // Validate unsuccessful login
+    cy.get('form>.error-text').should(
+      'include.text',
+      'Username and password are incorrect.'
+    );
+    cy.log('Login failed when using camelCase password.');
     cy.wait(2500);
   });
 
   // Scenario 4: Masteruser -> Verify trimmed And mixedCase username allows login
   it('Masteruser -> Verify trimmed And mixedCase username allows login', () => {
-    cy.fixture('supportView.json').as('example_supportView');
-    cy.get('@example_supportView').then((usersJson) => {
-      cy.visit(usersJson.baseUrl, { failOnStatusCode: false });
-      cy.url().should('include', '/login');
-
-      // Convert username to a combination of upper and lower case letters
-      const mixedCaseUsername = usersJson.username_supportViewMaster
-        .split('')
-        .map((char, index) =>
-          index % 2 === 0 ? char.toUpperCase() : char.toLowerCase()
-        )
-        .join('');
-
-      // Add 10 spaces at the beginning and end of the username
-      const trimmedAndmixedCaseUsername = `          ${mixedCaseUsername}          `;
-      cy.get('.username').type(trimmedAndmixedCaseUsername);
-      cy.get('.password').type(usersJson.password_supportViewMaster);
-      cy.wait(2500);
-      cy.get('.login-button').click();
-
-      // Validate successful login
-      cy.url().should('include', usersJson.baseUrl + '/dashboard/groups');
-      cy.log('User was able to log in after trimming username.');
+    cy.visit(Cypress.env('baseUrl'), {
+      failOnStatusCode: false,
     });
+    cy.url().should('include', '/login');
+
+    // Convert username to a combination of upper and lower case letters
+    const mixedCaseUsername = Cypress.env('username_supportViewMaster')
+      .split('')
+      .map((char, index) =>
+        index % 2 === 0 ? char.toUpperCase() : char.toLowerCase()
+      )
+      .join('');
+
+    // Add 10 spaces at the beginning and end of the username
+    const trimmedAndmixedCaseUsername = `          ${mixedCaseUsername}          `;
+    cy.get('.username').type(trimmedAndmixedCaseUsername);
+    cy.get('.password').type(Cypress.env('password_supportViewMaster'));
+    cy.wait(2500);
+    cy.get('.login-button').click();
+
+    // Validate successful login
+    cy.url().should('include', Cypress.env('baseUrl') + '/dashboard/groups');
+    cy.log('User was able to log in after trimming username.');
     cy.wait(3500);
     // Logout
     cy.get('.logout-icon').click();
@@ -146,52 +148,50 @@ describe('Invalid Login Attempts and Account Lock Test', () => {
 
   // Scenario 5: Masteruser -> Login to sw
   it('Masteruser -> Login to sw', () => {
-    cy.fixture('supportView.json').as('example_supportView');
-    cy.get('@example_supportView').then((usersJson) => {
-      cy.visit(usersJson.baseUrl, { failOnStatusCode: false });
-      cy.url().should('include', '/login');
-
-      cy.get('.username').type(usersJson.username_supportViewMaster);
-      cy.get('.password').type(usersJson.password_supportViewMaster);
-      cy.get('.login-button').click();
-
-      cy.url().should('include', '/dashboard/groups'); // Validate successful login
-      cy.wait(1500);
-
-      // Logout
-      cy.get('.logout-icon').click();
-      cy.wait(2000);
-      cy.get('.confirm-buttons > :nth-child(2)').click();
-      cy.log('Masteruser login test completed successfully.');
+    cy.visit(Cypress.env('baseUrl'), {
+      failOnStatusCode: false,
     });
+    cy.url().should('include', '/login');
+
+    cy.get('.username').type(Cypress.env('username_supportViewMaster'));
+    cy.get('.password').type(Cypress.env('password_supportViewMaster'));
+    cy.get('.login-button').click();
+
+    cy.url().should('include', '/dashboard/groups'); // Validate successful login
+    cy.wait(1500);
+
+    // Logout
+    cy.get('.logout-icon').click();
+    cy.wait(2000);
+    cy.get('.confirm-buttons > :nth-child(2)').click();
+    cy.log('Masteruser login test completed successfully.');
   }); //end it
 
   // Scenario 6: Admin User -> Verify trimmed And mixedCase username allows login
   it('Admin User -> Verify trimmed And mixedCase username allows login', () => {
-    cy.fixture('supportView.json').as('example_supportView');
-    cy.get('@example_supportView').then((usersJson) => {
-      cy.visit(usersJson.baseUrl, { failOnStatusCode: false });
-      cy.url().should('include', '/login');
-
-      // Convert username to a combination of upper and lower case letters
-      const mixedCaseUsername = usersJson.username_supportViewAdmin
-        .split('')
-        .map((char, index) =>
-          index % 2 === 0 ? char.toUpperCase() : char.toLowerCase()
-        )
-        .join('');
-
-      // Add 10 spaces at the beginning and end of the username
-      const trimmedAndmixedCaseUsername = `          ${mixedCaseUsername}          `;
-      cy.get('.username').type(trimmedAndmixedCaseUsername);
-      cy.get('.password').type(usersJson.password_supportViewAdmin);
-      cy.wait(2500);
-      cy.get('.login-button').click();
-
-      // Validate successful login
-      cy.url().should('include', '/dashboard/groups');
-      cy.url().should('include', usersJson.baseUrl + '/dashboard/groups');
+    cy.visit(Cypress.env('baseUrl'), {
+      failOnStatusCode: false,
     });
+    cy.url().should('include', '/login');
+
+    // Convert username to a combination of upper and lower case letters
+    const mixedCaseUsername = Cypress.env('username_supportViewAdmin')
+      .split('')
+      .map((char, index) =>
+        index % 2 === 0 ? char.toUpperCase() : char.toLowerCase()
+      )
+      .join('');
+
+    // Add 10 spaces at the beginning and end of the username
+    const trimmedAndmixedCaseUsername = `          ${mixedCaseUsername}          `;
+    cy.get('.username').type(trimmedAndmixedCaseUsername);
+    cy.get('.password').type(Cypress.env('password_supportViewAdmin'));
+    cy.wait(2500);
+    cy.get('.login-button').click();
+
+    // Validate successful login
+    cy.url().should('include', '/dashboard/groups');
+    cy.url().should('include', Cypress.env('baseUrl') + '/dashboard/groups');
     cy.wait(3500);
     // Logout
     cy.get('.logout-icon').click();
@@ -203,23 +203,22 @@ describe('Invalid Login Attempts and Account Lock Test', () => {
 
   // Scenario 7: AdminUser -> Login to sw
   it('Adminu user -> Login to sw', () => {
-    cy.fixture('supportView.json').as('example_supportView');
-    cy.get('@example_supportView').then((usersJson) => {
-      cy.visit(usersJson.baseUrl, { failOnStatusCode: false });
-      cy.url().should('include', '/login');
-
-      cy.get('.username').type(usersJson.username_supportViewAdmin);
-      cy.get('.password').type(usersJson.password_supportViewAdmin);
-      cy.get('.login-button').click();
-      cy.wait(2500);
-      cy.url().should('include', usersJson.baseUrl + '/dashboard/groups'); // Validate successful login
-      cy.wait(1500);
-
-      // Logout
-      cy.get('.logout-icon').click();
-      cy.wait(2000);
-      cy.get('.confirm-buttons > :nth-child(2)').click();
-      cy.log('Masteruser login test completed successfully.');
+    cy.visit(Cypress.env('baseUrl'), {
+      failOnStatusCode: false,
     });
+    cy.url().should('include', '/login');
+
+    cy.get('.username').type(Cypress.env('username_supportViewAdmin'));
+    cy.get('.password').type(Cypress.env('password_supportViewAdmin'));
+    cy.get('.login-button').click();
+    cy.wait(2500);
+    cy.url().should('include', Cypress.env('baseUrl') + '/dashboard/groups'); // Validate successful login
+    cy.wait(1500);
+
+    // Logout
+    cy.get('.logout-icon').click();
+    cy.wait(2000);
+    cy.get('.confirm-buttons > :nth-child(2)').click();
+    cy.log('Masteruser login test completed successfully.');
   }); //end it
 }); //end describe

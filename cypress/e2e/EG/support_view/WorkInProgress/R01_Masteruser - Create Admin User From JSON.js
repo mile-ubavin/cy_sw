@@ -1,29 +1,42 @@
 describe('Masteruser - Create Admin User From JSON', () => {
-  function clickOnAdminUserButton() {
-    const collectedButtonTexts = []; // Array to store all link texts
+  // function clickOnAdminUserButton() {
+  //   const collectedButtonTexts = []; // Array to store all link texts
 
-    cy.get('.ng-star-inserted>.action-buttons>button')
-      .find('.mdc-button__label')
-      .each(($el) => {
-        cy.wrap($el)
-          .invoke('text')
-          .then((text) => {
-            collectedButtonTexts.push(text.trim()); // Collect each link text in the array
-            cy.log('Collected Button Text:', text.trim());
-          });
-      })
-      .then(() => {
-        const isAdminUserButton = collectedButtonTexts.some((text) =>
-          ['Admin User', 'Admin Benutzer'].includes(text)
-        );
-        //Check if Admin has access to HR page in SW
-        if (isAdminUserButton) {
-          // Find the specific elements and click on it
-          cy.get('.ng-star-inserted>.action-buttons>button')
-            .contains(/Admin User|Admin Benutzer/)
-            .click({ force: true });
-        }
-      });
+  //   cy.get('.ng-star-inserted>.action-buttons>button')
+  //     .find('.mdc-button__label')
+  //     .each(($el) => {
+  //       cy.wrap($el)
+  //         .invoke('text')
+  //         .then((text) => {
+  //           collectedButtonTexts.push(text.trim()); // Collect each link text in the array
+  //           cy.log('Collected Button Text:', text.trim());
+  //         });
+  //     })
+  //     .then(() => {
+  //       const isAdminUserButton = collectedButtonTexts.some((text) =>
+  //         ['Admin User', 'Admin Benutzer'].includes(text)
+  //       );
+  //       //Check if Admin has access to HR page in SW
+  //       if (isAdminUserButton) {
+  //         // Find the specific elements and click on it
+  //         cy.get('.ng-star-inserted>.action-buttons>button')
+  //           .contains(/Admin User|Admin Benutzer/)
+  //           .click({ force: true });
+  //       }
+  //     });
+  //   cy.wait(1500);
+  // }
+
+  // Click on Admin User button
+  function clickOnAdminUserButton() {
+    //Find the Search button by button name and click on it
+    cy.get('.search-dialog>form>div>.mat-primary').click();
+    cy.wait(1500);
+    cy.get('.mdc-button__label')
+      // Find the button containing "Admin User" or "Admin Benutzer" button
+      .contains(/Admin User|Admin Benutzer/i)
+      .should('be.visible') // Optional: Ensure the button is visible before interacting
+      .click(); // Click the button
     cy.wait(1500);
   }
 
@@ -310,15 +323,6 @@ describe('Masteruser - Create Admin User From JSON', () => {
       });
 
     // New Admin is Logging into SW using Credentials taken from emails
-    // cy.fixture('supportView.json').as('example_supportView');
-    // cy.get('@example_supportView').then((usersJson) => {
-    // console.log('usersJson', usersJson);
-    // console.log('usersJson.baseUrl_prod', usersJson.baseUrl_prod);
-
-    // Visit the login page using the base URL from the fixture
-    // cy.visit(usersJson.baseUrl, {
-    //   failOnStatusCode: false,
-    // });
 
     cy.visit(Cypress.env('baseUrl'), {
       failOnStatusCode: false,
@@ -328,9 +332,10 @@ describe('Masteruser - Create Admin User From JSON', () => {
 
     cy.wait(['@visitURL'], { timeout: 20000 }).then((interception) => {
       // Log the intercepted response
-      // cy.log('Intercepted response:', interception.response);
-      // // Optional: Assert the response status code
-      // expect(interception.response.statusCode).to.eq(201);
+      cy.log('Intercepted response:', interception.response);
+
+      // Optional: Assert the response status code
+      expect(interception.response.statusCode).to.eq(200);
       // Optional: Assert response body or other properties
       // Example: expect(interception.response.body).to.have.property('key', 'value');
     });
@@ -548,7 +553,6 @@ describe('Masteruser - Create Admin User From JSON', () => {
     cy.get('.logout-icon ').click();
     cy.wait(2000);
     cy.get('.confirm-buttons > :nth-child(2)').click();
-    cy.log('Test completed successfully.');
     cy.wait(2500);
     cy.log('Test is successfully executed.');
   }); //end it

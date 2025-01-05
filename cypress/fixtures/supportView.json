@@ -1,5 +1,5 @@
 {
-  "baseUrl": "https://e-gehaltszettel-t.post-business-solutions.at/fe.e-gehaltszettel_t",
+  "baseUrl": "https://eboxpayslip.edeja.com/fe.e-box_t/",
   "baseUrl_34": "https://supportviewpayslip.edeja.com/fe",
   "baseUrl_04": "https://e-gehaltszettel-t.post-business-solutions.at/fe.e-gehaltszettel_t",
   "baseUrl_prod": "https://e-gehaltszettel.post-business-solutions.at/fe.e-gehaltszettel",
@@ -12,7 +12,7 @@
   "username_supportViewAdmin": "aquaAdmin",
   "password_supportViewAdmin": "Test1234!",
   "email_supportViewAdmin": "aqua.admin@yopmail.com",
-  "baseUrl_egEbox": "https://e-gehaltszettel-t.post-business-solutions.at/fe.e-box_t/",
+  "baseUrl_egEbox": "https://eboxpayslip.edeja.com/fe.e-box_t/",
   "baseUrl_egEbox_34": "https://eboxpayslip.edeja.com/fe.e-box_t/",
   "baseUrl_04_egEbox": "https://e-gehaltszettel-t.post-business-solutions.at/fe.e-box_t/",
   "username_egEbox": "aquaABBA000100279311",
