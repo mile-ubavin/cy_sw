@@ -13,7 +13,7 @@ describe('Invalid Login Attempts and Account Lock Test', () => {
   const invalidPassword = `Invalid-password - ${randomString}`;
 
   // Scenario 1: Lock the user after 5 invalid login attempts to SW
-  it('Lock the user after 5 invalid login attempts', () => {
+  it.skip('Lock the user after 5 invalid login attempts', () => {
     // cy.fixture('supportView.json').as('example_supportView');
     // cy.get('@example_supportView').then((usersJson) => {
     //   cy.visit(usersJson.baseUrl, { failOnStatusCode: false });

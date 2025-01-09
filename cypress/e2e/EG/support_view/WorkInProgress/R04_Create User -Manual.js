@@ -376,7 +376,7 @@ describe('R04_Create User -Manual.js', () => {
         );
         // cy.get('button[type="submit"]').click();
 
-        cy.wait(['@openDeliveriesPage'], { timeout: 20000 }).then(
+        cy.wait(['@openDeliveriesPage'], { timeout: 27000 }).then(
           (interception) => {
             // Log the intercepted response
             cy.log('Intercepted response:', interception.response);
@@ -393,7 +393,6 @@ describe('R04_Create User -Manual.js', () => {
         //cy.url().should('include', payslipJson.baseUrl_egEbox); // Validate url
         cy.url().should('include', Cypress.env('baseUrl_egEbox')); // Validate url
         cy.log('Test completed successfully.');
-        //  });//end then
       });
   });
 

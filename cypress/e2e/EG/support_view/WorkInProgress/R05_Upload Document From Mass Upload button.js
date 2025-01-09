@@ -1,9 +1,6 @@
 describe('R05_Upload Document From Mass Upload button', () => {
   // Click on Admin User button
   function clickOnAdminUserButton() {
-    //Find the Search button by button name and click on it
-    cy.get('.search-dialog>form>div>.mat-primary').click();
-    cy.wait(1500);
     cy.get('.mdc-button__label')
       // Find the button containing "Admin User" or "Admin Benutzer" button
       .contains(/Admin User|Admin Benutzer/i)
@@ -138,6 +135,9 @@ describe('R05_Upload Document From Mass Upload button', () => {
     cy.get('.search-dialog>form>.form-fields>.searchText-wrap')
       .eq(1)
       .type(Cypress.env('company')); // Use the company name from the cypress.config.js
+    cy.wait(1500);
+    //Find the Search button by button name and click on it
+    cy.get('.search-dialog>form>div>.mat-primary').click();
     cy.wait(1500);
     // Switch on Admin User page
     clickOnAdminUserButton();
@@ -371,7 +371,7 @@ describe('R05_Upload Document From Mass Upload button', () => {
   });
 
   //Disable View E-Box and DataSubmitter Roles
-  it('Enable View E-Box and DataSubmitter Roles for Specific Admin', () => {
+  it('Disable View E-Box and DataSubmitter Roles for Specific Admin', () => {
     // Login as a Master-User using custom command
     cy.loginToSupportViewMaster();
     cy.wait(3500);
@@ -382,6 +382,9 @@ describe('R05_Upload Document From Mass Upload button', () => {
     cy.get('.search-dialog>form>.form-fields>.searchText-wrap')
       .eq(1)
       .type(Cypress.env('company')); // Use the company name from the cypress.config.js
+    cy.wait(1500);
+    //Find the Search button by button name and click on it
+    cy.get('.search-dialog>form>div>.mat-primary').click();
     cy.wait(1500);
     // Switch on Admin User page
     clickOnAdminUserButton();

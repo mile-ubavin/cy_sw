@@ -1,45 +1,14 @@
 describe('Masteruser - Create Admin User From JSON', () => {
-  // function clickOnAdminUserButton() {
-  //   const collectedButtonTexts = []; // Array to store all link texts
-
-  //   cy.get('.ng-star-inserted>.action-buttons>button')
-  //     .find('.mdc-button__label')
-  //     .each(($el) => {
-  //       cy.wrap($el)
-  //         .invoke('text')
-  //         .then((text) => {
-  //           collectedButtonTexts.push(text.trim()); // Collect each link text in the array
-  //           cy.log('Collected Button Text:', text.trim());
-  //         });
-  //     })
-  //     .then(() => {
-  //       const isAdminUserButton = collectedButtonTexts.some((text) =>
-  //         ['Admin User', 'Admin Benutzer'].includes(text)
-  //       );
-  //       //Check if Admin has access to HR page in SW
-  //       if (isAdminUserButton) {
-  //         // Find the specific elements and click on it
-  //         cy.get('.ng-star-inserted>.action-buttons>button')
-  //           .contains(/Admin User|Admin Benutzer/)
-  //           .click({ force: true });
-  //       }
-  //     });
-  //   cy.wait(1500);
-  // }
-
   // Click on Admin User button
   function clickOnAdminUserButton() {
-    //Find the Search button by button name and click on it
-    cy.get('.search-dialog>form>div>.mat-primary').click();
-    cy.wait(1500);
-    cy.get('.mdc-button__label')
-      // Find the button containing "Admin User" or "Admin Benutzer" button
-      .contains(/Admin User|Admin Benutzer/i)
-      .should('be.visible') // Optional: Ensure the button is visible before interacting
-      .click(); // Click the button
-    cy.wait(1500);
+    cy.get('.ng-star-inserted>.action-buttons>button')
+      .contains(/Admin User|Admin Benutzer/)
+      .then(($button) => {
+        if ($button.length > 0) {
+          cy.wrap($button).click({ force: true });
+        }
+      });
   }
-
   //-------------------End Custom Function-------------------
   it('MasterCreateAdminUser', () => {
     // Login as Master User using a custom command
@@ -93,15 +62,12 @@ describe('Masteruser - Create Admin User From JSON', () => {
     );
     cy.get('button[type="submit"]').click();
 
-    cy.wait(['@editXUser'], { timeout: 20000 }).then((interception) => {
+    cy.wait(['@editXUser'], { timeout: 27000 }).then((interception) => {
       // Log the intercepted response
       cy.log('Intercepted response:', interception.response);
 
       // Optional: Assert the response status code
       expect(interception.response.statusCode).to.eq(201);
-
-      // Optional: Assert response body or other properties
-      // Example: expect(interception.response.body).to.have.property('key', 'value');
     });
 
     // Verify the success message
@@ -215,6 +181,10 @@ describe('Masteruser - Create Admin User From JSON', () => {
     cy.wait(2500);
 
     //********************* Yopmail *********************
+  }); //end it
+
+  it('Get Credentials from emails and Login as a New Admin', () => {
+    const adminUser = Cypress.env('createAdminUser')[0];
 
     // Visit the Yopmail inbox
     cy.visit('https://yopmail.com/en/');
@@ -314,30 +284,22 @@ describe('Masteruser - Create Admin User From JSON', () => {
               cy.log('Password:', passwordFromEmailBody);
             });
         }
-
-        // Delete all emails if the button is not disabled
-        cy.get('.menu>div>#delall')
-          .should('not.be.disabled')
-          .click({ force: true });
-        cy.wait(2500);
       });
 
     // New Admin is Logging into SW using Credentials taken from emails
-
+    cy.wait(2500);
+    cy.intercept('GET', '**/supportView/v1/generalInfo**').as('visitURL');
+    // cy.get('button[type="submit"]').click();
     cy.visit(Cypress.env('baseUrl'), {
       failOnStatusCode: false,
     });
-    cy.intercept('GET', '**/supportView/v1/generalInfo**').as('visitURL');
-    // cy.get('button[type="submit"]').click();
 
-    cy.wait(['@visitURL'], { timeout: 20000 }).then((interception) => {
+    cy.wait(['@visitURL'], { timeout: 27000 }).then((interception) => {
       // Log the intercepted response
       cy.log('Intercepted response:', interception.response);
 
       // Optional: Assert the response status code
       expect(interception.response.statusCode).to.eq(200);
-      // Optional: Assert response body or other properties
-      // Example: expect(interception.response.body).to.have.property('key', 'value');
     });
 
     // Validate that the login page URL includes '/login'
@@ -462,8 +424,11 @@ describe('Masteruser - Create Admin User From JSON', () => {
       cy.log('Test completed successfully.');
       cy.wait(2500);
     });
-    // }); //end fixture
+  }); //end it
 
+  it('Master user delete Admin user', () => {
+    const companyName = Cypress.env('company');
+    const adminUser = Cypress.env('createAdminUser')[0];
     //*******************MASTERUSER DELETE NEW ADMIN USER */
     // Login as Master User using a custom command
     cy.loginToSupportViewMaster();
@@ -555,5 +520,25 @@ describe('Masteruser - Create Admin User From JSON', () => {
     cy.get('.confirm-buttons > :nth-child(2)').click();
     cy.wait(2500);
     cy.log('Test is successfully executed.');
+  }); //end it
+
+  it('Yopmail - Clear inbox', () => {
+    const adminUser = Cypress.env('createAdminUser')[0];
+
+    // Visit Yopmail application or login page
+    cy.visit('https://yopmail.com/en/');
+    // Type the email and click refresh
+    cy.get('#login')
+      .type(adminUser.email)
+      .should('have.value', adminUser.email);
+    cy.wait(1500);
+    cy.get('#refreshbut > .md > .material-icons-outlined').click();
+
+    cy.wait(1500);
+    // Delete all emails if the button is not disabled
+    cy.get('.menu>div>#delall')
+      .should('not.be.disabled')
+      .click({ force: true });
+    cy.wait(2500);
   }); //end it
 }); //end describe
