@@ -271,6 +271,20 @@ Cypress.Commands.add('loginToEgEbox', () => {
   cy.wait(2000);
 }); //end login
 
+// Upload XML file
+Cypress.Commands.add('uploadXMLfile', function () {
+  cy.fixture('XML_1receiver(ISS_BBcare).xml', 'binary')
+    .then(Cypress.Blob.binaryStringToBlob)
+    .then((fileContent) => {
+      cy.get('#input-file').attachFile({
+        mimeType: 'text/xml',
+        fileContent,
+        filePath: 'XML_1receiver(ISS_BBcare).xml',
+        fileName: 'XML_1receiver(ISS_BBcare).xml',
+      });
+    });
+});
+
 // Upload Attachment
 Cypress.Commands.add('uploadDocument', function () {
   cy.get('@t').then((t) => {
@@ -408,18 +422,18 @@ Cypress.Commands.add('uploadValidImage', function () {
 
 //Upload CSV file
 
-Cypress.Commands.add('upload_csv', function () {
-  cy.fixture('SendCredentialsToPrint(2persons).csv', 'binary')
-    .then(Cypress.Blob.binaryStringToBlob)
-    .then((fileContent) => {
-      cy.get('.dialog-content>.upload-section>div>form>input').attachFile({
-        fileContent: Cypress.Blob.base64StringToBlob(fileContent, 'image/jpeg'),
-        fileName: 'SampleJPGImage_under_1mb.jpg',
-        mimeType: 'image/jpeg',
-        encoding: 'utf-8',
-      });
-    });
-});
+// Cypress.Commands.add('upload_csv', function () {
+//   cy.fixture('SendCredentialsToPrint(2persons).csv', 'binary')
+//     .then(Cypress.Blob.binaryStringToBlob)
+//     .then((fileContent) => {
+//       cy.get('.dialog-content>.upload-section>div>form>input').attachFile({
+//         fileContent: Cypress.Blob.base64StringToBlob(fileContent, 'image/jpeg'),
+//         fileName: 'SampleJPGImage_under_1mb.jpg',
+//         mimeType: 'image/jpeg',
+//         encoding: 'utf-8',
+//       });
+//     });
+// });
 
 //Upload CSV file
 

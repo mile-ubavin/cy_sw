@@ -275,7 +275,7 @@ describe('R05_Upload Document From Mass Upload button', () => {
     cy.wait(2500);
   }); //end it
 
-  //Sign Delivery
+  //Login to e-Box and Open Delivery
   it('Ebox user Open delivery', () => {
     cy.loginToEgEbox();
 
