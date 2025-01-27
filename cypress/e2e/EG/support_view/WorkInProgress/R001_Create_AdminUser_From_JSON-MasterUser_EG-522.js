@@ -1,4 +1,12 @@
 describe('Masteruser - Create Admin User From JSON', () => {
+  beforeEach(() => {
+    cy.clearCookies();
+    cy.clearLocalStorage();
+    cy.window().then((win) => {
+      win.sessionStorage.clear(); // Clears session storage
+    });
+  });
+
   it('MasterCreateAdminUser', () => {
     // Login as Master User using a custom command
     cy.loginToSupportViewMaster();
@@ -181,6 +189,7 @@ describe('Masteruser - Create Admin User From JSON', () => {
   it('Get Credentials from emails and Login as a New Admin', () => {
     const adminUser = Cypress.env('createAdminUser')[0];
 
+    // Visit the Yopmail inbox
     cy.visit('https://yopmail.com/en/');
     cy.get('#login').type(adminUser.email); // Use the same email generated earlier
     cy.get('#refreshbut > .md > .material-icons-outlined').click();
@@ -308,7 +317,32 @@ describe('Masteruser - Create Admin User From JSON', () => {
 
         cy.get('button[type="submit"]').click(); //end captured password
         // Wait for login to complete
-        cy.wait(3500);
+
+        // cy.intercept('POST', '**/supportView/v1/login/user**').as('loginURL');
+        // // cy.get('button[type="submit"]').click();
+
+        // cy.wait(['@loginURL'], { timeout: 27000 }).then(
+        //   (interception) => {
+        //     // Log the intercepted response
+        //     // cy.log('Intercepted response:', interception.response);
+        //     cy.visit(
+        //       'https://supportviewpayslip.edeja.com/fe/dashboard/groups',
+        //       {
+        //         failOnStatusCode: false,
+        //       }
+        //     );
+        //     // Optional: Assert the response status code
+        //     // expect(interception.statusCode).to.eq(200);
+        //   },
+        //   (err) => {
+        //     cy.log('ERROR', err);
+        //     cy.pause();
+        //   }
+        // );
+
+        cy.wait(2500);
+        cy.visit(Cypress.env('dashboardURL'));
+        cy.wait(5500);
 
         //Check visibility of buttons depend of selected Roles on the Companies page
         const buttonLabelsCompaniesPage = [

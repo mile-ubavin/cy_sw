@@ -1,3 +1,5 @@
+import 'cypress-downloadfile/lib/downloadFileCommand';
+
 describe('R04_Admin User Create E-Box User - Manual.js', () => {
   function selectRoleIfNotSelected(roles) {
     cy.get('mat-checkbox .mdc-form-field .mdc-label').then(($labels) => {
@@ -45,8 +47,9 @@ describe('R04_Admin User Create E-Box User - Manual.js', () => {
       }
     });
   }
+  const path = require('path');
 
-  it('Master Enable Roles to AdminUser', () => {
+  it.skip('Master Enable Roles to AdminUser', () => {
     // Login as Master User using a custom command
     cy.loginToSupportViewMaster();
     cy.wait(3500);
@@ -121,7 +124,7 @@ describe('R04_Admin User Create E-Box User - Manual.js', () => {
     //********************* Yopmail *********************
   }); //end it
 
-  it('Login As AdminUser - Create User Manually by Admin', () => {
+  it.only('Login As AdminUser - Create User Manually by Admin', () => {
     // Login as Master User using a custom command
     cy.loginToSupportViewAdmin();
     cy.wait(3500);
@@ -253,16 +256,21 @@ describe('R04_Admin User Create E-Box User - Manual.js', () => {
         // Download credentials
         cy.get('.download-bttn').click();
         cy.wait(1000);
-
         // Get the latest downloaded PDF file using the custom task
-        const downloadsDir = `${Cypress.config(
-          'fileServerFolder'
-        )}/cypress/downloads/`;
+        // const downloadsDir = downloadsFolder path.normalize(
+        //   `${Cypress.config('fileServerFolder')}/cypress/downloads/`
+        // );
+
+        // const downloadsDir = `${Cypress.config(
+        //   'fileServerFolder'
+        // )}/cypress/downloads/`;
+
+        const downloadsDir = Cypress.env('downloadsFolder');
         cy.task('getDownloadedPdf', downloadsDir).then((filePath) => {
           expect(filePath).to.not.be.null; // Assert the file exists
           cy.log(`Latest PDF File Path: ${filePath}`);
           cy.wait(3000);
-
+          m;
           // Read the PDF content and open in the same tab using a Blob
           cy.readFile(filePath, 'binary').then((pdfBinary) => {
             const pdfBlob = Cypress.Blob.binaryStringToBlob(

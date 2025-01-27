@@ -285,6 +285,20 @@ Cypress.Commands.add('uploadXMLfile', function () {
     });
 });
 
+// Upload TXT file
+Cypress.Commands.add('uploadTXTfile', function () {
+  cy.fixture('TXT_1receiver__(AQUA_ABBA000100279311_ISS BBcare).txt', 'binary')
+    .then(Cypress.Blob.binaryStringToBlob)
+    .then((fileContent) => {
+      cy.get('#input-file').attachFile({
+        mimeType: 'text/plain',
+        fileContent,
+        filePath: 'TXT_1receiver__(AQUA_ABBA000100279311_ISS BBcare).txt',
+        fileName: 'TXT_1receiver__(AQUA_ABBA000100279311_ISS BBcare).txt',
+      });
+    });
+});
+
 // Upload Attachment
 Cypress.Commands.add('uploadDocument', function () {
   cy.get('@t').then((t) => {
@@ -341,6 +355,74 @@ Cypress.Commands.add('uploadDocument', function () {
 //   });
 //   cy.wait(1000);
 // }); //end
+
+//getCredentialsFromYopmail
+Cypress.Commands.add('getCredentialsFromYopmail', () => {
+  const adminUser = Cypress.env('createAdminUser')[0];
+
+  cy.visit('https://yopmail.com/en/');
+  cy.get('#login').type(adminUser.email);
+  cy.get('#refreshbut > .md > .material-icons-outlined').click();
+
+  cy.iframe('#ifinbox')
+    .find('.mctn > .m > button > .lms')
+    .then((emails) => {
+      const emailSubjects = [...emails].map((email) =>
+        email.textContent.trim()
+      );
+      let usernameEmailIndex = emailSubjects.findIndex((subject) =>
+        subject.includes('Neuer Benutzer e-Gehaltszettel Portal – Benutzername')
+      );
+      let passwordEmailIndex = emailSubjects.findIndex((subject) =>
+        subject.includes('Neuer Benutzer e-Gehaltszettel Portal – Passwort')
+      );
+
+      if (usernameEmailIndex !== -1) {
+        cy.iframe('#ifinbox')
+          .find('.mctn > .m > button > .lms')
+          .eq(usernameEmailIndex)
+          .click()
+          .wait(1500);
+
+        cy.iframe('#ifmail')
+          .find(
+            '#mail>div>div:nth-child(2)>div:nth-child(3)>table>tbody>tr>td>p:nth-child(2)>span'
+          )
+          .invoke('text')
+          .then((innerText) => {
+            const username = innerText
+              .split('Hier ist Ihr Benutzername:')[1]
+              .trim();
+            Cypress.env('capturedUsername', username); // Save the username
+            cy.log('Captured Username:', username); // Log for verification
+            expect(username).not.to.be.undefined; // Assert username is not undefined
+          });
+      }
+
+      if (passwordEmailIndex !== -1) {
+        cy.iframe('#ifinbox')
+          .find('.mctn > .m > button > .lms')
+          .eq(passwordEmailIndex)
+          .click()
+          .wait(1500);
+
+        cy.iframe('#ifmail')
+          .find(
+            '#mail>div>div:nth-child(2)>div:nth-child(3)>table>tbody>tr>td>p:nth-child(2)>span'
+          )
+          .invoke('text')
+          .then((innerText) => {
+            const password = innerText
+              .split('hier ist Ihr Passwort:')[1]
+              .trim();
+            Cypress.env('capturedPassword', password); // Save the password
+            cy.log('Captured Password:', password); // Log for verification
+            expect(password).not.to.be.undefined; // Assert password is not undefined
+          });
+      }
+    });
+  cy.wait(4000);
+});
 
 // ***************** EG-E-Box *****************
 

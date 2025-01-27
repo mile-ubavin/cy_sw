@@ -406,7 +406,7 @@ describe('hrManagement - prepare doc for signing (HappyPath)', () => {
       cy.url().should('include', Cypress.env('baseUrl')); // Validate url'
       cy.log('Test completed successfully.');
       cy.wait(2500);
-    });
+    }); //end fixture
   }); // end it
   //Sign HR Delivery
   it('Ebox user signing HR delivery', () => {
@@ -584,7 +584,7 @@ describe('hrManagement - prepare doc for signing (HappyPath)', () => {
   });
 
   // Admin User is able to check new HR Delivery received in HR page
-  it.only('Admin User checks new delivery received in the HR page in SW', () => {
+  it('Admin User checks new delivery received in the HR page in SW', () => {
     adminUserChecksNewDeliveryReceivedInHRpage();
   });
 }); //end describe

@@ -1,6 +1,6 @@
 describe('Enable and Disable XML templates provided from JSON', () => {
   //Admin user Upload XML template before ebabling templated
-  it.skip('Failed upload XML template - before enabling template', () => {
+  it('Failed upload XML template - before enabling template', () => {
     cy.loginToSupportViewAdmin();
     // Wait for login to complete
     cy.wait(1500);
@@ -173,8 +173,8 @@ describe('Enable and Disable XML templates provided from JSON', () => {
     cy.wait(2500);
   });
 
-  //Admin user Upload XML template
-  it('Upload XML template', () => {
+  //Admin user Upload TXT File
+  it('Upload TXT File', () => {
     cy.loginToSupportViewAdmin();
     // Wait for login to complete
     cy.wait(1500);
@@ -194,7 +194,7 @@ describe('Enable and Disable XML templates provided from JSON', () => {
     cy.wait(1500);
 
     //Upload XML file
-    cy.uploadXMLfile();
+    cy.uploadTXTfile();
     cy.wait(2500);
 
     cy.intercept(

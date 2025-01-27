@@ -1,9 +1,74 @@
 const { defineConfig } = require('cypress');
 const fs = require('fs');
 const path = require('path');
-const https = require('https'); // Ensure https is imported
+const https = require('https');
+
+// Task: Get the latest downloaded PDF file
+const getDownloadedPdf = (downloadsDir) => {
+  try {
+    console.log(`Searching for PDFs in: ${downloadsDir}`);
+    const files = fs.readdirSync(downloadsDir);
+    const pdfFiles = files
+      .filter((file) => file.endsWith('.pdf'))
+      .map((file) => {
+        const fullPath = path.join(downloadsDir, file);
+        const fileStats = fs.statSync(fullPath);
+        return { file, fullPath, time: fileStats.mtime };
+      });
+
+    pdfFiles.sort((a, b) => b.time - a.time);
+
+    if (pdfFiles.length > 0) {
+      console.log(`Found PDF: ${pdfFiles[0].fullPath}`);
+    } else {
+      console.log('No PDF files found');
+    }
+
+    return pdfFiles.length > 0 ? pdfFiles[0].fullPath : null;
+  } catch (err) {
+    console.error(`Error reading directory: ${err.message}`);
+    return null;
+  }
+};
+
+// Task: Download a file from a URL
+const downloadFile = ({ url, destinationPath }) => {
+  return new Promise((resolve, reject) => {
+    const file = fs.createWriteStream(destinationPath);
+    https
+      .get(url, (response) => {
+        if (response.statusCode !== 200) {
+          reject(new Error(`Failed to get '${url}' (${response.statusCode})`));
+          return;
+        }
+        response.pipe(file);
+        file.on('finish', () => {
+          file.close(resolve);
+        });
+      })
+      .on('error', (err) => {
+        fs.unlink(destinationPath, (unlinkErr) => {
+          if (unlinkErr) {
+            console.error(`Failed to delete file: ${unlinkErr}`);
+          }
+        });
+        reject(err);
+      });
+  });
+};
+
+// Task: Open a file using dynamic import
+const openFile = async (filePath) => {
+  const { default: open } = await import('open'); // Dynamic import
+  return open(filePath).catch((err) => {
+    console.error(`Failed to open file: ${err.message}`);
+    throw err;
+  });
+};
 const environments = {
   eg_dev: {
+    usernameFromEmailBody: '',
+    passwordFromEmailBody: '',
     baseUrl: 'https://supportviewpayslip.edeja.com/fe',
 
     username_supportViewMaster: 'e-gehaltszettelMaster',
@@ -16,9 +81,13 @@ const environments = {
     password_supportViewAdmin: 'Test1234!',
     email_supportViewAdmin: 'aqua.admin@yopmail.com',
     baseUrl_egEbox: 'https://eboxpayslip.edeja.com/fe.e-box_t/',
-
+    companyPrefix: 'aqua',
     username_egEbox: 'aquaABBA000100279311',
     password_egEbox: 'Test1234!',
+    downloadsFolder:
+      'C:/Users/mubavin/Cypress/EG/cypress-automatison-framework/cypress/downloads/',
+    dashboardURL: 'https://supportviewpayslip.edeja.com/fe/dashboard/groups',
+    eboxDeliveryPage: 'https://eboxpayslip.edeja.com/fe.e-box_t/deliveries',
     enableXML: [
       { id: 'T101', name: 'BB Care' },
       { id: 'T102', name: 'Beiersdorfer' },
@@ -90,16 +159,20 @@ const environments = {
     password_supportViewMaster: 'Test1234!',
 
     company: 'Aqua',
-
+    companyPrefix: 'aqua',
     search: 'Android',
     username_supportViewAdmin: 'aquaAdmin',
     password_supportViewAdmin: 'Test1234!',
     email_supportViewAdmin: 'aqua.admin@yopmail.com',
     baseUrl_egEbox:
       'https://e-gehaltszettel-t.post-business-solutions.at/fe.e-box_t/',
-
+    companyPrefix: 'aqua',
     username_egEbox: 'aquaABBA000100279311',
     password_egEbox: 'Test1234!',
+    dashboardURL:
+      'https://e-gehaltszettel-t.post-business-solutions.at/fe.e-gehaltszettel_t/dashboard/groups',
+    eboxDeliveryPage:
+      'https://e-gehaltszettel-t.post-business-solutions.at/fe.e-gehaltszettel_t/deliveries',
     enableXML: [
       { id: 'T101', name: 'BB Care' },
       { id: 'T102', name: 'Beiersdorfer' },
@@ -171,16 +244,20 @@ const environments = {
     password_supportViewMaster: '%7axX~mc@4q>KhADF',
 
     company: 'Aqua',
-
+    companyPrefix: 'aqua',
     search: 'Android',
     username_supportViewAdmin: 'aquaAdmin',
     password_supportViewAdmin: 'Test1234!',
     email_supportViewAdmin: 'aqua.admin@yopmail.com',
     baseUrl_egEbox:
       'https://e-gehaltszettel.post-business-solutions.at/fe.e-box/',
-
+    companyPrefix: 'aqua',
     username_egEbox: 'aquaABBA000100279311',
     password_egEbox: 'Test1234!',
+    dashboardURL:
+      'https://e-gehaltszettel.post-business-solutions.at/fe.e-gehaltszettel/dashboard/groups',
+    eboxDeliveryPage:
+      'https://e-gehaltszettel.post-business-solutions.at/fe.e-gehaltszettel/deliveries',
     enableXML: [
       { id: 'T101', name: 'BB Care' },
       { id: 'T102', name: 'Beiersdorfer' },
@@ -254,63 +331,12 @@ module.exports = defineConfig({
     setupNodeEvents(on, config) {
       // Register the downloadFile task
       on('task', {
-        downloadFile({ url, destinationPath }) {
-          return new Promise((resolve, reject) => {
-            const file = fs.createWriteStream(destinationPath);
-            https
-              .get(url, (response) => {
-                if (response.statusCode !== 200) {
-                  reject(
-                    new Error(`Failed to get '${url}' (${response.statusCode})`)
-                  );
-                  return;
-                }
-                response.pipe(file);
-                file.on('finish', () => {
-                  file.close(resolve);
-                });
-              })
-              .on('error', (err) => {
-                fs.unlink(destinationPath, (unlinkErr) => {
-                  if (unlinkErr) {
-                    console.error(`Failed to delete file: ${unlinkErr}`);
-                  }
-                });
-                reject(err);
-              });
-          });
-        },
-
-        // Register the getDownloadedPdf task
-        getDownloadedPdf(downloadsDir) {
-          try {
-            const files = fs.readdirSync(downloadsDir);
-            const pdfFiles = files
-              .filter((file) => file.endsWith('.pdf'))
-              .map((file) => {
-                const fullPath = path.join(downloadsDir, file);
-                const fileStats = fs.statSync(fullPath);
-                return { file, fullPath, time: fileStats.mtime };
-              });
-            pdfFiles.sort((a, b) => b.time - a.time);
-            return pdfFiles.length > 0 ? pdfFiles[0].fullPath : null;
-          } catch (err) {
-            console.error(`Error reading directory: ${err}`);
-            return null;
-          }
-        },
-
-        // Register the openFile task
-        openFile(filePath) {
-          const open = require('open'); // Use require for consistency
-          return open(filePath).catch((err) => {
-            console.error(`Failed to open file: ${err}`);
-            throw err; // Propagate the error
-          });
-        },
+        getDownloadedPdf,
+        downloadFile,
+        openFile,
       });
       //  Set executing tests on various environments, targeting appropriate json from const=environments
-      const envConfig = environments['eg_prod'];
+      const envConfig = environments['eg_dev'];
       return { ...config, env: { ...config.env, ...envConfig } };
     }, //end
     specPattern: 'cypress/e2e/**/*.{js,jsx,ts,tsx}', // Ensure this matches your structure

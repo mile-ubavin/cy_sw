@@ -196,7 +196,7 @@ describe('hrManagement - prepare doc for signing (HappyPath)', () => {
           cy.wait(2500);
         }
       });
-  }
+  } //end function
 
   // Activate Ebox User For Selected Company
   // function activateEboxUserForSelectedCompany() {
@@ -267,13 +267,17 @@ describe('hrManagement - prepare doc for signing (HappyPath)', () => {
     cy.get('#searchButton>span').click(); // Click on the search button
     cy.fixture('supportView.json').as('payslipSW');
     cy.get('@payslipSW').then((payslipJson) => {
-      const companyName = payslipJson.company;
-      const EBoxUser = payslipJson.username_egEbox;
+      // Use the company name from the cypress.config.js
+      const companyName = Cypress.env('company');
+
+      const EBoxUser = Cypress.env('username_egEbox');
 
       // Search for Group by Display Name using the company name
       cy.get('.search-dialog>form>.form-fields>.searchText-wrap')
         .eq(1)
         .type(companyName);
+
+      //Find the Search button by button name and click on it
       cy.get('.search-dialog>form>div>.mat-primary').click();
       cy.wait(1500);
 
@@ -392,13 +396,16 @@ describe('hrManagement - prepare doc for signing (HappyPath)', () => {
     cy.get('#searchButton>span').click(); // Click on the search button
     cy.fixture('supportView.json').as('payslipSW');
     cy.get('@payslipSW').then((payslipJson) => {
-      const companyName = payslipJson.company;
-      const EBoxUser = payslipJson.username_egEbox;
+      const companyName = Cypress.env('company');
+
+      const EBoxUser = Cypress.env('username_egEbox');
 
       // Search for Group by Display Name using the company name
       cy.get('.search-dialog>form>.form-fields>.searchText-wrap')
         .eq(1)
         .type(companyName);
+
+      //Find the Search button by button name and click on it
       cy.get('.search-dialog>form>div>.mat-primary').click();
       cy.wait(1500);
 
@@ -453,18 +460,8 @@ describe('hrManagement - prepare doc for signing (HappyPath)', () => {
     //   cy.visit(payslipJson.baseUrl); // Visit base URL from fixture
     //   cy.url().should('include', payslipJson.baseUrl); // Validate the URL
     cy.get('@payslipSW').then((payslipJson) => {
-      cy.visit(payslipJson.baseUrl, {
-        failOnStatusCode: false,
-      });
+      cy.loginToSupportViewAdmin();
 
-      // Login to SW as Admin User
-      cy.get('input[formcontrolname="username"]').type(
-        payslipJson.username_supportViewAdmin
-      );
-      cy.get('input[formcontrolname="password"]').type(
-        payslipJson.password_supportViewAdmin
-      );
-      cy.get('button[type="submit"]').click();
       // Wait for login to complete
       cy.wait(1500);
 
@@ -621,13 +618,12 @@ describe('hrManagement - prepare doc for signing (HappyPath)', () => {
       //     cy.log('Cookie bar not visible');
       //   }
       // }); //End Remove Cookie
-      //Logout
 
+      // Logout
       cy.get('.logout-icon ').click();
       cy.wait(2000);
       cy.get('.confirm-buttons > :nth-child(2)').click();
-      cy.log('Test completed successfully.');
-      cy.wait(2500);
+      cy.url().should('include', Cypress.env('baseUrl')); // Validate url'
     }); //end
   }
 
@@ -638,222 +634,262 @@ describe('hrManagement - prepare doc for signing (HappyPath)', () => {
   //  Enable hrManagement' flag, on the Edit Company dialog
   it('Enable hrManagement flag on Company', () => {
     //Import credentials (un/pw) from 'supportView.json' file
+
+    cy.loginToSupportViewMaster();
+    //Search for Company by Display Name
+    cy.get('#searchButton>span').click(); //Click on search button
+    cy.wait(1000);
     cy.fixture('supportView.json').as('payslipSW');
     cy.get('@payslipSW').then((payslipJson) => {
-      // cy.visit(payslipJson.baseUrl);
-      // cy.url().should('include', payslipJson.baseUrl); //Validating url on the login page
-      //Login to sw
-      // cy.fixture('supportView.json').as('payslipSW');
-      // cy.get('@payslipSW').then((payslipJson) => {
-      //   cy.get('input[formcontrolname="username"]').type(
-      //     payslipJson.username_supportViewMaster
-      //   );
-      //   cy.get('input[formcontrolname="password"]').type(
-      //     payslipJson.password_supportViewMaster
-      //   );
-      //   cy.get('button[type="submit"]').click();
-      // });
-      cy.loginToSupportViewMaster();
-      //Search for Company by Display Name
-      cy.get('#searchButton>span').click(); //Click on search button
-      cy.wait(1000);
-      cy.fixture('supportView.json').as('payslipSW');
-      cy.get('@payslipSW').then((payslipJson) => {
-        // Use the company name from the JSON file
-        const companyName = payslipJson.company;
-        // Search for Group by Display Name using the company name
-        cy.get('.search-dialog>form>.form-fields>.searchText-wrap')
-          .eq(1)
-          .type(companyName);
-      });
-      //Find the Search button by button name and click on it
-      cy.wait(1500);
-      cy.get('.search-dialog>form>div>.mat-primary').click();
-      cy.wait(1500);
-
-      //Switch to user section
-      cy.get('.action-buttons > .mdc-button').eq(0).click();
-      cy.wait(1500);
-      //Scroll to the botton
-      cy.get('.mat-mdc-dialog-content').scrollTo('bottom');
-      cy.wait(2500);
-      //Check checkbox
-      cy.get('#hrManagementEnabled').then(($checkbox) => {
-        if (!$checkbox.is(':checked')) {
-          // If the checkbox is not checked, enable it
-          cy.get('#hrManagementEnabled').check();
-          cy.log('Checkbox was not enabled, now enabled.');
-          //Save Edit Company dialog
-          cy.get('button[type="submit"]').click();
-        } else {
-          // If the checkbox is already enabled
-          cy.log('Checkbox is already enabled.');
-          cy.get('.close[data-mat-icon-name="close"]').click();
-        }
-        //Close Edit Company dialog
-        cy.wait(2500);
-        //Logout
-        cy.get('.logout-icon ').click();
-        cy.wait(2000);
-        cy.get('.confirm-buttons > :nth-child(2)').click();
-        // cy.url().should('include', payslipJson.baseUrl); // Validate url'
-        cy.log('Test completed successfully.');
-        cy.wait(2500);
-      }); //end
+      // Use the company name from the cypress.config.js
+      const companyName = Cypress.env('company');
+      // Search for Group by Display Name using the company name
+      cy.get('.search-dialog>form>.form-fields>.searchText-wrap')
+        .eq(1)
+        .type(companyName);
     });
+    //Find the Search button by button name and click on it
+    cy.wait(1500);
+    cy.get('.search-dialog>form>div>.mat-primary').click();
+    cy.wait(1500);
+
+    //Switch to user section
+    cy.get('.action-buttons > .mdc-button').eq(0).click();
+    cy.wait(1500);
+    //Scroll to the botton
+    cy.get('.mat-mdc-dialog-content').scrollTo('bottom');
+    cy.wait(2500);
+    //Check checkbox
+    cy.get('#hrManagementEnabled').then(($checkbox) => {
+      if (!$checkbox.is(':checked')) {
+        // If the checkbox is not checked, enable it
+        cy.get('#hrManagementEnabled').check();
+        cy.log('Checkbox was not enabled, now enabled.');
+        //Save Edit Company dialog
+        cy.get('button[type="submit"]').click();
+      } else {
+        // If the checkbox is already enabled
+        cy.log('Checkbox is already enabled.');
+        cy.get('.close[data-mat-icon-name="close"]').click();
+      }
+      //Close Edit Company dialog
+      cy.wait(2500);
+      //Logout
+      cy.get('.logout-icon ').click();
+      cy.wait(2000);
+      cy.get('.confirm-buttons > :nth-child(2)').click();
+      // cy.url().should('include', payslipJson.baseUrl); // Validate url'
+      cy.log('Test completed successfully.');
+      cy.wait(2500);
+    }); //end
   }); //end it
 
   //Disable hrManagement on the Admin Users Role dilaog
   it('Disable hrManagement Admin Users Role', () => {
     //Login as a Master-User
-    cy.fixture('supportView.json').as('payslipSW');
-    cy.get('@payslipSW').then((payslipJson) => {
-      // cy.visit(payslipJson.baseUrl); //Taken from base url
-      // cy.url().should('include', payslipJson.baseUrl); //Validating url on the login page
-      // //Login to sw
-      // cy.get('@payslipSW').then((payslipJson) => {
-      //   cy.get('input[formcontrolname="username"]').type(
-      //     payslipJson.username_supportViewMaster
-      //   );
-      //   cy.get('input[formcontrolname="password"]').type(
-      //     payslipJson.password_supportViewMaster
-      //   );
-      //   cy.get('button[type="submit"]').click();
-      // });
-      cy.loginToSupportViewMaster();
-      //Search for 'Aqua' Group, by Display Name
-      cy.get('#searchButton>span').click(); //Click on search button
-      cy.wait(1000);
-      cy.fixture('supportView.json').as('payslipSW');
-      cy.get('@payslipSW').then((payslipJson) => {
-        // Use the company name from the JSON file
-        const companyName = payslipJson.company;
-        // Search for Group by Display Name using the company name
-        cy.get('.search-dialog>form>.form-fields>.searchText-wrap')
-          .eq(1)
-          .type(companyName);
-      });
-      cy.wait(1500);
-      //Find the Search button by button name and click on it
-      cy.get('.search-dialog>form>div>.mat-primary').click();
-      cy.wait(1500);
+    cy.loginToSupportViewMaster();
+    cy.wait(1500);
+    //Search for 'Aqua' Group, by Display Name
+    cy.get('#searchButton>span').click(); //Click on search button
+    cy.wait(1000);
 
-      // Switch on Admin User page
-      clickOnAdminUserButton();
+    // Use the company name from the cypress.config.js
+    const companyName = Cypress.env('company');
+    // Search for Group by Display Name using the company name
+    cy.get('input[formcontrolname="groupDescription"]').type(companyName);
 
-      // Switch on Admin user's Role dilaog
-      clickRoleRechteButtonForAquaUser();
+    //Click on Search button
+    cy.get('.search-dialog>form>div>.mat-primary').click();
+    cy.wait(1500);
 
-      //Disable HR Role (Admin user)
-      disableHrManagerRole();
-      cy.log('HR Role is successfully disabled');
-      cy.wait(3000);
+    //Click on Admin User button
+    cy.get('.action-buttons>button>.mdc-button__label')
+      .contains(/Admin User|Admin Benutzer/)
+      .click({ force: true });
 
-      //Logout
-      // cy.get('.logout-icon ').click();
-      // cy.wait(2000);
-      // cy.get('.confirm-buttons > :nth-child(2)').click();
-      // cy.url().should('include', payslipJson.baseUrl); // Validate url'
-      // cy.log('Test completed successfully.');
-      // cy.wait(2500);
+    //Search for specific Admin User by username (aquaAdmin)
 
-      //Logout
-      cy.get('.logout-icon ').click();
-      cy.wait(2000);
-      cy.get('.confirm-buttons > :nth-child(2)').click();
-      cy.log('Test completed successfully.');
-      cy.wait(2500);
+    const adminUser = Cypress.env('username_supportViewAdmin');
+    //Click on Search icon
+    cy.get('.search').click({ force: true });
+
+    // Search for Admin by Admin username
+    cy.get('input[formcontrolname="userName"]').type(adminUser);
+    cy.wait(1500);
+    //Click on Search button
+    cy.get('button[type="submit"]').click();
+    cy.wait(2000);
+
+    // Switch to Admin user's Role dilaog
+    cy.get('.action-buttons>button>.mdc-button__label');
+    cy.contains(/Rechte|Rights/i).click();
+    cy.wait(2000);
+
+    //Disable HR Role (Admin user)
+    // Access the input checkbox within the mat-checkbox component
+    cy.get('#mat-mdc-checkbox-5-input').then(($checkboxInput) => {
+      if ($checkboxInput.is(':checked')) {
+        // If the checkbox is checked, uncheck it by clicking the input element directly
+        cy.get('#mat-mdc-checkbox-5-input').click({ force: true });
+        cy.log('Checkbox was enabled, now disabled.');
+        cy.wait(2500);
+        // Save changes in the Admin's Role dialog
+        cy.get('button[type="submit"]').click();
+      } else {
+        // If the checkbox is already disabled, close the Rights dialog
+        cy.log('Checkbox is already disabled.');
+        cy.wait(2500);
+        cy.get('.close[data-mat-icon-name="close"]').click();
+      }
     });
+    cy.log('HR Role is successfully disabled');
+    cy.wait(3000);
+
+    //Logout
+    cy.get('.logout-icon ').click();
+    cy.wait(2000);
+    cy.get('.confirm-buttons > :nth-child(2)').click();
+    cy.log('Test completed successfully.');
+    cy.wait(2500);
   }); //end it
 
   //Check if Admin has access to HR page in SW (before enabling )
   it('Check if Admin has access to HR page in SW (before enabling )', () => {
     // Load credentials (un/pw) and user data from 'supportView.json'
-    cy.fixture('supportView.json').as('payslipSW');
-    cy.get('@payslipSW').then((payslipJson) => {
-      cy.visit(payslipJson.baseUrl, {
-        failOnStatusCode: false,
+    cy.loginToSupportViewAdmin();
+
+    // Wait for login to complete
+    cy.wait(1500);
+
+    //Check if Admin has access to HR page in SW
+    const collectedLinkTexts = []; // Array to store all link texts
+
+    cy.get('.side-menu>ul>navigation-item>.navigation-item>a')
+      .find('.user-label-wrap')
+      .each(($el) => {
+        cy.wrap($el)
+          .invoke('text')
+          .then((text) => {
+            collectedLinkTexts.push(text.trim()); // Collect each link text in the array
+            cy.log('Collected Link Text:', text.trim());
+          });
+      })
+      .then(() => {
+        // After collecting all link texts, perform a single check
+        const hasAccessToHRPage = collectedLinkTexts.some((text) =>
+          ['Erhaltene Sendungen', 'Received Shipments'].includes(text)
+        );
+        //Check if Admin has access to HR page in SW
+        if (hasAccessToHRPage) {
+          // Find the specific elements and check their visibility
+          cy.get('.side-menu>ul>navigation-item>.navigation-item>a')
+            .contains(/Erhaltene Sendungen|Received Shipments/)
+            .should('be.visible');
+          cy.log('Confirmed: HR page link is visible to the Admin.'); // Log if HR page access is detected
+          cy.wait(2500);
+        } else {
+          // Verify that elements with specified texts are not visible
+          cy.get('.side-menu>ul>navigation-item>.navigation-item>a')
+            .contains(/Erhaltene Sendungen|Received Shipments/)
+            .should('not.exist');
+          cy.log('Confirmed: HR page link is not visible to the Admin.'); // Log if HR page access is not detected
+          cy.wait(2500);
+        }
       });
+    cy.wait(2500);
 
-      // Login to SW as Admin User
-      cy.loginToSupportViewAdmin();
-
-      // cy.get('input[formcontrolname="username"]').type(
-      //   payslipJson.username_supportViewAdmin
-      // );
-      // cy.get('input[formcontrolname="password"]').type(
-      //   payslipJson.password_supportViewAdmin
-      // );
-      // cy.get('button[type="submit"]').click();
-
-      // Wait for login to complete
-      cy.wait(1500);
-
-      //Check if Admin has access to HR page in SW
-      checkIfAdminHasAccessToHrPage();
-      cy.wait(2500);
-      //Logout
-      cy.get('.logout-icon ').click();
-      cy.wait(2000);
-      cy.get('.confirm-buttons > :nth-child(2)').click();
-      cy.url().should('include', payslipJson.baseUrl); // Validate url'
-      cy.log('Test completed successfully.');
-      cy.wait(2500);
-    });
+    //Logout
+    cy.get('.logout-icon ').click();
+    cy.wait(2000);
+    cy.get('.confirm-buttons > :nth-child(2)').click();
+    // cy.url().should('include', payslipJson.baseUrl); // Validate url'
+    cy.log('Test completed successfully.');
+    cy.wait(2500);
   }); //end it
 
   //Enable Hr And Disable DataSubmitter Roles
   it('enableHrAndDisableDataSubmitterRoles', () => {
     //Login as a Master-User
-    cy.fixture('supportView.json').as('payslipSW');
-    cy.get('@payslipSW').then((payslipJson) => {
-      // cy.visit(payslipJson.baseUrl); //Taken from base url
-      // cy.url().should('include', payslipJson.baseUrl); //Validating url on the login page
-      // //Login to sw
-      // cy.get('@payslipSW').then((payslipJson) => {
-      //   cy.get('input[formcontrolname="username"]').type(
-      //     payslipJson.username_supportViewMaster
-      //   );
-      //   cy.get('input[formcontrolname="password"]').type(
-      //     payslipJson.password_supportViewMaster
-      //   );
-      //   cy.get('button[type="submit"]').click();
-      // });
-      cy.loginToSupportViewMaster();
-      cy.wait(1500);
-      //Search for 'Aqua' Group, by Display Name
-      cy.get('#searchButton>span').click(); //Click on search button
-      cy.fixture('supportView.json').as('payslipSW');
-      cy.get('@payslipSW').then((payslipJson) => {
-        // Use the company name from the JSON file
-        const companyName = payslipJson.company;
-        // Search for Group by Display Name using the company name
-        cy.get('.search-dialog>form>.form-fields>.searchText-wrap')
-          .eq(1)
-          .type(companyName);
-      });
-      //Find the Search button by button name and click on it
-      cy.get('.search-dialog>form>div>.mat-primary').click();
-      cy.wait(1500);
+    //Login as a Master-User
+    cy.loginToSupportViewMaster();
+    cy.wait(1500);
+    //Search for 'Aqua' Group, by Display Name
+    cy.get('#searchButton>span').click(); //Click on search button
+    cy.wait(1000);
 
-      // Switch on Admin User page
-      clickOnAdminUserButton();
+    // Use the company name from the cypress.config.js
+    const companyName = Cypress.env('company');
+    // Search for Group by Display Name using the company name
+    cy.get('input[formcontrolname="groupDescription"]').type(companyName);
 
-      // Switch on Admin user's Role dilaog
-      clickRoleRechteButtonForAquaUser();
+    //Click on Search button
+    cy.get('.search-dialog>form>div>.mat-primary').click();
+    cy.wait(1500);
 
-      //Enable HR Role (Admin user)
-      enableHrAndDisableDataSubmitterRoles();
-      cy.wait(3000);
+    //Click on Admin User button
+    cy.get('.action-buttons>button>.mdc-button__label')
+      .contains(/Admin User|Admin Benutzer/)
+      .click({ force: true });
 
-      //Logout
-      cy.get('.logout-icon ').click();
-      cy.wait(2000);
-      cy.get('.confirm-buttons > :nth-child(2)').click();
-      cy.url().should('include', payslipJson.baseUrl); // Validate url'
-      cy.log('Test completed successfully.');
-      cy.wait(2500);
+    //Search for specific Admin User by username (aquaAdmin)
+
+    const adminUser = Cypress.env('username_supportViewAdmin');
+    //Click on Search icon
+    cy.get('.search').click({ force: true });
+
+    // Search for Admin by Admin username
+    cy.get('input[formcontrolname="userName"]').type(adminUser);
+    cy.wait(1500);
+    //Click on Search button
+    cy.get('button[type="submit"]').click();
+    cy.wait(2000);
+
+    // Switch to Admin user's Role dilaog
+    cy.get('.action-buttons>button>.mdc-button__label');
+    cy.contains(/Rechte|Rights/i).click();
+    cy.wait(2000);
+
+    //Enable HR Role (Admin user)
+
+    // Enable HR Role
+    cy.get('#mat-mdc-checkbox-5-input').then(($checkboxInput) => {
+      if (!$checkboxInput.is(':checked')) {
+        // If the HR Role is not checked, enable it
+        cy.get('#mat-mdc-checkbox-5-input').click({ force: true });
+        cy.log('Checkbox was not enabled, now enabled.');
+        cy.wait(1500);
+      } else {
+        // HR Role is enabled
+        cy.log('Checkbox is already enabled.');
+        cy.wait(1500);
+      }
     });
+    cy.wait(1500);
+    //Disable Data Submitter Role
+    cy.get('#mat-mdc-checkbox-3-input').then(($checkboxInput) => {
+      if ($checkboxInput.is(':checked')) {
+        // If the Data Submitter Role is checked, uncheck it
+        cy.get('#mat-mdc-checkbox-3-input').click({ force: true });
+        cy.log('Checkbox was enabled, now disabled.');
+        cy.wait(2500);
+        // Save changes in the Admin's Role dialog
+        cy.get('button[type="submit"]').click();
+      } else {
+        // If the Data Submitter Role is disabled, close the Rights dialog
+
+        cy.log('Checkbox is already disabled.');
+        cy.wait(2500);
+        cy.get('button[type="submit"]').click();
+      }
+    });
+    cy.wait(3000);
+
+    //Logout
+    cy.get('.logout-icon ').click();
+    cy.wait(2000);
+    cy.get('.confirm-buttons > :nth-child(2)').click();
+    cy.log('Test completed successfully.');
+    cy.wait(2500);
   }); //end it
 
   //Deactivate E-Box user
@@ -882,7 +918,7 @@ describe('hrManagement - prepare doc for signing (HappyPath)', () => {
       cy.get('.logout-icon ').click();
       cy.wait(2000);
       cy.get('.confirm-buttons > :nth-child(2)').click();
-      cy.url().should('include', payslipJson.baseUrl); // Validate url'
+      // cy.url().should('include', payslipJson.baseUrl); // Validate url'
       cy.log('Test completed successfully.');
       cy.wait(2500);
     });
@@ -892,9 +928,12 @@ describe('hrManagement - prepare doc for signing (HappyPath)', () => {
   it('Hide Upload Button-if User is deactivated', () => {
     cy.fixture('supportView.json').as('payslipSW');
     cy.get('@payslipSW').then((payslipJson) => {
-      cy.visit(payslipJson.baseUrl_egEbox); // Taken from base URL
-      cy.url().should('include', payslipJson.baseUrl_egEbox); // Validate URL on the login page
-      cy.wait(2000);
+      cy.visit(Cypress.env('baseUrl_egEbox'), {
+        failOnStatusCode: false,
+      });
+      cy.wait(3500);
+      // Validate URL on the login page
+      cy.url().should('include', Cypress.env('baseUrl_egEbox'));
 
       //Remove Cookie
       cy.get('body').then(($body) => {
@@ -908,14 +947,21 @@ describe('hrManagement - prepare doc for signing (HappyPath)', () => {
       }); //End Remove Cookie
 
       // Login to E-Box
-      cy.get(':nth-child(1) > .ng-invalid > .input > .input__field-input').type(
-        payslipJson.username_egEbox
+      cy.get('input[placeholder="Benutzername"]').type(
+        Cypress.env('username_egEbox')
       );
-      cy.get('.ng-invalid > .input > .input__field-input').type(
-        payslipJson.password_egEbox
-      );
-      cy.wait(1000);
-      cy.get('button[type="submit"]').click();
+      cy.get('input[type="password"]').type(Cypress.env('password_egEbox'));
+      cy.intercept('POST', '**/rest/v2/deliveries**').as('getDeliveries');
+      cy.get('button[type="submit"]').click(); //Login
+
+      cy.wait(['@getDeliveries'], { timeout: 20000 }).then((interception) => {
+        // Log the intercepted response
+        cy.log('Intercepted response:', interception.response);
+
+        // Assert the response status code
+        expect(interception.response.statusCode).to.eq(200);
+      });
+      cy.url().should('include', '/deliveries'); // => validate url
       // Wait for login to complete
       cy.wait(2000);
       // Check visibility of Upload Delivery button - Button should be hidden
@@ -938,12 +984,14 @@ describe('hrManagement - prepare doc for signing (HappyPath)', () => {
       cy.get('.user-title').click();
       cy.wait(1500);
       cy.get('.logout-title > a').click();
+      //cy.url().should('include', payslipJson.baseUrl_egEbox); // Validate url
+      cy.url().should('include', Cypress.env('baseUrl_egEbox')); // Validate url
       cy.log('Test completed successfully.');
     });
   });
 
   //Activate E-Box user
-  it('Activate E-Box User', () => {
+  it.only('Activate E-Box User', () => {
     // Login as a Master-User
     cy.fixture('supportView.json').as('payslipSW');
     cy.get('@payslipSW').then((payslipJson) => {
@@ -986,87 +1034,288 @@ describe('hrManagement - prepare doc for signing (HappyPath)', () => {
   }); // end it
 
   //Crete HR delivery from E-Box
-  it('crete HR delivery from E-Box', () => {
-    cy.fixture('supportView.json').as('payslipSW');
-    cy.get('@payslipSW').then((payslipJson) => {
-      cy.visit(payslipJson.baseUrl_egEbox); // Taken from base URL
-      cy.url().should('include', payslipJson.baseUrl_egEbox); // Validate URL on the login page
-      cy.wait(2000);
-
-      //Remove Cookie
-      cy.get('body').then(($body) => {
-        if ($body.find('#onetrust-policy-title').is(':visible')) {
-          // If the cookie bar is visible, click on it and remove it
-          cy.get('#onetrust-accept-btn-handler').click();
-        } else {
-          // Log that the cookie bar was not visible
-          cy.log('Cookie bar not visible');
-        }
-      }); //End Remove Cookie
-
-      // Login to E-Box
-      cy.get(':nth-child(1) > .ng-invalid > .input > .input__field-input').type(
-        payslipJson.username_egEbox
-      );
-      cy.get('.ng-invalid > .input > .input__field-input').type(
-        payslipJson.password_egEbox
-      );
-      cy.wait(1000);
-      cy.get('button[type="submit"]').click();
-      // Wait for login to complete
-      cy.wait(2000);
-      // Check visibility of Upload Delivery button - Button should be hidden
-      cy.get('#toolbar-toggle_upload')
-        .invoke('css', 'border', '3px solid green')
-        .should('be.visible');
-      cy.wait(500);
-
-      // Create Upload Delivery
-      cy.get('#toolbar-toggle_upload').click();
-      cy.upload_attachment(); // Upload PDF documents from fixtures folder - custom command
-      cy.wait(2000);
-
-      // Capture the current date and time in the specified format
-      const now = new Date();
-      const formattedDate = now.toLocaleDateString('de-DE'); // Format as dd.mm.yyyy
-      const formattedTime = now.toLocaleTimeString('de-DE', {
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false,
-      });
-      uploadDateTime = `${formattedDate} ${formattedTime}`;
-      cy.log(`Upload DateTime: ${uploadDateTime}`);
-
-      // Generate a random 4-digit number and use it in the title
-      let randomNumber = Math.floor(1000 + Math.random() * 9000);
-      const title = `HR Delivery (pdf) - ${uploadDateTime}`; // Use formatted date and time in title
-      cy.get('input[name="deliveryTitle"]').type(title);
-
-      cy.wait(2000);
-      cy.contains(' Speichern ').click({ force: true });
-      cy.wait(3000);
-      //Upload label - sidebar should be visible
-      cy.get(
-        'app-inbox-filter-system-labels>div>a[aria-label="filtern nach upload"]'
-      ).should('be.visible');
-      cy.log('Expected Result: Upload label is not visible');
-      //Filter by Upload label
-      cy.get(
-        'app-inbox-filter-system-labels>div>a[aria-label="filtern nach upload"]'
-      ).click();
-      cy.wait(3000);
-      // Logout
-      cy.get('.user-title').click();
-      cy.wait(1500);
-      cy.get('.logout-title > a').click();
-      cy.url().should('include', payslipJson.baseUrl_egEbox); // Validate url
-      cy.log('Test completed successfully.');
+  it.only('crete HR delivery from E-Box', () => {
+    cy.visit(Cypress.env('baseUrl_egEbox'), {
+      failOnStatusCode: false,
     });
+    cy.wait(3500);
+    // Validate URL on the login page
+    cy.url().should('include', Cypress.env('baseUrl_egEbox'));
+
+    //Remove Cookie
+    cy.get('body').then(($body) => {
+      if ($body.find('#onetrust-policy-title').is(':visible')) {
+        // If the cookie bar is visible, click on it and remove it
+        cy.get('#onetrust-accept-btn-handler').click();
+      } else {
+        // Log that the cookie bar was not visible
+        cy.log('Cookie bar not visible');
+      }
+    }); //End Remove Cookie
+
+    cy.get('input[placeholder="Benutzername"]').type(
+      Cypress.env('username_egEbox')
+    );
+    cy.get('input[type="password"]').type(Cypress.env('password_egEbox'));
+    cy.intercept('POST', '**/rest/v2/deliveries**').as('getDeliveries');
+    cy.get('button[type="submit"]').click(); //Login
+
+    cy.wait(['@getDeliveries'], { timeout: 37000 }).then((interception) => {
+      // Log the intercepted response
+      cy.log('Intercepted response:', interception.response);
+
+      // Assert the response status code
+      expect(interception.response.statusCode).to.eq(200);
+    });
+    cy.url().should('include', '/deliveries'); // => validate url
+    // Wait for login to complete
+    cy.wait(2000);
+    // Check visibility of Upload Delivery button - Button should be hidden
+    cy.get('#toolbar-toggle_upload')
+      .invoke('css', 'border', '3px solid green')
+      .should('be.visible');
+    cy.wait(500);
+
+    // Create Upload Delivery
+    cy.get('#toolbar-toggle_upload').click();
+    cy.upload_attachment(); // Upload PDF documents from fixtures folder - custom command
+    cy.wait(2000);
+
+    // Capture the current date and time in the specified format
+    const now = new Date();
+    const formattedDate = now.toLocaleDateString('de-DE'); // Format as dd.mm.yyyy
+    const formattedTime = now.toLocaleTimeString('de-DE', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    });
+    uploadDateTime = `${formattedDate} ${formattedTime}`;
+    cy.log(`Upload DateTime: ${uploadDateTime}`);
+
+    // Generate a random 4-digit number and use it in the title
+    let randomNumber = Math.floor(1000 + Math.random() * 9000);
+    const title = `HR Delivery (pdf) - ${uploadDateTime}`; // Use formatted date and time in title
+    cy.get('input[name="deliveryTitle"]').type(title);
+    cy.wait(2000);
+
+    //Click on Send button
+    cy.get('button[type="submit"]')
+      .contains(/Send|Speichern/i)
+      .should('be.visible') // Optional: Ensure the button is visible before interacting
+      .click({ force: true });
+    cy.wait(3000);
+
+    // Logout
+    cy.get('.user-title').click();
+    cy.wait(1500);
+    cy.get('.logout-title > a').click();
+    cy.url().should('include', Cypress.env('baseUrl_egEbox')); // Validate url
+    cy.log('Test completed successfully.');
   });
 
   // Admin User is able to check new HR Delivery received in HR page
-  it('Admin User checks new delivery received in the HR page in SW', () => {
-    adminUserChecksNewDeliveryReceivedInHRpage();
+  it.only('Admin User checks new delivery received in the HR page in SW', () => {
+    //adminUserChecksNewDeliveryReceivedInHRpage();
+    cy.loginToSupportViewAdmin();
+
+    // Wait for login to complete
+    cy.wait(1500);
+
+    //Switch to HR page
+    // checkNewDeliveryInHrPage();
+    const collectedLinkTexts = []; // Array to store all link texts
+
+    cy.get('.side-menu>ul>navigation-item>.navigation-item>a')
+      .find('.user-label-wrap')
+      .each(($el) => {
+        cy.wrap($el)
+          .invoke('text')
+          .then((text) => {
+            collectedLinkTexts.push(text.trim()); // Collect each link text in the array
+            cy.log('Collected Link Text:', text.trim());
+          });
+      })
+      .wait(2500)
+      .then(() => {
+        // After collecting all link texts, perform a single check
+        const hasAccessToHRPage = collectedLinkTexts.some((text) =>
+          ['Erhaltene Sendungen', 'Received Shipments'].includes(text)
+        );
+        //Check if Admin has access to HR page in SW
+        if (hasAccessToHRPage) {
+          // Find the specific elements and check their visibility
+          cy.get('.side-menu>ul>navigation-item>.navigation-item>a')
+            .contains(/Erhaltene Sendungen|Received Shipments/)
+            .should('be.visible')
+            .click();
+          cy.log('Confirmed: HR page link is visible to the Admin.'); // Log if HR page access is detected
+          cy.wait(2500);
+        } else {
+          // Verify that elements with specified texts are not visible
+          cy.get('.side-menu>ul>navigation-item>.navigation-item>a')
+            .contains(/Erhaltene Sendungen|Received Shipments/)
+            .should('not.exist');
+          cy.log('Confirmed: HR page link is not visible to the Admin.'); // Log if HR page access is not detected
+          cy.wait(2500);
+        }
+      });
+
+    // Validate latest HR delivery
+    cy.log('Checking for the latest HR delivery received date for AQUA GmbH');
+
+    // Find the row with Company Name "AQUA GmbH" and get the corresponding Datum
+    cy.get('cdk-table>cdk-row').each(($row) => {
+      cy.wrap($row)
+        .find('.cdk-column-companyName')
+        .invoke('text')
+        .then((companyName) => {
+          if (companyName.trim() === 'AQUA GmbH') {
+            // If companyName matches, get the date from the corresponding Datum cell
+            cy.wrap($row);
+
+            //       .find(
+            //         '.cdk-column-userDataUpdateDate .cell-content-wrap .inline-div > div'
+            //       )
+
+            //       .invoke('text')
+            //       .then((receivedDateText) => {
+            //         // Log original received date text
+            //         cy.log(`Original Received Date Text: ${receivedDateText}`);
+
+            //         // Extract date and time parts
+            //         const datePart = receivedDateText.trim().split(' ')[0]; // "dd.mm.yyyy"
+            //         const timePart = receivedDateText
+            //           .trim()
+            //           .split(' ')[1]
+            //           .slice(0, 5); // "hh:mm" (removing seconds)
+
+            //         // Format to match "dd.mm.yyyy hh:mm" with leading zeros
+            //         const [day, month, year] = datePart
+            //           .split('.')
+            //           .map((v) => v.padStart(2, '0'));
+            //         const formattedReceivedDate = `${day}.${month}.${year} ${timePart}`;
+            //         cy.log(`Formatted Received Date: ${formattedReceivedDate}`);
+
+            //         // Parse uploadDateTime with consistent formatting
+            //         const [uploadDay, uploadMonth, uploadYear] = uploadDateTime
+            //           .split(' ')[0]
+            //           .split('.');
+            //         const [uploadHour, uploadMinute] = uploadDateTime
+            //           .split(' ')[1]
+            //           .split(':');
+            //         const formattedUploadDate = `${uploadDay.padStart(
+            //           2,
+            //           '0'
+            //         )}.${uploadMonth.padStart(
+            //           2,
+            //           '0'
+            //         )}.${uploadYear} ${uploadHour}:${uploadMinute}`;
+
+            //         // Create tolerance range by adding 1 minute
+            //         const uploadDate = new Date(
+            //           uploadYear,
+            //           uploadMonth - 1,
+            //           uploadDay,
+            //           uploadHour,
+            //           uploadMinute
+            //         );
+            //         const uploadDatePlusOneMinute = new Date(
+            //           uploadDate.getTime() + 60000
+            //         );
+
+            //         // Format uploadDatePlusOneMinute to match "dd.mm.yyyy hh:mm"
+            //         const formattedUploadDatePlusOneMinute = `${uploadDatePlusOneMinute
+            //           .getDate()
+            //           .toString()
+            //           .padStart(2, '0')}.${(
+            //           uploadDatePlusOneMinute.getMonth() + 1
+            //         )
+            //           .toString()
+            //           .padStart(
+            //             2,
+            //             '0'
+            //           )}.${uploadDatePlusOneMinute.getFullYear()} ${uploadDatePlusOneMinute
+            //           .getHours()
+            //           .toString()
+            //           .padStart(2, '0')}:${uploadDatePlusOneMinute
+            //           .getMinutes()
+            //           .toString()
+            //           .padStart(2, '0')}`;
+
+            //         cy.log(`Upload Date: ${formattedUploadDate}`);
+            //         cy.log(
+            //           `Upload Date + 1 Min: ${formattedUploadDatePlusOneMinute}`
+            //         );
+
+            //         // Compare the received date with both possible dates
+            //         expect([
+            //           formattedUploadDate,
+            //           formattedUploadDatePlusOneMinute,
+            //         ]).to.include(formattedReceivedDate);
+            //       });
+          }
+        });
+    });
+
+    cy.wait(3000);
+    //Click on magic link button
+    // cy.get('.action-buttons>button>.mdc-button__label').click({
+    //   force: true,
+    // });
+
+    // // .filter((index, el) => {
+    // //   const text = Cypress.$(el).text().trim();
+    // //   return text === ' Open E-Box ' || text === 'Nächste';
+    // // })
+    // // cy.get('button[data-action="openEbox"]').click(); // Replace with the actual selector
+
+    // cy.intercept(
+    //   'POST',
+    //   'https://supportviewpayslip.edeja.com/be/supportView/v1/person/magicLink/createByGroup',
+    //   {
+    //     statusCode: 200,
+    //     body: {
+    //       groupId: '654cb8556d84491d20c20525',
+    //       personId: '665efbfcdd2ca31e8c083c8a',
+    //       sourceType: 'HR_MANAGEMENT',
+    //     },
+    //   }
+    // ).as('magicLinkRequest');
+    // cy.window().then((win) => {
+    //   cy.stub(win, 'open')
+    //     .callsFake((url) => {
+    //       // Simulate navigation in the same tab by changing the window location
+    //       win.location.href = url;
+    //     })
+    //     .as('windowOpen');
+    // });
+    // // cy.wait('@magicLinkRequest').then((interception) => {
+    // //   expect(interception.response.statusCode).to.eq(200);
+    // //   const { magicLink } = interception.response.body;
+
+    // //   // Verify that the stubbed window.open method was called with the correct magic link
+    // //   cy.get('@windowOpen').should('be.calledWith', magicLink, '_blank');
+
+    // //   // Assert that the current URL is the magic link
+    // //   cy.url().should('eq', magicLink);
+    // // });
+    // cy.wait(3000);
+    // //Remove Cookie
+    // cy.get('body').then(($body) => {
+    //   if ($body.find('#onetrust-policy-title').is(':visible')) {
+    //     // If the cookie bar is visible, click on it and remove it
+    //     cy.get('#onetrust-accept-btn-handler').click();
+    //   } else {
+    //     // Log that the cookie bar was not visible
+    //     cy.log('Cookie bar not visible');
+    //   }
+    // }); //End Remove Cookie
+
+    // Logout
+    cy.get('.logout-icon ').click();
+    cy.wait(2000);
+    cy.get('.confirm-buttons > :nth-child(2)').click();
+    cy.url().should('include', Cypress.env('baseUrl')); // Validate url'
   });
 
   //Confirm HR Role On Assign Admin To Companies

@@ -1,4 +1,13 @@
-describe('R04_Create User -Manual.js', () => {
+describe('R03_Create User -Manual.js', () => {
+  // Resolvig slow loading of SV on services due to the cache
+  beforeEach(() => {
+    cy.clearCookies();
+    cy.clearLocalStorage();
+    cy.window().then((win) => {
+      win.sessionStorage.clear(); // Clears session storage
+    });
+  });
+
   it('Login As Masteruser - Create User Manually', () => {
     // Login as Master User using a custom command
     cy.loginToSupportViewMaster();
@@ -111,84 +120,10 @@ describe('R04_Create User -Manual.js', () => {
     } //end create usr function
 
     // Create the first user (with address)
-    //createUser(payslipJson.createUser[0]);
     createUser(Cypress.env('createUser')[0]);
 
     // Access the first Admin User object from cypress.config.js
     const user = Cypress.env('createUser')[0];
-
-    // Validate Confirm Address dialog
-    // cy.wait(1500);
-    // cy.get('send-to-print-promt .ng-star-inserted').then((elements) => {
-    //   const extractedValues = Array.from(elements).map((el) =>
-    //     el.innerText.trim()
-    //   );
-    //   cy.log('Extracted Values:', extractedValues);
-
-    //   // Validate the extracted values match the address data from the fixture
-    //   expect(extractedValues[0]).to.contain(
-    //     payslipJson.createUser[0].streetName
-    //   );
-    //   expect(extractedValues[1]).to.contain(
-    //     payslipJson.createUser[0].streetNumber
-    //   );
-    //   expect(extractedValues[2]).to.contain(
-    //     payslipJson.createUser[0].doorNumber
-    //   );
-    //   expect(extractedValues[3]).to.contain(
-    //     payslipJson.createUser[0].zipCode
-    //   );
-    //   expect(extractedValues[4]).to.contain(payslipJson.createUser[0].city);
-    //   expect(extractedValues[5]).to.satisfy(
-    //     (value) => value.includes('Austria') || value.includes('Österreich')
-    //   );
-    // });
-    // cy.wait(1500);
-    // // Confirm-close Address in the dialog
-    // cy.get(
-    //   'app-confirmation-dialog>.dialog-container>.dialog-footer>.dialog-actions>button>.title'
-    // )
-    //   .filter((index, buttonTitle) => {
-    //     return (
-    //       Cypress.$(buttonTitle).text().trim() === 'Confirm' ||
-    //       Cypress.$(buttonTitle).text().trim() === 'Bestätigen'
-    //     );
-    //   })
-    //   .click({ force: true });
-
-    // // Wait for user creation process
-    // cy.wait(2000);
-
-    // Create the second user (without address)
-    // createUser(payslipJson.createUserNoAddress[0]);
-
-    // cy.get('send-to-print-promt .ng-star-inserted').then((elements) => {
-    //   const extractedValues = Array.from(elements).map((el) =>
-    //     el.innerText.trim()
-    //   );
-    //   cy.log('Extracted Values:', extractedValues);
-
-    //   // Assuming the order is Street, House Number, Door Number, etc.
-    //   expect(extractedValues[0]).to.contain('');
-    //   expect(extractedValues[1]).to.contain('');
-    //   expect(extractedValues[2]).to.contain('');
-    //   expect(extractedValues[3]).to.contain('');
-    //   expect(extractedValues[4]).to.contain('');
-    //   expect(extractedValues[5]).to.contain('');
-    // });
-
-    // // Validate and confirm second user creation
-    // cy.wait(1500);
-    // cy.get(
-    //   'app-confirmation-dialog>.dialog-container>.dialog-footer>.dialog-actions>button>.title'
-    // )
-    //   .filter((index, buttonTitle) => {
-    //     return (
-    //       Cypress.$(buttonTitle).text().trim() === 'Confirm' ||
-    //       Cypress.$(buttonTitle).text().trim() === 'Bestätigen'
-    //     );
-    //   })
-    //   .click({ force: true });
 
     // Validate success message
     cy.get('sv-multiple-notifications>.messages>p')
@@ -230,13 +165,18 @@ describe('R04_Create User -Manual.js', () => {
         });
         cy.wait(3500);
       });
+  }); //end it
 
-    //********************* Yopmail *********************
-
-    // Visit yopmail application or login page
+  //********************* Yopmail *********************
+  it('Yopmail - Confirm email and Change password', () => {
+    // Visit yopmail application
     cy.visit('https://yopmail.com/en/');
+
+    // Access the first Admin User object from cypress.config.js
+    const user = Cypress.env('createUser')[0];
     cy.get('#login').type(user.email);
     cy.get('#refreshbut > .md > .material-icons-outlined').click();
+    cy.wait(1500);
     cy.iframe('#ifinbox')
       .find('.mctn > .m > button > .lms')
       .eq(0)
@@ -260,7 +200,7 @@ describe('R04_Create User -Manual.js', () => {
         cy.log('Captured text:', usernameFromEmailBody);
 
         //Confirm Email Address  - by clicking on "Jetzt E-Mail Adresse bestätigen" button from Comfirmation email
-
+        cy.wait(1500);
         let initialUrl;
         cy.iframe('#ifmail')
           .find(
@@ -279,28 +219,23 @@ describe('R04_Create User -Manual.js', () => {
           )
           .invoke('attr', 'target', '_self') //prevent opening in new tab
           .click();
-        // cy.wait(14000);
-        // //Remove Cookie
-        // cy.get('body').then(($body) => {
-        //   if ($body.find('#onetrust-policy-title').is(':visible')) {
-        //     // If the cookie bar is visible, click on it and remove it
-        //     cy.get('#onetrust-accept-btn-handler').click();
-        //   } else {
-        //     // Log that the cookie bar was not visible
-        //     cy.log('Cookie bar not visible');
-        //   }
-        // }); //End Remove Cookie
-        // cy.pause();
-        cy.wait(5000);
-        // cy.iframe("#ifmail")
-        //   .find("#onetrust-accept-btn-handler")
-        //   .should("exist")
-        //   .click(); // if exist, Remove Cookie bar
+        //Wait for Cookie bar
+        cy.wait(15000);
+        //Remove Cooki dialog (if shown)
+        if (cy.iframe('#ifmail').find('#onetrust-accept-btn-handler')) {
+          cy.iframe('#ifmail').find('#onetrust-accept-btn-handler').click();
+        } else {
+          cy.log('Cookie dialog is not shown');
+        }
+
+        // cy.iframe('#ifmail').find('#onetrust-accept-btn-handler').click();
+
+        cy.wait(8000);
         cy.iframe('#ifmail').find('.button').click();
         //Reload inbox
 
         cy.get('#refresh').click({ force: true }); //Click on Refresh inbox icon
-        cy.wait(4000);
+        cy.wait(5000);
         //Reset Pasword email
 
         cy.iframe('#ifinbox')
@@ -329,83 +264,89 @@ describe('R04_Create User -Manual.js', () => {
           .invoke('attr', 'target', '_self') //prevent opening in new tab
           .click();
         cy.wait(2500);
-        // cy.iframe("#ifmail")
-        //   .find("#onetrust-accept-btn-handler")
-        //   .should("exist")
-        //   .click(); // Remove Cookie bar
 
         //Fill the Set password form
         cy.iframe('#ifmail')
           .find('.input__field-input')
           .eq(0)
           .click()
-          //.type(payslipJson.password_egEbox); //fill the 1st input field
+
           .type(Cypress.env('password_egEbox')); //fill the 1st input field
         cy.iframe('#ifmail').find('.input-eye-icon').eq(0).click(); //Click on Show password icon
 
         cy.iframe('#ifmail')
           .find('.input__field-input')
           .eq(1)
-          //.type(payslipJson.password_egEbox); //fill the 2nd input field
+
           .type(Cypress.env('password_egEbox')); //fill the 1st input field
         cy.iframe('#ifmail').find('.input-eye-icon').eq(1).click(); //Click on Show password icon
         cy.iframe('#ifmail').find('.button').click(); //Click on confirm button
 
-        //********************* Login to ebox 1st time *********************
-
-        //cy.visit(payslipJson.baseUrl_egEbox); //Visit EG E-box login page
-        cy.visit(Cypress.env('baseUrl_egEbox'));
-        cy.wait(5000);
-
-        // Wait for the cookie bar to appear
-        //Remove Cookie
-        cy.get('body').then(($body) => {
-          if ($body.find('#onetrust-policy-title').is(':visible')) {
-            // If the cookie bar is visible, click on it and remove it
-            cy.get('#onetrust-accept-btn-handler').click();
-          } else {
-            // Log that the cookie bar was not visible
-            cy.log('Cookie bar not visible');
-          }
-        }); //End Remove Cookie
-        cy.wait(1500);
-        // Continue with Login
-        cy.get(
-          ':nth-child(1) > .ng-invalid > .input > .input__field-input'
-        ).type(usernameFromEmailBody);
-
-        cy.get('.ng-invalid > .input > .input__field-input').type(
-          Cypress.env('password_egEbox')
-        ); //fill the 1st input field
-
-        cy.wait(1000);
-        cy.get('button[type="submit"]').click(); //Login to E-Brief
-        // cy.wait(6000);
-
-        cy.intercept('POST', '**/rest/v2/deliveries**').as(
-          'openDeliveriesPage'
-        );
-        // cy.get('button[type="submit"]').click();
-
-        cy.wait(['@openDeliveriesPage'], { timeout: 37000 }).then(
-          (interception) => {
-            // Log the intercepted response
-            cy.log('Intercepted response:', interception.response);
-
-            // Assert the response status code
-            expect(interception.response.statusCode).to.eq(200);
-            cy.wait(2500);
-          }
-        );
-        cy.wait(10000);
-        // Logout
-        cy.get('.user-title').click();
-        cy.wait(1500);
-        cy.get('.logout-title > a').click();
-        //cy.url().should('include', payslipJson.baseUrl_egEbox); // Validate url
-        cy.url().should('include', Cypress.env('baseUrl_egEbox')); // Validate url
-        cy.log('Test completed successfully.');
+        cy.wait(2000);
       });
+  });
+
+  //********************* Login to ebox 1st time *********************
+  it('Login to e-Box 1st time', () => {
+    cy.visit(Cypress.env('baseUrl_egEbox'));
+    cy.wait(5000);
+
+    // Wait for the cookie bar to appear
+    //Remove Cookie
+    cy.get('body').then(($body) => {
+      if ($body.find('#onetrust-policy-title').is(':visible')) {
+        // If the cookie bar is visible, click on it and remove it
+        cy.get('#onetrust-accept-btn-handler').click();
+      } else {
+        // Log that the cookie bar was not visible
+        cy.log('Cookie bar not visible');
+      }
+    }); //End Remove Cookie
+    cy.wait(1500);
+    // Create the first user (with address)
+
+    // Access the first Admin User object from cypress.config.js
+    const user = Cypress.env('createUser')[0];
+    // Continue with Login
+    cy.log(Cypress.env('companyPrefix'));
+    cy.get(':nth-child(1) > .ng-invalid > .input > .input__field-input').type(
+      Cypress.env('companyPrefix') + user.username
+    );
+
+    //Cypress.env('manualAddress')
+    cy.get('.ng-invalid > .input > .input__field-input').type(
+      Cypress.env('password_egEbox')
+    );
+
+    // cy.wait(6000);
+
+    // cy.wait(10000);
+    // cy.visit(Cypress.env('eboxDeliveryPage'), {
+    //   failOnStatusCode: false,
+    // });
+    cy.wait(5500);
+
+    cy.intercept('POST', '**/rest/v2/deliveries**').as('openDeliveriesPage');
+    cy.wait(1000);
+    cy.get('button[type="submit"]').click(); //Login to E-Box
+    cy.wait(['@openDeliveriesPage'], { timeout: 37000 }).then(
+      (interception) => {
+        // Log the intercepted response
+        cy.log('Intercepted response:', interception.response);
+
+        // Assert the response status code
+        expect(interception.response.statusCode).to.eq(200);
+        cy.wait(2500);
+      }
+    );
+    cy.wait(7000);
+    // Logout
+    cy.get('.user-title').click();
+    cy.wait(1500);
+    cy.get('.logout-title > a').click();
+    //cy.url().should('include', payslipJson.baseUrl_egEbox); // Validate url
+    cy.url().should('include', Cypress.env('baseUrl_egEbox')); // Validate url
+    cy.log('Test completed successfully.');
   });
 
   // M A S T E R    U S E R - DELETE ALREADY CREATED USERS

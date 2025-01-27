@@ -59,7 +59,7 @@ describe('hrManagement - prepareDocumentForSpecificUser', () => {
   // }); //end it
 
   //Prepare document For Signing - For Specific user
-  it.skip('Send Delivery to selected-specific user', () => {
+  it('Send Delivery to selected-specific user', () => {
     cy.loginToSupportViewAdmin(); // Login as a master user
 
     // Search for Group section
@@ -184,7 +184,7 @@ describe('hrManagement - prepareDocumentForSpecificUser', () => {
   }); //end it
 
   //Login to e-Box and Open Delivery
-  it.skip('Ebox user Open delivery', () => {
+  it('Ebox user Open delivery', () => {
     cy.loginToEgEbox();
 
     //Open latest created deivery
@@ -223,7 +223,7 @@ describe('hrManagement - prepareDocumentForSpecificUser', () => {
   });
 
   // Send Delivery to selected-specific user
-  it('Send Delivery to selected-specific user', () => {
+  it.skip('Send Delivery to selected-specific user', () => {
     cy.loginToSupportViewAdmin(); // Log in as an admin user
 
     // Search for the specific group by display name
@@ -303,7 +303,7 @@ describe('hrManagement - prepareDocumentForSpecificUser', () => {
   });
 
   // Login to e-box and open the delivery
-  it.only('Ebox user Open delivery and validate title', function () {
+  it.skip('Ebox user Open delivery and validate title', function () {
     cy.loginToEgEbox();
 
     // Open the latest delivery and verify its content
