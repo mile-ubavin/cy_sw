@@ -703,32 +703,29 @@ Cypress.Commands.add('loginToDatapart', () => {
   cy.wait(1000);
 }); //end
 
-//Custom commands: Taken data from json file
+//Custom commands: Taken data from config file
 Cypress.Commands.add('loginToEgEboxAsStudent', () => {
-  // Load credentials from JSON file
-  cy.fixture('datapart.json').as('datapart');
-
-  // Visit the base URL
-  cy.get('@datapart').then((datapartJson) => {
-    // cy.visit(datapartJson.baseUrl);
-    cy.visit(datapartJson.baseUrl, {
-      failOnStatusCode: false,
-    });
-    cy.url().should('include', datapartJson.baseUrl);
-
-    // Enter username and password
-    cy.get('#mat-input-0').type(datapartJson.username_student);
-    cy.get('#mat-input-1').type(datapartJson.password_student);
-
-    cy.wait(1000);
-
-    // Click login button
-    cy.get('app-custom-icon-button').click();
-
-    // Wait for dashboard page to load
-    cy.url().should('include', '/deliveries');
-    cy.wait(2000);
+  //Import credentials (un/pw) from json file
+  cy.visit(Cypress.env('baseUrl'), {
+    failOnStatusCode: false,
   });
+  cy.url().should('include', Cypress.env('baseUrl'));
+
+  // Enter username and password
+
+  cy.get('#mat-input-0').type(Cypress.env('username_student'));
+  // .type(datapartJson.username_student);
+  cy.get('#mat-input-1').type(Cypress.env('password_student'));
+  //.type(datapartJson.password_student);
+
+  cy.wait(1000);
+
+  // Click login button
+  cy.get('app-custom-icon-button').click();
+
+  // Wait for dashboard page to load
+  cy.url().should('include', '/deliveries');
+  cy.wait(2000);
 }); //end login
 
 //dowload doc

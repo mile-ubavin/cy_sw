@@ -35,12 +35,11 @@ describe('Login/Logout to DATAPART E-Box', () => {
         ' Bitte geben Sie eine gültige E-Mail-Adresse an '
       );
       cy.wait(1500);
+
       //Enter valid email taken from json file
       cy.get('input[formcontrolname="mail"]').clear({ force: true });
-      cy.fixture('datapart.json').then((datapart) => {
-        cy.get('input[formcontrolname="mail"]').type(datapart.email, {
-          force: true,
-        });
+      cy.get('input[formcontrolname="mail"]').type(Cypress.env('email'), {
+        force: true,
       });
       cy.wait(1500);
     }); //end email
@@ -65,10 +64,8 @@ describe('Login/Logout to DATAPART E-Box', () => {
       cy.wait(1500);
       //Enter valid phoneNumber taken from json file
       cy.get('input[formcontrolname="phone"]').clear({ force: true });
-      cy.fixture('datapart.json').then((datapart) => {
-        cy.get('input[formcontrolname="phone"]').type(datapart.phone, {
-          force: true,
-        });
+      cy.get('input[formcontrolname="phone"]').type(Cypress.env('phone'), {
+        force: true,
       });
       cy.wait(1500);
     }); //end phone
@@ -81,10 +78,8 @@ describe('Login/Logout to DATAPART E-Box', () => {
     ).click();
     cy.wait(3000);
     cy.get('.logout-title > a').click({ force: true });
-    cy.fixture('datapart.json').as('datapart');
-    cy.get('@datapart').then((datapartJson) => {
-      cy.visit(datapartJson.baseUrl); //Taken from base url
-      cy.url().should('include', datapartJson.baseUrl); //Validating url on the login page
-    });
+    cy.url().should('include', Cypress.env('baseUrl')); // Validate URL
+    cy.log('Test completed successfully.');
+    cy.wait(2500);
   }); //end it
 });

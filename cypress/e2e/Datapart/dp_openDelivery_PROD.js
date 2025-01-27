@@ -131,10 +131,8 @@ describe('Login/OPen delivery', () => {
     ).click();
     cy.wait(9000);
     cy.get('.logout-title > a').click({ force: true });
-    cy.fixture('datapart.json').as('datapart');
-    cy.get('@datapart').then((datapartJson) => {
-      cy.visit(datapartJson.baseUrl); //Taken from base url
-      cy.url().should('include', datapartJson.baseUrl); //Validating url on the login page
-    });
+    cy.url().should('include', Cypress.env('baseUrl')); // Validate URL
+    cy.log('Test completed successfully.');
+    cy.wait(2500);
   });
 });

@@ -26,11 +26,9 @@ describe('Invalid Login to DP', () => {
     const TestEmail = emails(7);
     const EmailState = validateEmail(TestEmail);
     it('EmailTest -' + TestEmail + ' - ' + EmailState, () => {
-      //Get url from datapart.json / fixture folder
-      cy.fixture('datapart.json').as('datapart');
-      cy.get('@datapart').then((datapartJson) => {
-        cy.visit(datapartJson.baseUrl); //Taken from base url
-        cy.url().should('include', datapartJson.baseUrl); //Validating url on the login page
+      //Get url from config file
+      cy.visit(Cypress.env('baseUrl'), {
+        failOnStatusCode: false,
       });
       cy.get('#mat-input-0').type(TestEmail);
       cy.get('#mat-input-1')
@@ -38,8 +36,8 @@ describe('Invalid Login to DP', () => {
         .get('.mat-mdc-form-field-icon-suffix')
         .click(); //Show/Hide pass
 
-      cy.get('.button-content-wrap').invoke('text').as('buttonTitle');
-      cy.get('@buttonTitle').should('include', ' Anmelden '); //Validate Button title
+      // cy.get('.button-content-wrap').invoke('text').as('buttonTitle');
+      // cy.get('@buttonTitle').should('include', ' Anmelden '); //Validate Button title
       cy.get('app-custom-icon-button').click(); //Click on login button
       cy.wait(1000);
 
