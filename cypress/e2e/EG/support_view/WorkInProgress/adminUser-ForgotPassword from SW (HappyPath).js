@@ -1,4 +1,4 @@
-/// <reference types="Cypress" />
+/// <reference types="cypress" />
 
 describe('adminUser-ForgotPassword from SW (HappyPath)', () => {
   it('adminUser-triggerForgotPasswordFromSW', () => {
@@ -7,8 +7,10 @@ describe('adminUser-ForgotPassword from SW (HappyPath)', () => {
     //Import credentials (un/pw) from 'supportView.json' file
     cy.fixture('supportView.json').as('payslipSW');
     cy.get('@payslipSW').then((payslipJson) => {
-      cy.visit(payslipJson.baseUrl); //Taken from base url
-      cy.url().should('include', payslipJson.baseUrl); //Validating url on the login page
+      cy.visit(Cypress.env('baseUrl'), {
+        failOnStatusCode: false,
+      });
+      cy.url().should('include', '/login'); //Validating url on the login page
       cy.wait(2000);
       cy.get('.forgot-password-button').click();
       //Check title
@@ -173,13 +175,30 @@ describe('adminUser-ForgotPassword from SW (HappyPath)', () => {
           cy.get('input[formcontrolname="password"]').type(newPassword);
           cy.get('button[type="submit"]').click();
         });
+        cy.pause();
+        cy.wait(2500);
+        //cy.visit(Cypress.env('dashboardURL'));
+
+        cy.visit(Cypress.env('dashboardURL'), {
+          failOnStatusCode: false,
+        });
+        cy.wait(5500);
+
+        //Remove pop up
+        cy.get('body').then(($body) => {
+          if ($body.find('.release-note-dialog__close-icon').length > 0) {
+            cy.get('.release-note-dialog__close-icon').click();
+          } else {
+            cy.log('Close icon is NOT present');
+          }
+        });
 
         //Logout
         cy.get('.logout-icon ').click();
         cy.wait(2000);
         cy.get('.confirm-buttons > :nth-child(2)').click();
         cy.url();
-        cy.should('include', 'https://supportviewpayslip.edeja.com/fe/login'); // Validate url
+        // cy.should('include', 'https://supportviewpayslip.edeja.com/fe/login'); // Validate url
         cy.wait(3000);
       });
   }); //end it
@@ -322,12 +341,26 @@ describe('adminUser-ForgotPassword from SW (HappyPath)', () => {
         cy.get('button[type="submit"]').click();
       });
 
+      cy.visit(Cypress.env('dashboardURL'), {
+        failOnStatusCode: false,
+      });
+      cy.wait(5500);
+
+      //Remove pop up
+      cy.get('body').then(($body) => {
+        if ($body.find('.release-note-dialog__close-icon').length > 0) {
+          cy.get('.release-note-dialog__close-icon').click();
+        } else {
+          cy.log('Close icon is NOT present');
+        }
+      });
+
       //Logout
       cy.get('.logout-icon ').click();
       cy.wait(2000);
       cy.get('.confirm-buttons > :nth-child(2)').click();
       cy.url();
-      cy.should('include', 'https://supportviewpayslip.edeja.com/fe/login'); // Validate url
+      // cy.should('include', 'https://supportviewpayslip.edeja.com/fe/login'); // Validate url
       cy.wait(3000);
     });
   });

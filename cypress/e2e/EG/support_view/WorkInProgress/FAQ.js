@@ -7,6 +7,16 @@ describe('masterFaq EN - Manage FAQ Pages - base scenario', () => {
     cy.loginToSupportViewMaster(); // Login custom commands
     cy.wait(3000);
 
+    //Remove pop up
+    cy.get('body').then(($body) => {
+      if ($body.find('.release-note-dialog__close-icon').length > 0) {
+        cy.get('.release-note-dialog__close-icon').click();
+      } else {
+        cy.log('Close icon is NOT present');
+      }
+    });
+    cy.wait(1500);
+
     //Various Functions---------------------->
 
     // Create Question and an Answer
@@ -135,7 +145,7 @@ describe('masterFaq EN - Manage FAQ Pages - base scenario', () => {
       //     );
       // });
 
-      cy.wait(12000);
+      cy.wait(2500);
       // // Optionally, add a wait or check if the image is added to the editor
       // cy.wait(1000); // Adjust the wait time as needed
 
@@ -631,26 +641,19 @@ describe('masterFaq EN - Manage FAQ Pages - base scenario', () => {
       return currentLanguage === 'English' ? 'German' : 'English';
     }
 
-    // Import credentials (username/password) from 'supportView.json'
-    cy.fixture('supportView.json').then((payslipJson) => {
-      // Visit the base URL
-      //cy.visit(payslipJson.baseUrl_04); // Taken from base url
-      cy.visit(payslipJson.baseUrl_04, {
-        failOnStatusCode: false,
-      });
+    cy.loginToSupportViewAdmin();
+    // Wait for a fixed time (if necessary, but try to avoid it)
+    cy.wait(1500);
 
-      // Login to support view
-      cy.get('input[formcontrolname="username"]').type(
-        payslipJson.username_supportViewAdmin
-      );
-      cy.get('input[formcontrolname="password"]').type(
-        payslipJson.password_supportViewAdmin
-      );
-      cy.get('button[type="submit"]').click();
-
-      // Wait for a fixed time (if necessary, but try to avoid it)
-      cy.wait(1500);
+    //Remove pop up
+    cy.get('body').then(($body) => {
+      if ($body.find('.release-note-dialog__close-icon').length > 0) {
+        cy.get('.release-note-dialog__close-icon').click();
+      } else {
+        cy.log('Close icon is NOT present');
+      }
     });
+    cy.wait(1500);
 
     //Switch to Help page
     cy.get(
@@ -706,6 +709,16 @@ describe('masterFaq EN - Manage FAQ Pages - base scenario', () => {
     // Login using custom command
     cy.loginToSupportViewMaster(); // Login custom commands
     cy.wait(3000);
+
+    //Remove pop up
+    cy.get('body').then(($body) => {
+      if ($body.find('.release-note-dialog__close-icon').length > 0) {
+        cy.get('.release-note-dialog__close-icon').click();
+      } else {
+        cy.log('Close icon is NOT present');
+      }
+    });
+    cy.wait(1500);
     //Delete latest created question
 
     // Navigate to FAQ Modify page
@@ -781,25 +794,18 @@ describe('masterFaq EN - Manage FAQ Pages - base scenario', () => {
     }
 
     // Import credentials (username/password) from 'supportView.json'
-    cy.fixture('supportView.json').then((payslipJson) => {
-      // Visit the base URL
-      //cy.visit(payslipJson.baseUrl_04); // Taken from base url
-      cy.visit(payslipJson.baseUrl_04, {
-        failOnStatusCode: false,
-      });
+    cy.loginToSupportViewAdmin();
+    cy.wait(1500);
 
-      // Login to support view
-      cy.get('input[formcontrolname="username"]').type(
-        payslipJson.username_supportViewAdmin
-      );
-      cy.get('input[formcontrolname="password"]').type(
-        payslipJson.password_supportViewAdmin
-      );
-      cy.get('button[type="submit"]').click();
-
-      // Wait for a fixed time (if necessary, but try to avoid it)
-      cy.wait(1500);
+    //Remove pop up
+    cy.get('body').then(($body) => {
+      if ($body.find('.release-note-dialog__close-icon').length > 0) {
+        cy.get('.release-note-dialog__close-icon').click();
+      } else {
+        cy.log('Close icon is NOT present');
+      }
     });
+    cy.wait(1500);
 
     //Switch to Help page
     cy.get(

@@ -322,7 +322,7 @@ const environments = {
     ],
   },
   dp_dev: {
-    baseUrl: 'http://ebox-datapart.edeja.com/datapart/',
+    baseUrl: 'https://datapart.edeja.com/ebox',
     baseUrl_04: 'https://services.post-business-solutions.at/pf.datapart_t/',
     baseUrl_prod: 'https://my-datapart.de/pf.datapart',
     dp_sw_dev: 'http://supportview.edeja.com/login',
@@ -331,7 +331,7 @@ const environments = {
     dp_master: 'datapartMaster',
     username_supportViewAdmin_04: 'tsupporter',
     password_supportViewAdmin_04: 'Test1234!',
-    username_student: 'smile',
+    username_student: 'smile1',
     password_student: 'Test1234!',
     username_supportViewMaster: 'e-gehaltszettelMaster',
     password_supportViewMaster: 'Test1234!',
@@ -385,7 +385,7 @@ const environments = {
     dp_master: 'datapartMaster',
     username_supportViewAdmin: 'tsupporter',
     password_supportViewAdmin: 'Test1234!',
-    username_student: 'smile',
+    username_student: 'smile1•',
     password_student: 'Test1234!',
     username_supportViewMaster: 'e-gehaltszettelMaster',
     password_supportViewMaster: 'Test1234!',
@@ -496,7 +496,7 @@ module.exports = defineConfig({
         openFile,
       });
       //  Set executing tests on various environments, targeting appropriate json from const=environments
-      const envConfig = environments['dp_test'];
+      const envConfig = environments['eg_test'];
       return { ...config, env: { ...config.env, ...envConfig } };
     }, //end
     specPattern: 'cypress/e2e/**/*.{js,jsx,ts,tsx}', // Ensure this matches your structure

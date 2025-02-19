@@ -1,17 +1,27 @@
 describe('R03_Create User -Manual.js', () => {
   // Resolvig slow loading of SV on services due to the cache
-  beforeEach(() => {
-    cy.clearCookies();
-    cy.clearLocalStorage();
-    cy.window().then((win) => {
-      win.sessionStorage.clear(); // Clears session storage
-    });
-  });
+  // beforeEach(() => {
+  //   cy.clearCookies();
+  //   cy.clearLocalStorage();
+  //   cy.window().then((win) => {
+  //     win.sessionStorage.clear(); // Clears session storage
+  //   });
+  // });
 
   it('Login As Masteruser - Create User Manually', () => {
     // Login as Master User using a custom command
     cy.loginToSupportViewMaster();
     cy.wait(3500);
+    //Remove pop up
+    cy.get('body').then(($body) => {
+      if ($body.find('.release-note-dialog__close-icon').length > 0) {
+        cy.get('.release-note-dialog__close-icon').click();
+      } else {
+        cy.log('Close icon is NOT present');
+      }
+    });
+    cy.wait(1500);
+
     //Search for Company by Display Name
     cy.get('#searchButton>span').click(); //Click on search button
     cy.wait(1000);
@@ -21,7 +31,7 @@ describe('R03_Create User -Manual.js', () => {
 
     // Search for Group by Display Name using the company name
     cy.get('.search-dialog>form>.form-fields>.searchText-wrap')
-      .eq(1)
+      .eq(0)
       .type(companyName);
 
     //Find the Search button by button name and click on it
@@ -221,12 +231,35 @@ describe('R03_Create User -Manual.js', () => {
           .click();
         //Wait for Cookie bar
         cy.wait(15000);
-        //Remove Cooki dialog (if shown)
+
+        // //Remove Cooki dialog (if shown)
         if (cy.iframe('#ifmail').find('#onetrust-accept-btn-handler')) {
           cy.iframe('#ifmail').find('#onetrust-accept-btn-handler').click();
         } else {
           cy.log('Cookie dialog is not shown');
         }
+
+        // Remove Cookie dialog (if shown)
+        // cy.iframe('#ifmail')
+        //   .find('#onetrust-accept-btn-handler', { timeout: 3000 })
+        //   .then(($btn) => {
+        //     if ($btn.length > 0 && $btn.is(':visible')) {
+        //       cy.wrap($btn).click();
+        //       cy.log('Cookie dialog was shown and clicked.');
+        //     } else {
+        //       cy.log('Cookie dialog is not shown.');
+        //     }
+        //   });
+
+        // cy.iframe('#ifmail')
+        //   .find('#onetrust-accept-btn-handler')
+        //   .then(($btn) => {
+        //     if ($btn.length) {
+        //       cy.wrap($btn).click();
+        //     } else {
+        //       cy.log('Cookie dialog is not shown');
+        //     }
+        //   });
 
         // cy.iframe('#ifmail').find('#onetrust-accept-btn-handler').click();
 
@@ -355,6 +388,16 @@ describe('R03_Create User -Manual.js', () => {
     const user = Cypress.env('createUser')[0];
     cy.loginToSupportViewMaster();
     cy.wait(3500);
+
+    //Remove pop up
+    cy.get('body').then(($body) => {
+      if ($body.find('.release-note-dialog__close-icon').length > 0) {
+        cy.get('.release-note-dialog__close-icon').click();
+      } else {
+        cy.log('Close icon is NOT present');
+      }
+    });
+    cy.wait(1500);
 
     //Search for Group by Display Name
     cy.get('#searchButton>span').click(); //Click on search button

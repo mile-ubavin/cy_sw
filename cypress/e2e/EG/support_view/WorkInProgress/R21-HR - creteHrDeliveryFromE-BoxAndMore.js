@@ -645,7 +645,7 @@ describe('hrManagement - prepare doc for signing (HappyPath)', () => {
       const companyName = Cypress.env('company');
       // Search for Group by Display Name using the company name
       cy.get('.search-dialog>form>.form-fields>.searchText-wrap')
-        .eq(1)
+        .eq(0)
         .type(companyName);
     });
     //Find the Search button by button name and click on it

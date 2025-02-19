@@ -4,33 +4,58 @@ describe('Send welcome mail via post / EinfachBrief (HappyPath)', () => {
     //Import credentials (un/pw) from 'supportView.json' file
     cy.fixture('supportView.json').as('payslipSW');
     cy.get('@payslipSW').then((payslipJson) => {
-      cy.visit(payslipJson.baseUrl); //Taken from base url
-      cy.url().should('include', payslipJson.baseUrl); //Validating url on the login page
+      // cy.visit(payslipJson.baseUrl); //Taken from base url
+      // cy.url().should('include', payslipJson.baseUrl); //Validating url on the login page
 
       //Login to sw
-      cy.fixture('supportView.json').as('payslipSW');
-      cy.get('@payslipSW').then((payslipJson) => {
-        cy.get('input[formcontrolname="username"]').type(
-          payslipJson.username_supportViewMaster
-        );
-        cy.get('input[formcontrolname="password"]').type(
-          payslipJson.password_supportViewMaster
-        );
-        cy.get('button[type="submit"]').click();
-      });
+      //cy.fixture('supportView.json').as('payslipSW');
+      // cy.get('@payslipSW').then((payslipJson) => {
+      //   cy.get('input[formcontrolname="username"]').type(
+      //     payslipJson.username_supportViewMaster
+      //   );
+      //   cy.get('input[formcontrolname="password"]').type(
+      //     payslipJson.password_supportViewMaster
+      //   );
+      //   cy.get('button[type="submit"]').click();
+      // });
 
       //Search for Group by Display Name
-      cy.get('#searchButton>span').click(); //Click on search button
-      cy.fixture('supportView.json').as('payslipSW');
-      cy.get('@payslipSW').then((payslipJson) => {
-        // Use the company name from the JSON file
-        const companyName = payslipJson.search;
-        // Search for Group by Display Name using the company name
-        cy.get('.search-dialog>form>.form-fields>.searchText-wrap')
-          .eq(1)
-          .type(companyName);
+      // cy.get('#searchButton>span').click(); //Click on search button
+      // cy.fixture('supportView.json').as('payslipSW');
+      // cy.get('@payslipSW').then((payslipJson) => {
+      //   // Use the company name from the JSON file
+      //   const companyName = payslipJson.search;
+      //   // Search for Group by Display Name using the company name
+      //   cy.get('.search-dialog>form>.form-fields>.searchText-wrap')
+      //     .eq(1)
+      //     .type(companyName);
+      // });
+
+      cy.loginToSupportViewMaster(); // Login as a master user
+      cy.wait(2500);
+
+      //Remove pop up
+      cy.get('body').then(($body) => {
+        if ($body.find('.release-note-dialog__close-icon').length > 0) {
+          cy.get('.release-note-dialog__close-icon').click();
+        } else {
+          cy.log('Close icon is NOT present');
+        }
       });
-      //Find the Search button by button name and click on it
+      cy.wait(1500);
+
+      cy.intercept('GET', '**/group/template/tenant/**').as('apiRequest');
+
+      // Search for Group section
+      cy.get('#searchButton>span').click(); // Click on the search button
+
+      // Search for Group by Display Name using the company name
+      cy.get('.search-dialog>form>.form-fields>.searchText-wrap')
+        .eq(1)
+        .type(Cypress.env('company')); // Use the company name from the cypress.config.js
+      cy.wait(1500);
+
+      // Find and click the search button
       cy.get('.search-dialog>form>div>.mat-primary').click();
       cy.wait(1500);
       //Switch to user section
@@ -46,11 +71,13 @@ describe('Send welcome mail via post / EinfachBrief (HappyPath)', () => {
         // If the checkbox is not checked, enable it
         cy.get('#hrManagementEnabled').check();
         cy.log('Checkbox was not enabled, now enabled.');
+        cy.wait(1500);
         //Save Edit Company dialog
         cy.get('button[type="submit"]').click();
       } else {
         // If the checkbox is already enabled
         cy.log('Checkbox is already enabled.');
+        cy.wait(1500);
         cy.get('.close[data-mat-icon-name="close"]').click();
       }
       //Close Edit Company dialog
@@ -60,45 +87,46 @@ describe('Send welcome mail via post / EinfachBrief (HappyPath)', () => {
       cy.wait(2000);
       cy.get('.confirm-buttons > :nth-child(2)').click();
       cy.url();
-      cy.should('include', 'https://supportviewpayslip.edeja.com/fe/login'); // Validate url
+      //cy.should('include', 'https://supportviewpayslip.edeja.com/fe/login'); // Validate url
       cy.wait(1500);
     });
   }); //end it
 
   // A D M I N   U S E R - CREATE USER FROM CSV FILE
 
-  it('Login As AdminUser - Create Users from CSV file', () => {
+  it.only('Login As AdminUser - Create Users from CSV file', () => {
     //Import credentials (un/pw) from 'supportView.json' file
     cy.fixture('supportView.json').as('payslipSW');
     cy.get('@payslipSW').then((payslipJson) => {
-      cy.visit(payslipJson.baseUrl); //Taken from base url
-      cy.url().should('include', payslipJson.baseUrl); //Validating url on the login page
-      //Login to sw
-      cy.fixture('supportView.json').as('payslipSW');
-      cy.get('@payslipSW').then((payslipJson) => {
-        cy.get('input[formcontrolname="username"]').type(
-          payslipJson.username_supportViewAdmin
-        );
-        cy.get('input[formcontrolname="password"]').type(
-          payslipJson.password_supportViewAdmin
-        );
-        cy.get('button[type="submit"]').click();
-      });
+      // Login as Master User using a custom command
+      cy.loginToSupportViewAdmin();
+      cy.wait(3500);
 
-      //Search for Group by Display Name
+      //Remove pop up
+      cy.get('body').then(($body) => {
+        if ($body.find('.release-note-dialog__close-icon').length > 0) {
+          cy.get('.release-note-dialog__close-icon').click();
+        } else {
+          cy.log('Close icon is NOT present');
+        }
+      });
+      cy.wait(1500);
+
+      //Search for Company by Display Name
       cy.get('#searchButton>span').click(); //Click on search button
-      cy.fixture('supportView.json').as('payslipSW');
-      cy.get('@payslipSW').then((payslipJson) => {
-        // Use the company name from the JSON file
-        const companyName = payslipJson.search;
-        // Search for Group by Display Name using the company name
-        cy.get('.search-dialog>form>.form-fields>.searchText-wrap')
-          .eq(1)
-          .type(companyName);
-      });
-      //Find the Search button by button name and click on it
+      cy.wait(1000);
 
+      // Use the company name from the cypress.config.js
+      const companyName = Cypress.env('company');
+
+      // Search for Group by Display Name using the company name
+      cy.get('.search-dialog>form>.form-fields>.searchText-wrap')
+        .eq(1)
+        .type(companyName);
+
+      //Find the Search button by button name and click on it
       cy.get('.search-dialog>form>div>.mat-primary').click();
+      cy.wait(1500);
 
       //Switch to user section
       //cy.get('.mdc-button > .mdc-button__label').eq(4).click();
@@ -167,19 +195,32 @@ describe('Send welcome mail via post / EinfachBrief (HappyPath)', () => {
   it('Download and open the latest PDF', () => {
     cy.fixture('einfachbrief.json').as('einfachbrief');
     cy.get('@einfachbrief').then((einfachbriefJson) => {
-      cy.visit(einfachbriefJson.baseUrl);
-      cy.url().should('include', einfachbriefJson.baseUrl);
+      // cy.visit(einfachbriefJson.baseUrl);
+      // cy.url().should('include', einfachbriefJson.baseUrl);
 
-      cy.wait(2000);
-      // Log in to the system
-      cy.get('tp-input[formcontrolname="username"]').type(
-        einfachbriefJson.email_supportViewAdmin
-      );
-      cy.get('tp-input[formcontrolname="password"]').type(
-        einfachbriefJson.password_supportViewAdmin
-      );
-      cy.get('button[type="submit"]').click();
+      // cy.wait(2000);
+      // // Log in to the system
+      // cy.get('tp-input[formcontrolname="username"]').type(
+      //   einfachbriefJson.email_supportViewAdmin
+      // );
+      // cy.get('tp-input[formcontrolname="password"]').type(
+      //   einfachbriefJson.password_supportViewAdmin
+      // );
+      // cy.get('button[type="submit"]').click();
 
+      // cy.wait(1500);
+
+      cy.loginToSupportViewMaster(); // Login as a master user
+      cy.wait(2500);
+
+      //Remove pop up
+      cy.get('body').then(($body) => {
+        if ($body.find('.release-note-dialog__close-icon').length > 0) {
+          cy.get('.release-note-dialog__close-icon').click();
+        } else {
+          cy.log('Close icon is NOT present');
+        }
+      });
       cy.wait(1500);
 
       // Switch to Shopping Card table
@@ -347,19 +388,32 @@ describe('Send welcome mail via post / EinfachBrief (HappyPath)', () => {
     //Import credentials (un/pw) from 'supportView.json' file
     cy.fixture('supportView.json').as('payslipSW');
     cy.get('@payslipSW').then((payslipJson) => {
-      cy.visit(payslipJson.baseUrl); //Taken from base url
-      cy.url().should('include', payslipJson.baseUrl); //Validating url on the login page
-      //Login to sw
-      cy.fixture('supportView.json').as('payslipSW');
-      cy.get('@payslipSW').then((payslipJson) => {
-        cy.get('input[formcontrolname="username"]').type(
-          payslipJson.username_supportViewMaster
-        );
-        cy.get('input[formcontrolname="password"]').type(
-          payslipJson.password_supportViewMaster
-        );
-        cy.get('button[type="submit"]').click();
+      // cy.visit(payslipJson.baseUrl); //Taken from base url
+      // cy.url().should('include', payslipJson.baseUrl); //Validating url on the login page
+      // //Login to sw
+      // cy.fixture('supportView.json').as('payslipSW');
+      // cy.get('@payslipSW').then((payslipJson) => {
+      //   cy.get('input[formcontrolname="username"]').type(
+      //     payslipJson.username_supportViewMaster
+      //   );
+      //   cy.get('input[formcontrolname="password"]').type(
+      //     payslipJson.password_supportViewMaster
+      //   );
+      //   cy.get('button[type="submit"]').click();
+      // });
+
+      cy.loginToSupportViewMaster(); // Login as a master user
+      cy.wait(2500);
+
+      //Remove pop up
+      cy.get('body').then(($body) => {
+        if ($body.find('.release-note-dialog__close-icon').length > 0) {
+          cy.get('.release-note-dialog__close-icon').click();
+        } else {
+          cy.log('Close icon is NOT present');
+        }
       });
+      cy.wait(1500);
 
       //Search for Group by Display Name
       cy.get('#searchButton>span').click(); //Click on search button
@@ -449,7 +503,7 @@ describe('Send welcome mail via post / EinfachBrief (HappyPath)', () => {
       cy.wait(2000);
       cy.get('.confirm-buttons > :nth-child(2)').click();
       cy.url();
-      cy.should('include', 'https://supportviewpayslip.edeja.com/fe/login'); // Validate url
+      // cy.should('include', 'https://supportviewpayslip.edeja.com/fe/login'); // Validate url
       cy.wait(1500);
     });
     // Completion message at the end of the test

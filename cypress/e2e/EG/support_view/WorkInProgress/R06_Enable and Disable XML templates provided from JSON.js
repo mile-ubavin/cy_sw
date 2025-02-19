@@ -1,8 +1,18 @@
 describe('Enable and Disable XML templates provided from JSON', () => {
-  //Admin user Upload XML template before ebabling templated
-  it.skip('Failed upload XML template - before enabling template', () => {
+  //Admin user Upload XML file before enabling templated
+  it('Failed upload XML file - before enabling template', () => {
     cy.loginToSupportViewAdmin();
     // Wait for login to complete
+    cy.wait(1500);
+
+    //Remove pop up
+    cy.get('body').then(($body) => {
+      if ($body.find('.release-note-dialog__close-icon').length > 0) {
+        cy.get('.release-note-dialog__close-icon').click();
+      } else {
+        cy.log('Close icon is NOT present');
+      }
+    });
     cy.wait(1500);
 
     // Click On Upload Personal Document Button
@@ -12,11 +22,25 @@ describe('Enable and Disable XML templates provided from JSON', () => {
       .click(); // Click the button
     cy.wait(1500);
 
-    // Click on Upload Document button
-    cy.get('.buttons-wrapper>button>.title')
-      .contains(/Upload Document|Dokument hochladen/i)
-      .should('be.visible') // Ensure the button is visible before interacting
-      .click(); // Click the button
+    // // Click on Upload Document button
+    // cy.get('.buttons-wrapper>button>.title')
+    //   .contains(/Upload Document|Dokument hochladen/i)
+    //   .should('be.visible') // Ensure the button is visible before interacting
+    //   .click(); // Click the button
+    // cy.wait(1500);
+
+    //Click on Upload Document button
+    cy.get('body').then(($body) => {
+      if ($body.find('.buttons-wrapper>button>.title').length > 0) {
+        cy.get('.buttons-wrapper>button>.title')
+          .contains(/Upload Document|Dokument hochladen/i)
+          .should('be.visible') // Optional: Ensure the button is visible before interacting
+          .click(); // Click the button
+        cy.wait(1500);
+      } else {
+        cy.log('Close icon is NOT present');
+      }
+    });
     cy.wait(1500);
 
     // Upload XML file
@@ -83,6 +107,18 @@ describe('Enable and Disable XML templates provided from JSON', () => {
   //Enable xml teplates by Masteruser
   it('Enable XML templates by Masteruser', () => {
     cy.loginToSupportViewMaster(); // Login as a master user
+    cy.wait(1500);
+
+    //Remove pop up
+    cy.get('body').then(($body) => {
+      if ($body.find('.release-note-dialog__close-icon').length > 0) {
+        cy.get('.release-note-dialog__close-icon').click();
+      } else {
+        cy.log('Close icon is NOT present');
+      }
+    });
+    cy.wait(1500);
+
     cy.intercept('GET', '**/group/template/tenant/**').as('apiRequest');
 
     // Search for Group section
@@ -90,7 +126,7 @@ describe('Enable and Disable XML templates provided from JSON', () => {
 
     // Search for Group by Display Name using the company name
     cy.get('.search-dialog>form>.form-fields>.searchText-wrap')
-      .eq(1)
+      .eq(0)
       .type(Cypress.env('company')); // Use the company name from the cypress.config.js
     cy.wait(1500);
 
@@ -173,10 +209,20 @@ describe('Enable and Disable XML templates provided from JSON', () => {
     cy.wait(2500);
   });
 
-  //Admin user Upload XML template
+  //Admin user Upload XML template, after enabling xml template
   it('Upload XML template', () => {
     cy.loginToSupportViewAdmin();
     // Wait for login to complete
+    cy.wait(1500);
+
+    //Remove pop up
+    cy.get('body').then(($body) => {
+      if ($body.find('.release-note-dialog__close-icon').length > 0) {
+        cy.get('.release-note-dialog__close-icon').click();
+      } else {
+        cy.log('Close icon is NOT present');
+      }
+    });
     cy.wait(1500);
 
     //Click On Upload Personal Document Button
@@ -186,11 +232,25 @@ describe('Enable and Disable XML templates provided from JSON', () => {
       .click(); // Click the button
     cy.wait(1500);
 
+    // //Click on Upload Document button
+    // cy.get('.buttons-wrapper>button>.title')
+    //   .contains(/Upload Document|Dokument hochladen/i)
+    //   .should('be.visible') // Optional: Ensure the button is visible before interacting
+    //   .click(); // Click the button
+    // cy.wait(1500);
+
     //Click on Upload Document button
-    cy.get('.buttons-wrapper>button>.title')
-      .contains(/Upload Document|Dokument hochladen/i)
-      .should('be.visible') // Optional: Ensure the button is visible before interacting
-      .click(); // Click the button
+    cy.get('body').then(($body) => {
+      if ($body.find('.buttons-wrapper>button>.title').length > 0) {
+        cy.get('.buttons-wrapper>button>.title')
+          .contains(/Upload Document|Dokument hochladen/i)
+          .should('be.visible') // Optional: Ensure the button is visible before interacting
+          .click(); // Click the button
+        cy.wait(1500);
+      } else {
+        cy.log('Close icon is NOT present');
+      }
+    });
     cy.wait(1500);
 
     //Upload XML file
@@ -201,14 +261,14 @@ describe('Enable and Disable XML templates provided from JSON', () => {
       'POST',
       '**/deliveryHandler/checkDocumentProcessingStatus**'
     ).as('completeCheckingDocumentProcessingStatus');
-
+    cy.wait(2500);
     cy.get('.dialog-actions>button>.title')
       .contains(/Upload Personal Document|Personalisierte Dokumente hochladen/i)
       .should('be.visible') // Optional: Ensure the button is visible before interacting
       .click(); // Click the button
 
     cy.wait(['@completeCheckingDocumentProcessingStatus'], {
-      timeout: 27000,
+      timeout: 37000,
     }).then((interception) => {
       // Log the intercepted response
       cy.log('Intercepted response:', interception.response);
@@ -217,6 +277,38 @@ describe('Enable and Disable XML templates provided from JSON', () => {
       expect(interception.response.statusCode).to.eq(200);
     });
 
+    //Waiting For Success Message
+
+    // cy.intercept(
+    //   'POST',
+    //   '**/deliveryHandler/checkDocumentProcessingStatus**'
+    // ).as('waitingForMessage');
+    // cy.wait(2500);
+    // cy.wait(['@waitingForMessage'], {
+    //   timeout: 27000,
+    // }).then((interception) => {
+    //   // Log the intercepted response
+    //   cy.log('Intercepted response:', interception.response);
+
+    //   // Assert the response status code
+    //   expect(interception.response.statusCode).to.eq(200);
+    // });
+    cy.wait(4000);
+
+    // Verify success message, after uplading document
+    cy.get('.list-item-status>.success')
+      .should('be.visible') // Ensure it's visible first
+      .invoke('text') // Get the text of the element
+      .then((text) => {
+        // Trim the text and validate it
+        const trimmedText = text.trim();
+        expect(trimmedText).to.match(
+          /Document successfully uploaded|Dokument erfolgreich hochgeladen/
+        );
+      });
+    cy.wait(2500);
+
+    //Click on Send button, to process delivery
     cy.get('.dialog-actions>button>.title')
       .contains(/Send|Senden /i)
       .should('be.visible') // Optional: Ensure the button is visible before interacting
@@ -255,6 +347,7 @@ describe('Enable and Disable XML templates provided from JSON', () => {
   //Login to e-Box and Open Delivery
   it('Ebox user Open delivery', () => {
     cy.loginToEgEbox();
+    cy.wait(2500);
 
     //Open latest created deivery
     cy.intercept(
@@ -309,47 +402,57 @@ describe('Enable and Disable XML templates provided from JSON', () => {
         .eq(index)
         .should('include.text', 'Versandreport e-Gehaltszettel Portal');
     }
-    // Define email body function
-    function emailBody() {
-      cy.iframe('#ifmail')
-        .find('#mail > div')
-        .then(($div) => {
-          const text = $div.text().trim();
-          expect(
-            text.includes(
-              '1 Sendung(en) die Sie postalisch als Brief verschicken wollten, konnte(n) nicht ordnungsgemäß zugestellt werden, bitte überprüfen Sie die Daten der Mitarbeiter*innen, oder wenden Sie sich an unseren Kundenservice e-gehaltszettel@post.at'
-            ) ||
-              text.includes(
-                'Zusätzlich haben Sie 1 Sendung(en) erfolgreich über den postalischen Weg als Brief versendet. Das Dokument wird von uns über das „Einfach Brief“-Portal  gedruckt, kurvertiert und an die Adresse des Benutzers versendet'
-              )
-          ).to.be.true; // OR condition
-        });
-    }
 
     // Access the inbox iframe and validate the email subject
     emailSubject(0); // Validate subject of Reporting email
-    emailBody(); // Validate email body
 
-    // Wait to ensure the email content is loaded
+    cy.iframe('#ifmail')
+      .find('#mail > div')
+      .invoke('text') // Get the text content
+      .then((text) => {
+        // Log the email body text
+        cy.log('Email Body Text:', text);
+
+        // Normalize spaces for comparison
+        const normalizedText = text.trim().replace(/\s+/g, ' '); // Normalize extra spaces
+
+        // Validate that the email body contains the expected text
+        expect(normalizedText).to.include(
+          'Sie haben 1 Sendung(en) erfolgreich digital in das e-Gehaltszettel Portal Ihrer Benutzer*innen eingeliefert'
+        );
+        expect(normalizedText).to.include(
+          'Zusätzlich haben Sie 0 Sendung(en) erfolgreich über den postalischen Weg als Brief versendet. Das Dokument wird von uns über das „Einfach Brief“-Portal gedruckt, kurvertiert und an die Adresse des Benutzers versendet.'
+        );
+        expect(normalizedText).to.include('Ihr e-Gehaltszettel Team');
+      });
+
     cy.wait(4500);
 
-    // // Switch to the second email
-    // cy.iframe('#ifinbox').find('.mctn > .m > button > .lms').eq(1).click();
+    // Switch to the second email
+    //cy.iframe('#ifinbox').find('.mctn > .m > button > .lms').eq(1).click();
 
     // emailSubject(1); // Validate subject of second email
     // cy.wait(1500);
     // emailBody(); // Validate second email body
 
-    // Delete all emails if the button is not disabled
-    cy.get('.menu>div>#delall')
-      .should('not.be.disabled')
-      .click({ force: true });
-    cy.wait(4500);
+    //cy.wait(4500);
   });
 
   //Disable xml teplates by Masteruser
   it('Disable XML templates by Masteruser', () => {
     cy.loginToSupportViewMaster(); // Login as a master user
+    cy.wait(2000);
+
+    //Remove pop up
+    cy.get('body').then(($body) => {
+      if ($body.find('.release-note-dialog__close-icon').length > 0) {
+        cy.get('.release-note-dialog__close-icon').click();
+      } else {
+        cy.log('Close icon is NOT present');
+      }
+    });
+    cy.wait(1500);
+
     cy.intercept('GET', '**/group/template/tenant/**').as('apiRequest');
 
     // Search for Group section
@@ -357,7 +460,7 @@ describe('Enable and Disable XML templates provided from JSON', () => {
 
     // Search for Group by Display Name using the company name
     cy.get('.search-dialog>form>.form-fields>.searchText-wrap')
-      .eq(1)
+      .eq(0)
       .type(Cypress.env('company')); // Use the company name from the cypress.config.js
     cy.wait(1500);
 

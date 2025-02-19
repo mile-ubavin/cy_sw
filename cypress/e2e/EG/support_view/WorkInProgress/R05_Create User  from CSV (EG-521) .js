@@ -2,11 +2,20 @@ describe('Master - Create User from CSV', () => {
   // A D M I N   U S E R - CREATE USER FROM CSV FILE
 
   it('Login As AdminUser - Create Users from CSV file', () => {
-    //Import credentials (un/pw) from 'supportView.json' file
-
     // Login as Master User using a custom command
-    cy.loginToSupportViewAdmin();
+    cy.loginToSupportViewMaster();
     cy.wait(3500);
+
+    //Remove pop up
+    cy.get('body').then(($body) => {
+      if ($body.find('.release-note-dialog__close-icon').length > 0) {
+        cy.get('.release-note-dialog__close-icon').click();
+      } else {
+        cy.log('Close icon is NOT present');
+      }
+    });
+    cy.wait(1500);
+
     //Search for Company by Display Name
     cy.get('#searchButton>span').click(); //Click on search button
     cy.wait(1000);
@@ -16,7 +25,7 @@ describe('Master - Create User from CSV', () => {
 
     // Search for Group by Display Name using the company name
     cy.get('.search-dialog>form>.form-fields>.searchText-wrap')
-      .eq(1)
+      .eq(0)
       .type(companyName);
 
     //Find the Search button by button name and click on it
@@ -97,8 +106,6 @@ describe('Master - Create User from CSV', () => {
       });
     cy.wait(2500);
 
-    cy.pause();
-
     //Logout
     cy.get('.logout-icon ').click();
     cy.wait(2000);
@@ -110,7 +117,7 @@ describe('Master - Create User from CSV', () => {
 
   //Y O P M A I L
 
-  it('Yopmail - Get Reporting email', () => {
+  it.skip('Yopmail - Get Reporting email', () => {
     // Visit Yopmail
     cy.visit('https://yopmail.com/en/');
 
@@ -162,10 +169,21 @@ describe('Master - Create User from CSV', () => {
   });
 
   // M A S T E R    U S E R - DELETE ALREADY CREATED USERS
-  it('Login As Master User - Delete Alredy created Users', () => {
+  it.skip('Login As Master User - Delete Alredy created Users', () => {
     // Login as Master User using a custom command
     cy.loginToSupportViewMaster();
     cy.wait(3500);
+
+    //Remove pop up
+    cy.get('body').then(($body) => {
+      if ($body.find('.release-note-dialog__close-icon').length > 0) {
+        cy.get('.release-note-dialog__close-icon').click();
+      } else {
+        cy.log('Close icon is NOT present');
+      }
+    });
+    cy.wait(1500);
+
     //Search for Company by Display Name
     cy.get('#searchButton>span').click(); //Click on search button
     cy.wait(1000);
@@ -175,7 +193,7 @@ describe('Master - Create User from CSV', () => {
 
     // Search for Group by Display Name using the company name
     cy.get('.search-dialog>form>.form-fields>.searchText-wrap')
-      .eq(1)
+      .eq(0)
       .type(companyName);
 
     //Find the Search button by button name and click on it

@@ -8,9 +8,9 @@ describe('Upload serviceLine pdf file and chec emails', () => {
     return currentLanguage === 'English' ? 'German' : 'English';
   }
   //Precondition - delete all emails from Admin user's inbox -> call custom command
-  before(() => {
-    cy.deleteAllEmails();
-  });
+  // before(() => {
+  //   cy.deleteAllEmails();
+  // });
   //Upload valid serviceLine pdf by Admn User
   it(`Upload serviceLine pdf by Admn User and check emails`, function () {
     cy.loginToSupportViewAdmin() //Login custom commands

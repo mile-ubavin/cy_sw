@@ -124,7 +124,7 @@ describe('hrManagement - prepareDocumentForSpecificUser', () => {
     cy.fixture('supportView.json').as('payslipSW');
 
     cy.get('@payslipSW').then((payslipJson) => {
-      cy.visit(payslipJson.baseUrl_04, {
+      cy.visit(payslipJson.baseUrl, {
         failOnStatusCode: false,
       });
 
@@ -405,7 +405,7 @@ describe('hrManagement - prepareDocumentForSpecificUser', () => {
         cy.get('.logout-icon ').click();
         cy.wait(2000);
         cy.get('.confirm-buttons > :nth-child(2)').click();
-        cy.url().should('include', payslipJson.baseUrl_04); // Validate url'
+        cy.url().should('include', payslipJson.baseUrl); // Validate url'
         cy.log('Test completed successfully.');
         cy.wait(2500);
       }); //end
@@ -460,14 +460,14 @@ describe('hrManagement - prepareDocumentForSpecificUser', () => {
       cy.get('.logout-icon ').click();
       cy.wait(2000);
       cy.get('.confirm-buttons > :nth-child(2)').click();
-      cy.url().should('include', payslipJson.baseUrl_04); // Validate url'
+      cy.url().should('include', payslipJson.baseUrl); // Validate url'
       cy.log('Test completed successfully.');
       cy.wait(2500);
     });
   }); //end it
 
   //Prepare document For Signing - For Specific user
-  it('prepareDocumentForSpecificUser_2SiganturePlaceholders', () => {
+  it.only('prepareDocumentForSpecificUser_2SiganturePlaceholders', () => {
     // Load credentials (un/pw) and user data from 'supportView.json'
     // cy.fixture('supportView.json').as('payslipSW');
     // cy.get('@payslipSW').then((payslipJson) => {
@@ -476,7 +476,7 @@ describe('hrManagement - prepareDocumentForSpecificUser', () => {
 
     cy.fixture('supportView.json').as('payslipSW');
     cy.get('@payslipSW').then((payslipJson) => {
-      cy.visit(payslipJson.baseUrl_04, {
+      cy.visit(payslipJson.baseUrl, {
         failOnStatusCode: false,
       });
 
@@ -491,6 +491,15 @@ describe('hrManagement - prepareDocumentForSpecificUser', () => {
 
       // Wait for login to complete
       cy.wait(1500);
+
+      // Remove popup if it appears
+      cy.get('body').then(($body) => {
+        if ($body.find('.release-note-dialog__close-icon').length > 0) {
+          cy.get('.release-note-dialog__close-icon').first().click();
+        } else {
+          cy.log('Close icon is NOT present');
+        }
+      });
 
       // Search for 'Aqua' Group, by Display Name
       cy.get('#searchButton>span').click(); //Click on search button
@@ -732,18 +741,18 @@ describe('hrManagement - prepareDocumentForSpecificUser', () => {
       cy.get('.logout-icon ').click();
       cy.wait(2000);
       cy.get('.confirm-buttons > :nth-child(2)').click();
-      cy.url().should('include', payslipJson.baseUrl_04); // Validate url'
+      cy.url().should('include', payslipJson.baseUrl); // Validate url'
       cy.log('Test completed successfully.');
       cy.wait(2500);
     });
   }); //end it
 
   //Sign HR Delivery
-  it('Ebox user signing HR delivery_2 Signatures', () => {
+  it.only('Ebox user signing HR delivery_2 Signatures', () => {
     cy.fixture('supportView.json').as('payslipSW');
     cy.get('@payslipSW').then((payslipJson) => {
-      cy.visit(payslipJson.baseUrl_04_egEbox); // Taken from base URL
-      cy.url().should('include', payslipJson.baseUrl_04_egEbox); // Validate URL on the login page
+      cy.visit(payslipJson.baseUrl_egEbox); // Taken from base URL
+      cy.url().should('include', payslipJson.baseUrl_egEbox); // Validate URL on the login page
       cy.wait(2000);
 
       //Remove Cookie
@@ -897,7 +906,7 @@ describe('hrManagement - prepareDocumentForSpecificUser', () => {
       cy.get('.user-title').click();
       cy.wait(1500);
       cy.get('.logout-title > a').click();
-      cy.url().should('include', payslipJson.baseUrl_04_egEbox); // Validate url
+      cy.url().should('include', payslipJson.baseUrl_egEbox); // Validate url
       cy.log('Test completed successfully.');
     });
   });

@@ -95,7 +95,7 @@ describe('Open Sepa from Personal Datao DATAPART E-Box', () => {
     //cy.get('mat-icon[data-mat-icon-name="save"]').click({ force: true });
     cy.get('.save > .mdc-button__label').click({ force: true });
     cy.wait(1500);
-    cy.pause();
+
     //Confirm Save dialog
     cy.get('.mat-mdc-dialog-actions>button>.mat-mdc-button-touch-target')
       .eq(0)
@@ -109,7 +109,7 @@ describe('Open Sepa from Personal Datao DATAPART E-Box', () => {
     //   '.mdc-dialog__container>.mat-mdc-dialog-surface>.mat-mdc-dialog-component-host>.mat-mdc-dialog-actions>.mat-accent'
     // ).click({ force: true });
     //Save Document in hs
-    cy.get('.save').click({ force: true });
+    //cy.get('.save').click({ force: true });
     cy.wait(4500);
     //Logout
     cy.get(

@@ -138,6 +138,16 @@ describe('Invalid Login Attempts and Account Lock Test', () => {
     cy.url().should('include', Cypress.env('baseUrl') + '/dashboard/groups');
     cy.log('User was able to log in after trimming username.');
     cy.wait(3500);
+
+    //Remove pop up
+    cy.get('body').then(($body) => {
+      if ($body.find('.release-note-dialog__close-icon').length > 0) {
+        cy.get('.release-note-dialog__close-icon').click();
+      } else {
+        cy.log('Close icon is NOT present');
+      }
+    });
+    cy.wait(1500);
     // Logout
     cy.get('.logout-icon').click();
     cy.wait(2000);
@@ -158,6 +168,16 @@ describe('Invalid Login Attempts and Account Lock Test', () => {
     cy.get('.login-button').click();
 
     cy.url().should('include', '/dashboard/groups'); // Validate successful login
+    cy.wait(2500);
+
+    //Remove pop up
+    cy.get('body').then(($body) => {
+      if ($body.find('.release-note-dialog__close-icon').length > 0) {
+        cy.get('.release-note-dialog__close-icon').click();
+      } else {
+        cy.log('Close icon is NOT present');
+      }
+    });
     cy.wait(1500);
 
     // Logout
@@ -193,6 +213,17 @@ describe('Invalid Login Attempts and Account Lock Test', () => {
     cy.url().should('include', '/dashboard/groups');
     cy.url().should('include', Cypress.env('baseUrl') + '/dashboard/groups');
     cy.wait(3500);
+
+    //Remove pop up
+    cy.get('body').then(($body) => {
+      if ($body.find('.release-note-dialog__close-icon').length > 0) {
+        cy.get('.release-note-dialog__close-icon').click();
+      } else {
+        cy.log('Close icon is NOT present');
+      }
+    });
+    cy.wait(1500);
+
     // Logout
     cy.get('.logout-icon').click();
     cy.wait(2000);
@@ -213,6 +244,16 @@ describe('Invalid Login Attempts and Account Lock Test', () => {
     cy.get('.login-button').click();
     cy.wait(2500);
     cy.url().should('include', Cypress.env('baseUrl') + '/dashboard/groups'); // Validate successful login
+    cy.wait(2500);
+
+    //Remove pop up
+    cy.get('body').then(($body) => {
+      if ($body.find('.release-note-dialog__close-icon').length > 0) {
+        cy.get('.release-note-dialog__close-icon').click();
+      } else {
+        cy.log('Close icon is NOT present');
+      }
+    });
     cy.wait(1500);
 
     // Logout

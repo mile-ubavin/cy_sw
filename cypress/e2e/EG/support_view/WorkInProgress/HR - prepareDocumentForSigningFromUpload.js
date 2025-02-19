@@ -51,19 +51,7 @@ describe('hrManagement - prepare doc for signing (HappyPath)', () => {
     //   cy.visit(payslipJson.baseUrl); // Visit base URL from fixture
     //   cy.url().should('include', payslipJson.baseUrl); // Validate the URL
     cy.get('@payslipSW').then((payslipJson) => {
-      cy.visit(payslipJson.baseUrl_04, {
-        failOnStatusCode: false,
-      });
-
-      // Login to SW as Admin User
-      cy.get('input[formcontrolname="username"]').type(
-        payslipJson.username_supportViewAdmin
-      );
-      cy.get('input[formcontrolname="password"]').type(
-        payslipJson.password_supportViewAdmin
-      );
-      cy.get('button[type="submit"]').click();
-      // Wait for login to complete
+      cy.loginToSupportViewAdmin();
       cy.wait(1500);
 
       //Switch to HR page
@@ -243,29 +231,18 @@ describe('hrManagement - prepare doc for signing (HappyPath)', () => {
 
     cy.fixture('supportView.json').as('payslipSW');
     cy.get('@payslipSW').then((payslipJson) => {
-      cy.visit(payslipJson.baseUrl_04, {
-        failOnStatusCode: false,
-      });
-
-      // Login to SW as Admin User
-      cy.get('input[formcontrolname="username"]').type(
-        payslipJson.username_supportViewAdmin
-      );
-      cy.get('input[formcontrolname="password"]').type(
-        payslipJson.password_supportViewAdmin
-      );
-      cy.get('button[type="submit"]').click();
+      cy.loginToSupportViewAdmin();
 
       // Wait for login to complete
       cy.wait(1500);
 
       //Click On Upload Button
       cy.get('.upload__document>.mdc-button__label>.upload__document__text')
-        .filter((index, el) => {
-          const text = Cypress.$(el).text().trim();
-          return text === 'Upload Document' || text === 'Dokument hochladen';
-        })
-        .click();
+        .contains(
+          /Upload Personal Document|Personalisierte Dokumente hochladen/i
+        )
+        .should('be.visible') // Optional: Ensure the button is visible before interacting
+        .click(); // Click the button
       cy.wait(1500);
 
       //Check number of Upload buttons
@@ -377,21 +354,33 @@ describe('hrManagement - prepare doc for signing (HappyPath)', () => {
       //     return text === 'SAVE TEMPORARY' || text === 'VORLÄUFIG SPEICHERN';
       //   })
       //   .click({ force: true });
-      cy.wait(6000);
+      cy.wait(8000);
 
-      cy.get('.dialog-footer>.dialog-actions>button>.title')
-        .filter((index, el) => {
-          const text = Cypress.$(el).text().trim();
-          return text === 'Send' || text === 'Senden';
-        })
-        .click();
-      cy.wait(5000);
+      // Verify success message, after uplading document
+      cy.get('.list-item-status>.success')
+        .should('be.visible') // Ensure it's visible first
+        .invoke('text') // Get the text of the element
+        .then((text) => {
+          // Trim the text and validate it
+          const trimmedText = text.trim();
+          expect(trimmedText).to.match(
+            /Document successfully uploaded|Dokument erfolgreich hochgeladen/
+          );
+        });
+      cy.wait(2500);
+
+      //Click on Send button, to process delivery
+      cy.get('.dialog-actions>button>.title')
+        .contains(/Send|Senden /i)
+        .should('be.visible') // Optional: Ensure the button is visible before interacting
+        .click(); // Click the button
+      cy.wait(1500);
 
       //Logout
       cy.get('.logout-icon ').click();
       cy.wait(2000);
       cy.get('.confirm-buttons > :nth-child(2)').click();
-      cy.url().should('include', payslipJson.baseUrl_04); // Validate url'
+
       cy.log('Test completed successfully.');
       cy.wait(4500);
     });
@@ -401,30 +390,52 @@ describe('hrManagement - prepare doc for signing (HappyPath)', () => {
   it('Ebox user signing HR delivery', () => {
     cy.fixture('supportView.json').as('payslipSW');
     cy.get('@payslipSW').then((payslipJson) => {
-      cy.visit(payslipJson.baseUrl_04_egEbox); // Taken from base URL
-      cy.url().should('include', payslipJson.baseUrl_04_egEbox); // Validate URL on the login page
-      cy.wait(2000);
+      // cy.visit(payslipJson.baseUrl_04_egEbox); // Taken from base URL
+      // cy.url().should('include', payslipJson.baseUrl_04_egEbox); // Validate URL on the login page
+      // cy.wait(2000);
 
-      //Remove Cookie
-      cy.get('body').then(($body) => {
-        if ($body.find('#onetrust-policy-title').is(':visible')) {
-          // If the cookie bar is visible, click on it and remove it
-          cy.get('#onetrust-accept-btn-handler').click();
-        } else {
-          // Log that the cookie bar was not visible
-          cy.log('Cookie bar not visible');
-        }
-      }); //End Remove Cookie
+      // //Remove Cookie
+      // cy.get('body').then(($body) => {
+      //   if ($body.find('#onetrust-policy-title').is(':visible')) {
+      //     // If the cookie bar is visible, click on it and remove it
+      //     cy.get('#onetrust-accept-btn-handler').click();
+      //   } else {
+      //     // Log that the cookie bar was not visible
+      //     cy.log('Cookie bar not visible');
+      //   }
+      // }); //End Remove Cookie
 
-      // Login to E-Box
-      cy.get(':nth-child(1) > .ng-invalid > .input > .input__field-input').type(
-        payslipJson.username_egEbox
-      );
-      cy.get('.ng-invalid > .input > .input__field-input').type(
-        payslipJson.password_egEbox
-      );
-      cy.wait(1000);
-      cy.get('button[type="submit"]').click();
+      // // Login to E-Box
+      // cy.get(':nth-child(1) > .ng-invalid > .input > .input__field-input').type(
+      //   payslipJson.username_egEbox
+      // );
+      // cy.get('.ng-invalid > .input > .input__field-input').type(
+      //   payslipJson.password_egEbox
+      // );
+      // cy.wait(1000);
+      // cy.get('button[type="submit"]').click();
+
+      cy.loginToEgEbox();
+
+      // //Open latest created deivery
+      // cy.intercept(
+      //   'GET',
+      //   '**/hybridsign/backend_t/document/v1/getDocument/**'
+      // ).as('getDocument');
+      // cy.intercept('GET', '**/getIdentifications?**').as('getIdentifications');
+      // cy.get('.mdc-data-table__content>tr>.subject-sender-cell')
+      //   .eq(0)
+      //   .click({ force: true });
+
+      // cy.wait(['@getIdentifications'], { timeout: 37000 }).then(
+      //   (interception) => {
+      //     // Log the intercepted response
+      //     cy.log('Intercepted response:', interception.response);
+
+      //     // Assert the response status code
+      //     expect(interception.response.statusCode).to.eq(200);
+      //   }
+      // );
       // Wait for login to complete
       cy.wait(7500);
       // Assert that the unsigned icon is visible
@@ -566,7 +577,7 @@ describe('hrManagement - prepare doc for signing (HappyPath)', () => {
   });
 
   // Admin User is able to check new HR Delivery received in HR page
-  it('Admin User checks new delivery received in the HR page in SW', () => {
+  it.only('Admin User checks new delivery received in the HR page in SW', () => {
     adminUserChecksNewDeliveryReceivedInHRpage();
   });
 }); //end describe

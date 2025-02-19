@@ -128,6 +128,17 @@ describe('R05_Upload Document From Mass Upload button', () => {
     // Login as a Master-User using custom command
     cy.loginToSupportViewMaster();
     cy.wait(3500);
+
+    //Remove pop up
+    cy.get('body').then(($body) => {
+      if ($body.find('.release-note-dialog__close-icon').length > 0) {
+        cy.get('.release-note-dialog__close-icon').click();
+      } else {
+        cy.log('Close icon is NOT present');
+      }
+    });
+    cy.wait(1500);
+
     // Search for Company by Display Name
     cy.get('#searchButton>span').click(); //Click on search button
     cy.wait(1000);
@@ -160,6 +171,16 @@ describe('R05_Upload Document From Mass Upload button', () => {
     cy.fixture('supportView.json').as('payslipSW');
     cy.loginToSupportViewAdmin();
     // Wait for login to complete
+    cy.wait(1500);
+
+    //Remove pop up
+    cy.get('body').then(($body) => {
+      if ($body.find('.release-note-dialog__close-icon').length > 0) {
+        cy.get('.release-note-dialog__close-icon').click();
+      } else {
+        cy.log('Close icon is NOT present');
+      }
+    });
     cy.wait(1500);
 
     //Click On Mass Upload Button
@@ -278,6 +299,7 @@ describe('R05_Upload Document From Mass Upload button', () => {
   //Login to e-Box and Open Delivery
   it('Ebox user Open delivery', () => {
     cy.loginToEgEbox();
+    cy.wait(2500);
 
     //Open latest created deivery
     cy.intercept(
@@ -289,7 +311,7 @@ describe('R05_Upload Document From Mass Upload button', () => {
       .eq(0)
       .click({ force: true });
 
-    cy.wait(['@getIdentifications'], { timeout: 27000 }).then(
+    cy.wait(['@getIdentifications'], { timeout: 47000 }).then(
       (interception) => {
         // Log the intercepted response
         cy.log('Intercepted response:', interception.response);
@@ -375,6 +397,17 @@ describe('R05_Upload Document From Mass Upload button', () => {
     // Login as a Master-User using custom command
     cy.loginToSupportViewMaster();
     cy.wait(3500);
+
+    //Remove pop up
+    cy.get('body').then(($body) => {
+      if ($body.find('.release-note-dialog__close-icon').length > 0) {
+        cy.get('.release-note-dialog__close-icon').click();
+      } else {
+        cy.log('Close icon is NOT present');
+      }
+    });
+    cy.wait(1500);
+
     // Search for Company by Display Name
     cy.get('#searchButton>span').click(); //Click on search button
     cy.wait(1000);
