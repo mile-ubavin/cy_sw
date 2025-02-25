@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="iso-8859-1" ?>
+<!DOCTYPE PBInvoice_2_5_at PUBLIC "" "https://business.ebpp.at/xml/DTD/PBInvoice_2_5_at.dtd">
+<PBInvoice_2_5_at>
+  <InvoiceNumber>000300082077777111</InvoiceNumber>
+  <InvoiceDate>20231028</InvoiceDate>
+  <DueDate>20230728</DueDate>
+  <URL>http://www.brueder.cc</URL>
+  <LogoURL>https://e-gehaltszettel.post-business-solutions.at/be.e-gehaltszettel/resources/branding/MadovTest/TEST.JPG</LogoURL>
+  <LayoutID>T101</LayoutID>
+  <Language>GER</Language>
+  <Biller>
+    <SystemsBillerID>AQUA</SystemsBillerID>
+    <Address>
+      <Salutation>Firma</Salutation>
+      <Name>QA Solutions GmbH</Name>
+      <Street>Straße 777</Street>
+      <Town>Wien</Town>
+      <ZIP>1020</ZIP>
+      <Country>Österreich</Country>
+    </Address>
+  </Biller>
+<InvoiceRecipient>
+  <BillersInvoiceRecipientID>ABBA000100279311</BillersInvoiceRecipientID>
+  <Address>
+    <Name>Testuser</Name>
+    <Street>Main street</Street>
+    <Town>Wien</Town>
+    <ZIP>8020</ZIP>
+  </Address>
+  </InvoiceRecipient>
+  <ShortComment></ShortComment>
+  <Details>
+    <ItemList>
+      <LineItem><Element>
+
+
+                                                           QA Solutions GmbH
+       Personalnummer billy
+                                                           Mai 2023         Seite  1
+          Herrn                                            Alleinverd./Erz.:
+          QA Billy                                         Freibetrag:          0,00
+          Strass Weidengasse 777                           Pendlerpauschale   000,00
+          8011 Wien                                        Gruppe:               ST2
+                                                           Stufe:                 03
+                                                           Vorrückung:    00.00.0000
+                                                           Besch.grad:         00,00
+     Bezüge
+     ======
+     Monat Lart Bezeichnung                    Anzahl      Wert/Einh.       Betrag
+     ................................................................................
+     07/23 1000 Grundbezug                                                00000,00
+     07/23 1070 KV-Überzahlung                                            00000,00
+     04/23 7505 Diäten Lst/SV frei                                           00,40
+     04/23 757R Kilometergeld frei                                          000,52
+                                   Summe Bezüge                           00000,92
+     ................................................................................
+     Abzüge
+     ======
+     Monat Lart Bezeichnung                      Tage      Bemessung        Betrag
+     ................................................................................
+     07/23 8781 Zukunftsvorsorge UNIQA                                       00,00-
+     07/23 878K Pensionskassen-Btr. IT-KV                                   000,00-
+     07/23 /27A DN-Anteil-SV lfd. aktiv         30,00       0.000,00      00000,03-
+     07/23 /440 Steuer gemäss Tarif             30,00       0.000,55      00000,27-
+                                   Summe Abzüge                           00000,30-
+     ................................................................................
+     07/23 /559 Überweisung       IBAN: TEST 0000 1000 3000 0080          00000,70
+
+
+     07/23 /679 BV: DG-Beitrag gesamt                                        00,75
+
+
+
+     Grundlagen/Bemessungen
+     ======================
+           Lart Bezeichnung                                   Betrag
+     ................................................................................
+           /102 SV-Br. lfd. Bezüge ges.                     00000,08
+           /111 ST-Brutto (lfd. Bezüge)                     00000,08
+           /49S Pendlereuro mtl. effektiv                      00,16
+
+</Element></LineItem>
+   </ItemList>
+ </Details>
+ <Tax>
+   <TaxID>no Tax</TaxID>
+ <Amount Currency="EUR">0</Amount>
+ </Tax>
+ <TotalAmount Currency="EUR">
+   <Full SuppressZero="yes">0</Full>
+   <Minimum>0.00</Minimum>
+ </TotalAmount>
+ <PaymentMethod>
+  <NoPayment>
+    <Comment>Zu dieser Abrechnung kann keine Zahlung erfasst werden.</Comment>
+  </NoPayment>
+  </PaymentMethod>
+</PBInvoice_2_5_at>
+
+

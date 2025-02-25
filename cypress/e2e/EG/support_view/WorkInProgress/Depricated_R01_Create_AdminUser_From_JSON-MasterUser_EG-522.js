@@ -1,26 +1,8 @@
 describe('Masteruser - Create Admin User From JSON', () => {
-  // beforeEach(() => {
-  //   cy.clearCookies();
-  //   cy.clearLocalStorage();
-  //   cy.window().then((win) => {
-  //     win.sessionStorage.clear(); // Clears session storage
-  //   });
-  // });
-
   it('MasterCreateAdminUser', () => {
     // Login as Master User using a custom command
     cy.loginToSupportViewMaster();
     cy.wait(3500);
-
-    //Remove pop up
-    cy.get('body').then(($body) => {
-      if ($body.find('.release-note-dialog__close-icon').length > 0) {
-        cy.get('.release-note-dialog__close-icon').click();
-      } else {
-        cy.log('Close icon is NOT present');
-      }
-    });
-
     //Search for Company by Display Name
     cy.get('#searchButton>span').click(); //Click on search button
     cy.wait(1000);
@@ -75,7 +57,7 @@ describe('Masteruser - Create Admin User From JSON', () => {
     );
     cy.get('button[type="submit"]').click();
 
-    cy.wait(['@editXUser'], { timeout: 37000 }).then((interception) => {
+    cy.wait(['@editXUser'], { timeout: 27000 }).then((interception) => {
       // Log the intercepted response
       cy.log('Intercepted response:', interception.response);
 
@@ -199,7 +181,6 @@ describe('Masteruser - Create Admin User From JSON', () => {
   it('Get Credentials from emails and Login as a New Admin', () => {
     const adminUser = Cypress.env('createAdminUser')[0];
 
-    // Visit the Yopmail inbox
     cy.visit('https://yopmail.com/en/');
     cy.get('#login').type(adminUser.email); // Use the same email generated earlier
     cy.get('#refreshbut > .md > .material-icons-outlined').click();
@@ -317,7 +298,6 @@ describe('Masteruser - Create Admin User From JSON', () => {
 
     // Validate that the login page URL includes '/login'
     cy.url().should('include', '/login');
-
     // Use extracted username and password for login
     cy.get('@capturedUsername').then((username) => {
       cy.get('@capturedPassword').then((password) => {
@@ -328,45 +308,7 @@ describe('Masteruser - Create Admin User From JSON', () => {
 
         cy.get('button[type="submit"]').click(); //end captured password
         // Wait for login to complete
-
-        // cy.intercept('POST', '**/supportView/v1/login/user**').as('loginURL');
-        // // cy.get('button[type="submit"]').click();
-
-        // cy.wait(['@loginURL'], { timeout: 27000 }).then(
-        //   (interception) => {
-        //     // Log the intercepted response
-        //     // cy.log('Intercepted response:', interception.response);
-        //     cy.visit(
-        //       'https://supportviewpayslip.edeja.com/fe/dashboard/groups',
-        //       {
-        //         failOnStatusCode: false,
-        //       }
-        //     );
-        //     // Optional: Assert the response status code
-        //     // expect(interception.statusCode).to.eq(200);
-        //   },
-        //   (err) => {
-        //     cy.log('ERROR', err);
-        //     cy.pause();
-        //   }
-        // );
-
-        cy.wait(2500);
-        //cy.visit(Cypress.env('dashboardURL'));
-
-        cy.visit(Cypress.env('dashboardURL'), {
-          failOnStatusCode: false,
-        });
-        cy.wait(5500);
-
-        //Remove pop up
-        cy.get('body').then(($body) => {
-          if ($body.find('.release-note-dialog__close-icon').length > 0) {
-            cy.get('.release-note-dialog__close-icon').click();
-          } else {
-            cy.log('Close icon is NOT present');
-          }
-        });
+        cy.wait(3500);
 
         //Check visibility of buttons depend of selected Roles on the Companies page
         const buttonLabelsCompaniesPage = [
@@ -486,16 +428,6 @@ describe('Masteruser - Create Admin User From JSON', () => {
     // Login as Master User using a custom command
     cy.loginToSupportViewMaster();
     cy.wait(3500);
-
-    //Remove pop up
-    cy.get('body').then(($body) => {
-      if ($body.find('.release-note-dialog__close-icon').length > 0) {
-        cy.get('.release-note-dialog__close-icon').click();
-      } else {
-        cy.log('Close icon is NOT present');
-      }
-    });
-
     //Search for the Test Company
     cy.get('#searchButton>span').click(); //Click on search button
     cy.wait(1000);

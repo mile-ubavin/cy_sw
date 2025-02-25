@@ -2,6 +2,7 @@ const { defineConfig } = require('cypress');
 const fs = require('fs');
 const path = require('path');
 const https = require('https');
+const storedValues = {};
 
 // Task: Get the latest downloaded PDF file
 const getDownloadedPdf = (downloadsDir) => {
@@ -494,6 +495,13 @@ module.exports = defineConfig({
         getDownloadedPdf,
         downloadFile,
         openFile,
+        setValue({ key, value }) {
+          storedValues[key] = value;
+          return null; // Cypress requires tasks to return a value, even if it's null
+        },
+        getValue(key) {
+          return storedValues[key] || null;
+        },
       });
       //  Set executing tests on various environments, targeting appropriate json from const=environments
       const envConfig = environments['eg_test'];

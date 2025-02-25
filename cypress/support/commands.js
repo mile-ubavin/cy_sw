@@ -273,14 +273,14 @@ Cypress.Commands.add('loginToEgEbox', () => {
 
 // Upload XML file
 Cypress.Commands.add('uploadXMLfile', function () {
-  cy.fixture('XML_1receiver(ISS_BBcare).xml', 'binary')
+  cy.fixture('XML_1receiver__(AQUA_ABBA000100279311_ISS BBcare).xml', 'binary')
     .then(Cypress.Blob.binaryStringToBlob)
     .then((fileContent) => {
       cy.get('#input-file').attachFile({
         mimeType: 'text/xml',
         fileContent,
-        filePath: 'XML_1receiver(ISS_BBcare).xml',
-        fileName: 'XML_1receiver(ISS_BBcare).xml',
+        filePath: 'XML_1receiver__(AQUA_ABBA000100279311_ISS BBcare).xml',
+        fileName: 'XML_1receiver__(AQUA_ABBA000100279311_ISS BBcare).xml',
       });
     });
 });

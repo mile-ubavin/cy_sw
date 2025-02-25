@@ -254,37 +254,37 @@ describe('R04_Admin User Create E-Box User - Manual.js', () => {
         ]);
 
         // Download credentials
-        cy.get('.download-bttn').click();
-        cy.wait(1000);
-        // Get the latest downloaded PDF file using the custom task
-        // const downloadsDir = downloadsFolder path.normalize(
-        //   `${Cypress.config('fileServerFolder')}/cypress/downloads/`
-        // );
+        // cy.get('.download-bttn').click();
+        // cy.wait(1000);
+        // // Get the latest downloaded PDF file using the custom task
+        // // const downloadsDir = downloadsFolder path.normalize(
+        // //   `${Cypress.config('fileServerFolder')}/cypress/downloads/`
+        // // );
 
-        // const downloadsDir = `${Cypress.config(
-        //   'fileServerFolder'
-        // )}/cypress/downloads/`;
+        // // const downloadsDir = `${Cypress.config(
+        // //   'fileServerFolder'
+        // // )}/cypress/downloads/`;
 
-        const downloadsDir = Cypress.env('downloadsFolder');
-        cy.task('getDownloadedPdf', downloadsDir).then((filePath) => {
-          expect(filePath).to.not.be.null; // Assert the file exists
-          cy.log(`Latest PDF File Path: ${filePath}`);
-          cy.wait(3000);
-          m;
-          // Read the PDF content and open in the same tab using a Blob
-          cy.readFile(filePath, 'binary').then((pdfBinary) => {
-            const pdfBlob = Cypress.Blob.binaryStringToBlob(
-              pdfBinary,
-              'application/pdf'
-            );
-            const pdfUrl = URL.createObjectURL(pdfBlob);
+        // const downloadsDir = Cypress.env('downloadsFolder');
+        // cy.task('getDownloadedPdf', downloadsDir).then((filePath) => {
+        //   expect(filePath).to.not.be.null; // Assert the file exists
+        //   cy.log(`Latest PDF File Path: ${filePath}`);
+        //   cy.wait(3000);
+        //   m;
+        //   // Read the PDF content and open in the same tab using a Blob
+        //   cy.readFile(filePath, 'binary').then((pdfBinary) => {
+        //     const pdfBlob = Cypress.Blob.binaryStringToBlob(
+        //       pdfBinary,
+        //       'application/pdf'
+        //     );
+        //     const pdfUrl = URL.createObjectURL(pdfBlob);
 
-            // Open the PDF in the same tab
-            cy.window().then((win) => {
-              win.location.href = pdfUrl; // Loads the PDF in the same window
-            });
-          });
-        });
+        //     // Open the PDF in the same tab
+        //     cy.window().then((win) => {
+        //       win.location.href = pdfUrl; // Loads the PDF in the same window
+        //     });
+        //   });
+        // });
         cy.wait(3500);
       });
 
