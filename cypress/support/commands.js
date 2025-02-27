@@ -299,6 +299,53 @@ Cypress.Commands.add('uploadTXTfile', function () {
     });
 });
 
+//Upload serviceLIne for ABBA000100279311
+Cypress.Commands.add('uploadServiceLine', function () {
+  cy.fixture('Serviceline-tid=AQUA_gid=ABBA000100279311.pdf', 'binary')
+    .then(Cypress.Blob.binaryStringToBlob)
+    .then((fileContent) => {
+      cy.get('#input-file').attachFile({
+        mimeType: 'application/pdf',
+        fileContent,
+        filePath: 'Serviceline-tid=AQUA_gid=ABBA000100279311.pdf',
+        fileName: 'Serviceline-tid=AQUA_gid=ABBA000100279311.pdf',
+      });
+    });
+});
+
+//UploadServiceLineFile_WithValidAndInvalidTid
+Cypress.Commands.add('uploadServiceLineFile_WithValidAndInvalidTid', () => {
+  cy.fixture(
+    'Serviceline- 2Receivers_VALID_AND_INVALID_TID_(tid=AQUA_gid=ABBA000100279311).pdf',
+    'binary'
+  )
+    .then(Cypress.Blob.binaryStringToBlob)
+    .then((fileContent) => {
+      cy.get('#input-file').attachFile({
+        mimeType: 'application/pdf',
+        fileContent,
+        filePath:
+          'Serviceline- 2Receivers_VALID_AND_INVALID_TID_(tid=AQUA_gid=ABBA000100279311).pdf',
+        fileName:
+          'Serviceline- 2Receivers_VALID_AND_INVALID_TID_(tid=AQUA_gid=ABBA000100279311).pdf',
+      });
+    });
+});
+
+//Upload pdfDictionary 305_Dictionary_(AQUA_ABBA000100279311)
+Cypress.Commands.add('uploadPDFdictionary305', () => {
+  cy.fixture('305_Dictionary_(AQUA_ABBA000100279311).pdf', 'binary')
+    .then(Cypress.Blob.binaryStringToBlob)
+    .then((fileContent) => {
+      cy.get('#input-file').attachFile({
+        mimeType: 'application/pdf',
+        fileContent,
+        filePath: '305_Dictionary_(AQUA_ABBA000100279311).pdf',
+        fileName: '305_Dictionary_(AQUA_ABBA000100279311).pdf',
+      });
+    });
+});
+
 // Upload Attachment
 Cypress.Commands.add('uploadDocument', function () {
   cy.get('@t').then((t) => {

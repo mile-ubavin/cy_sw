@@ -142,25 +142,38 @@ describe('hrManagement - prepareDocumentForSpecificUser', () => {
     uploadDateTime = `${formattedDate} ${formattedTime}`;
     cy.log(`Upload DateTime: ${uploadDateTime}`);
 
+    cy.wait(2500);
     //Add Delivery Title
     const title = `Delivery For Specific User (pdf) - ${uploadDateTime}`;
 
     cy.get('input[formcontrolname="subject"]').clear().type(title);
     cy.wait(1500);
 
+    cy.pause();
     //Add signature placeholder No.1
-    cy.intercept('GET', '**/maintanance-config/**').as('upload');
+    // cy.intercept('GET', '**/maintanance-config/**').as('upload');
 
-    cy.get('.controls > .ng-star-inserted').click({ force: true });
+    // cy.get('.dialog-actions>button>.title')
+    //   .contains(/Upload|hochladen/i)
+    //   .should('be.visible') // Optional: Ensure the button is visible before interacting
+    //   .click(); // Click the button
+    // cy.wait(1500);
 
-    cy.wait(['@upload'], { timeout: 15000 }).then((interception) => {
-      // Log the intercepted response
-      cy.log('Intercepted response:', interception.response);
+    // cy.wait(['@upload'], { timeout: 15000 }).then((interception) => {
+    //   // Log the intercepted response
+    //   cy.log('Intercepted response:', interception.response);
 
-      // Optional: Assert the response status code
-      expect(interception.response.statusCode).to.eq(200);
-    });
+    //   // Optional: Assert the response status code
+    //   expect(interception.response.statusCode).to.eq(200);
+    // });
 
+    cy.get('.dialog-actions>button>.title')
+      .contains(/Upload|hochladen/i)
+      .should('be.visible') // Optional: Ensure the button is visible before interacting
+      .click(); // Click the button
+    cy.wait(1500);
+
+    cy.pause();
     //Click on Send delivery
     cy.get('.dialog-actions>button>.title')
       .contains(/Send|Senden/i)

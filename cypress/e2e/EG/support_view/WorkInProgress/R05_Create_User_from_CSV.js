@@ -32,6 +32,7 @@ describe('Master - Create User from CSV', () => {
     cy.get('.search-dialog>form>div>.mat-primary').click();
     cy.wait(1500);
 
+    //Create user
     cy.get('.action-buttons>.mdc-button>.mdc-button__label')
       .filter((index, el) => {
         const text = Cypress.$(el).text().trim();
@@ -104,10 +105,83 @@ describe('Master - Create User from CSV', () => {
           '2 Benutzer wurden erstellt', // German
         ]);
       });
+    //cy.wait(7500);
+    // Wait until the success message disappears completely
+    cy.get('sv-multiple-notifications>.messages>p', { timeout: 20000 }).should(
+      'not.exist'
+    );
+
+    //Create user which already exist
+
+    //Click on create User button
+    cy.get('.button-wraper>button > .mdc-button__label')
+      .filter((index, el) => {
+        const text = Cypress.$(el).text().trim();
+        return text === 'Create user' || text === 'Neuen Benutzer Anlegen';
+      })
+      .click({ force: true });
+    cy.wait(1500);
+
+    //Click on Upload CSV button
+    cy.get('.create_user_dialog_content>.buttons-wrapper>button')
+      .filter((index, el) => {
+        const text = Cypress.$(el).text().trim();
+        return text === 'CSV uploading' || text === 'CSV Anlage';
+      })
+      .click();
+
+    //Upload CSV file
+    cy.upload_csv();
+
+    cy.get('mat-select[formcontrolname="companyPrefix"]').click();
+    //cy.get('#mat-select-value-3 > .mat-mdc-select-placeholder').click();
+    cy.get('div.cdk-overlay-pane').should('exist'); // Ensure the overlay pane is present
+    cy.get('div.cdk-overlay-pane mat-option').should(
+      'have.length.greaterThan',
+      0
+    );
+    //Select Company prefix
+    cy.wait(1500);
+    cy.get('mat-option').eq(0).click();
+    cy.wait(1500);
+
+    cy.intercept('POST', '**/supportView/v1/person/fromGroup/**').as(
+      'uploadCSV'
+    );
+
+    //Click on  Create Users button
+    cy.get('.dialog-actions>button>.title')
+      .contains(/Create Users|Benutzer Anlegen/i)
+      .should('be.visible') // Optional: Ensure the button is visible before interacting
+      .click(); // Click the button
+    // cy.wait(10000);
+    cy.wait(['@uploadCSV'], {
+      timeout: 57000,
+    }).then((interception) => {
+      // Log the intercepted response
+      cy.log('Intercepted response:', interception.response);
+
+      // Assert the response status code
+      expect(interception.response.statusCode).to.eq(200);
+    });
+
+    cy.wait(2000);
+    //Validate success message
+    cy.get('sv-multiple-notifications>.messages>p')
+      .invoke('text')
+      .then((text) => {
+        const trimmedText = text.trim();
+
+        // Check if the text matches either English or German message
+        expect(trimmedText).to.be.oneOf([
+          '2 Users were skipped, because they already exist', // English
+          '2 Benutzer wurden übersprungen, da sie bereits existieren', // German
+        ]);
+      });
     cy.wait(2500);
 
     //Logout
-    cy.get('.logout-icon ').click();
+    cy.get('.logout-icon ').click({ force: true });
     cy.wait(2000);
     cy.get('.confirm-buttons > :nth-child(2)').click();
     cy.url();
@@ -116,60 +190,229 @@ describe('Master - Create User from CSV', () => {
   }); //end it
 
   //Y O P M A I L
-
-  it.skip('Yopmail - Get Reporting email', () => {
-    // Visit Yopmail
+  it('Yopmail - Confirm email and Change password', () => {
+    // Visit yopmail application
     cy.visit('https://yopmail.com/en/');
 
-    // Enter the support admin email
-    cy.get('#login').type(Cypress.env('email_supportViewAdmin'));
+    // Access the first Admin User object from cypress.config.js
+    const csvTestuser = Cypress.env('csvTestuser')[0];
+    cy.get('#login').type(csvTestuser.email);
 
-    // Click the refresh button
+    //cy.get('#login').type('otto.testuser@yopmail.com');
+
     cy.get('#refreshbut > .md > .material-icons-outlined').click();
-    //Custom functions:
-    // Define email subject function
-    function emailSubject(index) {
-      cy.iframe('#ifinbox')
-        .find('.mctn > .m > button > .lms')
-        .eq(index)
-        .should('include.text', 'Versandreport e-Gehaltszettel Portal');
-    }
-    // Define email body function
-    function emailBody() {
-      cy.iframe('#ifmail')
-        .find('#mail > div')
-        .then(($div) => {
-          const text = $div.text().trim();
-          expect(
-            text.includes(
-              '1 Sendung(en) die Sie postalisch als Brief verschicken wollten, konnte(n) nicht ordnungsgemäß zugestellt werden, bitte überprüfen Sie die Daten der Mitarbeiter*innen, oder wenden Sie sich an unseren Kundenservice e-gehaltszettel@post.at'
-            ) ||
-              text.includes(
-                'Zusätzlich haben Sie 1 Sendung(en) erfolgreich über den postalischen Weg als Brief versendet. Das Dokument wird von uns über das „Einfach Brief“-Portal  gedruckt, kurvertiert und an die Adresse des Benutzers versendet'
-              )
-          ).to.be.true; // OR condition
-        });
-    }
-
-    // Access the inbox iframe and validate the email subject
-    emailSubject(0); // Validate subject of Reporting email
-    emailBody(); // Validate email body
-
-    // Wait to ensure the email content is loaded
-    cy.wait(4500);
-
-    // Switch to the second email
-    cy.iframe('#ifinbox').find('.mctn > .m > button > .lms').eq(1).click();
-
-    emailSubject(1); // Validate subject of second email
     cy.wait(1500);
-    emailBody(); // Validate second email body
+    cy.iframe('#ifinbox')
+      .find('.mctn > .m > button > .lms')
+      .eq(0)
+      .should('include.text', 'Ihr neuer Benutzer im e-Gehaltszettel Portal'); //Validate subject of Verification email
 
-    cy.wait(4500);
+    cy.iframe('#ifmail')
+      .find(
+        '#mail>div>div:nth-child(2)>div:nth-child(3)>table>tbody>tr>td>p:nth-child(2)>span'
+      )
+      .invoke('text')
+      .then((innerText) => {
+        const startIndex =
+          innerText.indexOf('Hier ist Ihr Benutzername:') +
+          'Hier ist Ihr Benutzername:'.length;
+        const endIndex = innerText.indexOf('Bitte bestätigen Sie');
+
+        const usernameFromEmailBody = innerText
+          .substring(startIndex, endIndex)
+          .trim();
+
+        cy.log('Captured text:', usernameFromEmailBody);
+
+        //Confirm Email Address  - by clicking on "Jetzt E-Mail Adresse bestätigen" button from Comfirmation email
+        cy.wait(1500);
+        let initialUrl;
+        cy.iframe('#ifmail')
+          .find(
+            '#mail>div>div:nth-child(2)>div:nth-child(3)>table>tbody>tr>td>p:nth-child(2)>span>a'
+          )
+          .should('include.text', 'Jetzt E-Mail Adresse bestätigen')
+          .invoke('attr', 'href')
+          .then((href) => {
+            // Log link text
+            cy.log(`The href attribute is: ${href}`);
+          });
+
+        cy.iframe('#ifmail')
+          .find(
+            '#mail>div>div:nth-child(2)>div:nth-child(3)>table>tbody>tr>td>p:nth-child(2)>span>a'
+          )
+          .invoke('attr', 'target', '_self') //prevent opening in new tab
+          .click();
+
+        // // Remove Cookie dialog (if shown)
+        // cy.iframe('#ifmail')
+        //   .find('#onetrust-accept-btn-handler', { timeout: 5000 })
+        //   .its('length')
+        //   .then((length) => {
+        //     if (length > 0) {
+        //       cy.iframe('#ifmail').find('#onetrust-accept-btn-handler').click();
+        //       cy.log('Cookie dialog accepted.');
+        //     } else {
+        //       cy.log('Cookie dialog is not shown.');
+        //     }
+        //   });
+
+        //Wait for Cookie bar
+        cy.wait(15000);
+
+        //Remove Cooki dialog (if shown)
+        if (cy.iframe('#ifmail').find('#onetrust-accept-btn-handler')) {
+          cy.iframe('#ifmail').find('#onetrust-accept-btn-handler').click();
+        } else {
+          cy.log('Cookie dialog is not shown');
+        }
+
+        // Remove Cookie dialog (if shown)
+        // cy.iframe('#ifmail')
+        //   .find('#onetrust-accept-btn-handler', { timeout: 3000 })
+        //   .then(($btn) => {
+        //     if ($btn.length > 0 && $btn.is(':visible')) {
+        //       cy.wrap($btn).click();
+        //       cy.log('Cookie dialog was shown and clicked.');
+        //     } else {
+        //       cy.log('Cookie dialog is not shown.');
+        //     }
+        //   });
+
+        // cy.iframe('#ifmail')
+        //   .find('#onetrust-accept-btn-handler')
+        //   .then(($btn) => {
+        //     if ($btn.length) {
+        //       cy.wrap($btn).click();
+        //     } else {
+        //       cy.log('Cookie dialog is not shown');
+        //     }
+        //   });
+
+        // cy.iframe('#ifmail').find('#onetrust-accept-btn-handler').click();
+
+        cy.wait(8000);
+        cy.iframe('#ifmail').find('.button').click();
+        //Reload inbox
+
+        cy.get('#refresh').click({ force: true }); //Click on Refresh inbox icon
+        cy.wait(15000);
+        //Reset Pasword email
+
+        cy.iframe('#ifinbox')
+          .find('.mctn > .m > button > .lms')
+          .eq(0)
+
+          .should(
+            'include.text',
+            'Passwort zurücksetzen e-Gehaltszettel Portal'
+          ); //Validate subject of Verification email
+
+        let initialUrl_pass;
+        cy.iframe('#ifmail')
+          .find(
+            '#mail>div>div:nth-child(2)>div:nth-child(3)>table>tbody>tr>td>p:nth-child(4)>span>a'
+          )
+          .should('include.text', 'Neues Passwort erstellen ')
+          .invoke('attr', 'href')
+          .then((href) => {
+            // Log link text
+            cy.log(`The href attribute is: ${href}`);
+          });
+        cy.iframe('#ifmail')
+          .find(
+            '#mail>div>div:nth-child(2)>div:nth-child(3)>table>tbody>tr>td>p:nth-child(4)>span>a'
+          )
+          .invoke('attr', 'target', '_self') //prevent opening in new tab
+          .click();
+        cy.wait(2500);
+
+        //Fill the Set password form
+        cy.iframe('#ifmail')
+          .find('.input__field-input')
+          .eq(0)
+          .click()
+          .type(Cypress.env('password_egEbox')); //fill the 1st input field
+
+        cy.iframe('#ifmail').find('.input-eye-icon').eq(0).click(); //Click on Show password icon
+
+        cy.iframe('#ifmail')
+          .find('.input__field-input')
+          .eq(1)
+
+          .type(Cypress.env('password_egEbox')); //fill the 1st input field
+        cy.iframe('#ifmail').find('.input-eye-icon').eq(1).click(); //Click on Show password icon
+        cy.iframe('#ifmail').find('.button').click(); //Click on confirm button
+
+        cy.wait(2000);
+      });
+  });
+
+  it('Login to e-Box 1st time', () => {
+    cy.visit(Cypress.env('baseUrl_egEbox'));
+    cy.wait(5000);
+
+    // Wait for the cookie bar to appear
+    //Remove Cookie
+    cy.get('body').then(($body) => {
+      if ($body.find('#onetrust-policy-title').is(':visible')) {
+        // If the cookie bar is visible, click on it and remove it
+        cy.get('#onetrust-accept-btn-handler').click();
+      } else {
+        // Log that the cookie bar was not visible
+        cy.log('Cookie bar not visible');
+      }
+    }); //End Remove Cookie
+    cy.wait(1500);
+    // Create the first user (with address)
+
+    // Access the first Admin User object from cypress.config.js
+    const csvUser = Cypress.env('csvTestuser')[0];
+    // Continue with Login
+    cy.log(Cypress.env('companyPrefix'));
+    cy.get(':nth-child(1) > .ng-invalid > .input > .input__field-input').type(
+      // Cypress.env('companyPrefix') + 'ottoTestuser'
+      Cypress.env('companyPrefix') + csvUser.accountNumber
+    );
+
+    cy.get('.ng-invalid > .input > .input__field-input').type(
+      Cypress.env('password_egEbox')
+    );
+
+    // cy.wait(6000);
+
+    // cy.wait(10000);
+    // cy.visit(Cypress.env('eboxDeliveryPage'), {
+    //   failOnStatusCode: false,
+    // });
+    cy.wait(5500);
+
+    cy.intercept('POST', '**/rest/v2/deliveries**').as('openDeliveriesPage');
+    cy.wait(1000);
+    cy.get('button[type="submit"]').click(); //Login to E-Box
+    cy.wait(['@openDeliveriesPage'], { timeout: 37000 }).then(
+      (interception) => {
+        // Log the intercepted response
+        cy.log('Intercepted response:', interception.response);
+
+        // Assert the response status code
+        expect(interception.response.statusCode).to.eq(200);
+        cy.wait(2500);
+      }
+    );
+    cy.wait(7000);
+    // Logout
+    cy.get('.user-title').click();
+    cy.wait(1500);
+    cy.get('.logout-title > a').click();
+    //cy.url().should('include', payslipJson.baseUrl_egEbox); // Validate url
+    cy.url().should('include', Cypress.env('baseUrl_egEbox')); // Validate url
+    cy.log('Test completed successfully.');
   });
 
   // M A S T E R    U S E R - DELETE ALREADY CREATED USERS
-  it.skip('Login As Master User - Delete Alredy created Users', () => {
+  it('Login As Master User - Delete Alredy created Users', () => {
     // Login as Master User using a custom command
     cy.loginToSupportViewMaster();
     cy.wait(3500);

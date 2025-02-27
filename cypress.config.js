@@ -98,6 +98,11 @@ const environments = {
       { id: 'T101', name: 'BB Care' },
       { id: 'T102', name: 'Beiersdorfer' },
     ],
+    enablePDFDictionary: [
+      { name: 'PDFTABDictionary-200' },
+      { name: 'PDFTABDictionary-301' },
+      { name: 'PDFTABDictionary-305' },
+    ],
     createAdminUser: [
       {
         firstName: 'Mustermann',
@@ -149,6 +154,12 @@ const environments = {
         subcompanyPrefix: 'sPr',
         subcompanyName: 'sNm',
         prefixLength: '10',
+      },
+    ],
+    csvTestuser: [
+      {
+        accountNumber: 'ottoTestuser',
+        email: 'otto.testuser@yopmail.com',
       },
     ],
   },
@@ -236,6 +247,12 @@ const environments = {
         prefixLength: '10',
       },
     ],
+    csvTestuser: [
+      {
+        accountNumber: 'ottoTestuser',
+        email: 'otto.testuser@yopmail.com',
+      },
+    ],
   },
   eg_prod: {
     baseUrl:
@@ -319,6 +336,12 @@ const environments = {
         subcompanyPrefix: 'sPr',
         subcompanyName: 'sNm',
         prefixLength: '10',
+      },
+    ],
+    csvTestuser: [
+      {
+        accountNumber: 'ottoTestuser',
+        email: 'otto.testuser@yopmail.com',
       },
     ],
   },

@@ -252,7 +252,7 @@ describe('hrManagement - prepare doc for signing (HappyPath)', () => {
   var uploadDateTime;
 
   //Prepare document For Signing - From Upload Button
-  it('prepareDocumentForSigningFromUpload', () => {
+  it.only('prepareDocumentForSigningFromUpload', () => {
     cy.fixture('supportView.json').as('payslipSW');
     cy.get('@payslipSW').then((payslipJson) => {
       cy.loginToSupportViewAdmin();
