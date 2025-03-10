@@ -337,7 +337,7 @@ describe('Upload valid Serviceline files, validate Success and Warring messages'
   //Login to e-Box and Open Delivery
   it('Ebox user Open delivery', () => {
     cy.loginToEgEbox();
-    cy.wait(2500);
+    cy.wait(5500);
     //Open latest created deivery
     cy.intercept(
       'GET',
@@ -551,7 +551,7 @@ describe('Upload valid Serviceline files, validate Success and Warring messages'
       ['Company Admin', 'Firmen-Administrator'],
       ['Customer Creator', 'Nutzeranlage'],
       ['Data Submitter', 'Versand'],
-      // ['View E-Box', 'E-Box ansehen'],
+      ['View E-Box', 'E-Box ansehen'],
       // ['HR Manager', 'HR Manager'],
     ];
 
@@ -681,13 +681,11 @@ describe('Upload valid Serviceline files, validate Success and Warring messages'
     cy.wait(1500);
 
     // Upload serviceLine file
-
     cy.uploadServiceLineFile_WithValidAndInvalidTid();
 
     cy.wait(2500);
 
     // Select Company
-
     cy.get('.mdc-floating-label').click({
       force: true,
     });
@@ -721,8 +719,6 @@ describe('Upload valid Serviceline files, validate Success and Warring messages'
     // Focus out
     cy.get('body').type('{esc}');
     cy.wait(1500);
-
-    //******************************************************************* */
 
     cy.intercept(
       'POST',
@@ -819,11 +815,11 @@ describe('Upload valid Serviceline files, validate Success and Warring messages'
     );
 
     // Scroll to the bottom of the PDF viewer or page
-    cy.get('.content-container>.scroll-container').eq(1).scrollTo('bottom', {
-      duration: 500,
-      ensureScrollable: false,
-    });
-    cy.wait(3500);
+    // cy.get('.content-container>.scroll-container').eq(1).scrollTo('bottom', {
+    //   duration: 500,
+    //   ensureScrollable: false,
+    // });
+    // cy.wait(3500);
 
     // Logout
     cy.get('.user-title').click();

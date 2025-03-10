@@ -144,8 +144,8 @@ Cypress.Commands.add('loginToEBrief', () => {
   cy.visit('/'); //Taken from base url
   cy.url().should('include', '/'); //Validating url on the dashboard page
   cy.wait(1000);
-  // cy.get("#onetrust-accept-btn-handler").click(); //Remove Cookie bar
-  // cy.wait(1000);
+  cy.get('#onetrust-accept-btn-handler').click(); //Remove Cookie bar
+  cy.wait(1000);
   cy.get('button[type="submit"]').should('be.visible').and('be.enabled'); //3 Buttons should be visible and enabled in the landing page (Validation) - optional
   cy.get('.login-form > sc-button > .button')
     .contains('Jetzt Anmelden')
@@ -156,7 +156,7 @@ Cypress.Commands.add('loginToEBrief', () => {
   //Import credentials (un/pw) from 'ebrief.json' file
   cy.fixture('ebrief.json').as('example_kiam');
   cy.get('@example_kiam').then((usersJson) => {
-    cy.get('#signInName').type(usersJson.username_kiam_prod);
+    cy.get('#signInName').type(usersJson.username_kiam);
     cy.get('#password').type(usersJson.password_kiam);
     cy.wait(1000);
     cy.get('#showPassword').click(); //Show/Hide pass
@@ -233,7 +233,7 @@ Cypress.Commands.add('loginToEgEbox', () => {
   cy.visit(Cypress.env('baseUrl_egEbox'), {
     failOnStatusCode: false,
   });
-  cy.wait(3500);
+  cy.wait(4500);
   // Validate URL on the login page
   cy.url().should('include', Cypress.env('baseUrl_egEbox'));
 
@@ -247,7 +247,7 @@ Cypress.Commands.add('loginToEgEbox', () => {
       cy.log('Cookie bar not visible');
     }
   }); //End Remove Cookie
-
+  cy.wait(1500);
   //Import credentials (un/pw) from 'cypress config' file
   cy.get('input[placeholder="Benutzername"]').type(
     Cypress.env('username_egEbox')
@@ -260,7 +260,7 @@ Cypress.Commands.add('loginToEgEbox', () => {
   cy.intercept('POST', '**/rest/v2/deliveries**').as('getDeliveries');
   cy.get('button[type="submit"]').click(); //Login
 
-  cy.wait(['@getDeliveries'], { timeout: 20000 }).then((interception) => {
+  cy.wait(['@getDeliveries'], { timeout: 57000 }).then((interception) => {
     // Log the intercepted response
     cy.log('Intercepted response:', interception.response);
 

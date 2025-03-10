@@ -15,27 +15,22 @@ describe('Enable and Disable XML templates provided from JSON', () => {
     });
     cy.wait(1500);
 
-    // Click On Upload Personal Document Button
+    //Click On Upload Personal Document Button
     cy.get('.upload__document>.mdc-button__label>.upload__document__text')
       .contains(/Upload Personal Document|Personalisierte Dokumente hochladen/i)
-      .should('be.visible') // Ensure the button is visible before interacting
+      .should('be.visible') // Optional: Ensure the button is visible before interacting
       .click(); // Click the button
     cy.wait(1500);
 
-    // // Click on Upload Document button
-    // cy.get('.buttons-wrapper>button>.title')
-    //   .contains(/Upload Document|Dokument hochladen/i)
-    //   .should('be.visible') // Ensure the button is visible before interacting
-    //   .click(); // Click the button
-    // cy.wait(1500);
-
     //Click on Upload Document button
     cy.get('body').then(($body) => {
-      if ($body.find('.buttons-wrapper>button>.title').length > 0) {
+      if ($body.find('.buttons-wrapper>button').length > 0) {
         cy.get('.buttons-wrapper>button>.title')
-          .contains(/Upload Document|Dokument hochladen/i)
-          .should('be.visible') // Optional: Ensure the button is visible before interacting
-          .click(); // Click the button
+          .filter((index, el) => {
+            const text = Cypress.$(el).text().trim();
+            return text === 'Upload Document' || text === 'Dokument hochladen';
+          })
+          .click();
         cy.wait(1500);
       } else {
         cy.log('Close icon is NOT present');
@@ -232,20 +227,15 @@ describe('Enable and Disable XML templates provided from JSON', () => {
       .click(); // Click the button
     cy.wait(1500);
 
-    // //Click on Upload Document button
-    // cy.get('.buttons-wrapper>button>.title')
-    //   .contains(/Upload Document|Dokument hochladen/i)
-    //   .should('be.visible') // Optional: Ensure the button is visible before interacting
-    //   .click(); // Click the button
-    // cy.wait(1500);
-
     //Click on Upload Document button
     cy.get('body').then(($body) => {
-      if ($body.find('.buttons-wrapper>button>.title').length > 0) {
+      if ($body.find('.buttons-wrapper>button').length > 0) {
         cy.get('.buttons-wrapper>button>.title')
-          .contains(/Upload Document|Dokument hochladen/i)
-          .should('be.visible') // Optional: Ensure the button is visible before interacting
-          .click(); // Click the button
+          .filter((index, el) => {
+            const text = Cypress.$(el).text().trim();
+            return text === 'Upload Document' || text === 'Dokument hochladen';
+          })
+          .click();
         cy.wait(1500);
       } else {
         cy.log('Close icon is NOT present');

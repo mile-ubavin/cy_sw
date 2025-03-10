@@ -1,4 +1,4 @@
-/// <reference types="Cypress" />
+/// <reference types="cypress" />
 
 describe('adminUser-ForgotPassword from SW (HappyPath)', () => {
   it('adminUser-triggerForgotPasswordFromSW', () => {

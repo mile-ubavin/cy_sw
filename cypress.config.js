@@ -85,6 +85,7 @@ const environments = {
     companyPrefix: 'aqua',
     username_egEbox: 'aquaABBA000100279311',
     password_egEbox: 'Test1234!',
+    accountNumber_egEbox: 'ABBA000100279311',
     downloadsFolder:
       'C:/Users/mubavin/Cypress/EG/cypress-automatison-framework/cypress/downloads/',
     dashboardURL: 'https://supportviewpayslip.edeja.com/fe/dashboard/groups',
@@ -102,6 +103,10 @@ const environments = {
       { name: 'PDFTABDictionary-200' },
       { name: 'PDFTABDictionary-301' },
       { name: 'PDFTABDictionary-305' },
+    ],
+    disablePDFDictionary: [
+      { name: 'PDFTABDictionary-200' },
+      { name: 'PDFTABDictionary-301' },
     ],
     createAdminUser: [
       {
@@ -181,6 +186,7 @@ const environments = {
     companyPrefix: 'aqua',
     username_egEbox: 'aquaABBA000100279311',
     password_egEbox: 'Test1234!',
+    accountNumber_egEbox: 'ABBA000100279311',
     dashboardURL:
       'https://e-gehaltszettel-t.post-business-solutions.at/fe.e-gehaltszettel_t/dashboard/groups',
     eboxDeliveryPage:
@@ -193,6 +199,15 @@ const environments = {
     disableXML: [
       { id: 'T101', name: 'BB Care' },
       { id: 'T102', name: 'Beiersdorfer' },
+    ],
+    enablePDFDictionary: [
+      { name: 'PDFTABDictionary-200' },
+      { name: 'PDFTABDictionary-301' },
+      { name: 'PDFTABDictionary-305' },
+    ],
+    disablePDFDictionary: [
+      { name: 'PDFTABDictionary-200' },
+      { name: 'PDFTABDictionary-301' },
     ],
     createAdminUser: [
       {
@@ -272,6 +287,7 @@ const environments = {
     companyPrefix: 'aqua',
     username_egEbox: 'aquaABBA000100279311',
     password_egEbox: 'Test1234!',
+    accountNumber_egEbox: 'ABBA000100279311',
     dashboardURL:
       'https://e-gehaltszettel.post-business-solutions.at/fe.e-gehaltszettel/dashboard/groups',
     eboxDeliveryPage:
@@ -284,6 +300,15 @@ const environments = {
     disableXML: [
       { id: 'T101', name: 'BB Care' },
       { id: 'T102', name: 'Beiersdorfer' },
+    ],
+    enablePDFDictionary: [
+      { name: 'PDFTABDictionary-200' },
+      { name: 'PDFTABDictionary-301' },
+      { name: 'PDFTABDictionary-305' },
+    ],
+    disablePDFDictionary: [
+      { name: 'PDFTABDictionary-200' },
+      { name: 'PDFTABDictionary-301' },
     ],
     createAdminUser: [
       {
@@ -527,7 +552,7 @@ module.exports = defineConfig({
         },
       });
       //  Set executing tests on various environments, targeting appropriate json from const=environments
-      const envConfig = environments['eg_test'];
+      const envConfig = environments['eg_dev'];
       return { ...config, env: { ...config.env, ...envConfig } };
     }, //end
     specPattern: 'cypress/e2e/**/*.{js,jsx,ts,tsx}', // Ensure this matches your structure

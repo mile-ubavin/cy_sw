@@ -238,52 +238,6 @@ describe('hrManagement - prepare doc for signing (HappyPath)', () => {
 
     cy.wait(3500);
 
-    // Capture the current date and time in the specified format
-    // const now = new Date();
-    // const formattedDate = now.toLocaleDateString('de-DE'); // Format as dd.mm.yyyy
-    // const formattedTime = now.toLocaleTimeString('de-DE', {
-    //   hour: '2-digit',
-    //   minute: '2-digit',
-    //   hour12: false,
-    // });
-
-    // const uploadDateTime = `${formattedDate} ${formattedTime}`;
-    // cy.log(`Upload DateTime: ${uploadDateTime}`);
-
-    // // Store in Cypress environment
-    // cy.wrap(uploadDateTime).then((time) => {
-    //   Cypress.env('uploadDateTime', time);
-    // });
-
-    // const title = `HR Delivery (pdf) - ${uploadDateTime}`;
-
-    // Capture the current date and time in the specified format
-    const now = new Date();
-    const day = String(now.getDate()).padStart(2, '0'); // Ensure two digits
-    const month = String(now.getMonth() + 1).padStart(2, '0'); // Months are 0-based
-    const year = now.getFullYear();
-    const formattedDate = `${day}.${month}.${year}`; // Ensures dd.mm.yyyy format
-
-    const formattedTime = now
-      .toLocaleTimeString('de-DE', {
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false,
-      })
-      .trim(); // Trim to remove leading spaces
-
-    uploadDateTime = `${formattedDate} ${formattedTime}`; // Store the value in a variable
-    cy.log(`Upload DateTime: ${uploadDateTime}`); // Log the stored uploadDateTime
-
-    const title = `HR Delivery (pdf) - ${uploadDateTime}`;
-    cy.log(`Title for the document: ${title}`); // Log the title to check
-
-    //Validate uploadDateTime
-    cy.log(`Upload DateTime to verify: ${uploadDateTime}`); // Log to verify the value is accessible
-    console.log('uploadDateTime', uploadDateTime);
-
-    //------------------END DATE  ------------------------------
-
     // Loop through all signature buttons
     cy.get('.touch-signature-button').each(($button, index, $list) => {
       cy.wrap($button).click({ force: true });
@@ -424,55 +378,11 @@ describe('hrManagement - prepare doc for signing (HappyPath)', () => {
     cy.get('button[color="primary"]').click();
     cy.wait(1500);
 
-    //Validate uploadDateTime
-    cy.log(`Upload DateTime to verify: ${uploadDateTime}`); // Log to verify the value is accessible
-    console.log('uploadDateTime', uploadDateTime);
-
-    // Normalize the stored uploadDateTime
-    const normalizedUploadDateTime = uploadDateTime
-      .replace(',', ' ')
-      .replace(/\s+/g, ' ')
-      .trim();
-
-    cy.get('.cdk-column-userDataUpdateDate>div>div>div') // Adjust selector based on the actual document details container
-      .invoke('text')
-      .then((docText) => {
-        // Normalize the extracted document DateTime
-        const docDateTime = docText
-          .replace(',', ' ')
-          .replace(/\s+/g, ' ')
-          .trim();
-        cy.log(`Extracted DateTime from Document: '${docDateTime}'`);
-
-        // Convert both to Date objects for accurate time comparison
-        const parseDateTime = (dateTimeStr) => {
-          const [datePart, timePart] = dateTimeStr.split(' ');
-          const [day, month, year] = datePart.split('.').map(Number);
-          const [hour, minute] = timePart.split(':').map(Number);
-          return new Date(year, month - 1, day, hour, minute); // Month is 0-based in JS
-        };
-
-        const uploadedTime = parseDateTime(normalizedUploadDateTime);
-        const extractedTime = parseDateTime(docDateTime);
-
-        // Allow up to +1 minute difference
-        const maxAllowedTime = new Date(uploadedTime);
-        maxAllowedTime.setMinutes(uploadedTime.getMinutes() + 1);
-
-        // Validate the extracted time is within range
-        expect(extractedTime).to.be.at.least(uploadedTime);
-        expect(extractedTime).to.be.at.most(maxAllowedTime);
-
-        cy.log(
-          `Validated: Expected ${normalizedUploadDateTime} (or +1 min) <= ${docDateTime} (actual)`
-        );
-      });
-
     //Click on magic link button
     cy.wait(3000);
     cy.get('.action-buttons>button>.mdc-button__label')
       .parent()
-      // .invoke('removeAttr', 'target') // Remove target="_blank"
+      //.invoke('removeAttr', 'target') // Remove target="_blank"
       .click({ force: true });
 
     // Prevent opening (e-Box) in new tab
