@@ -76,13 +76,14 @@ const environments = {
     password_supportViewMaster: 'Test1234!',
 
     company: 'Aqua',
+    companyPrefix: 'aqua',
+    companyEmail: 'aqua.gmbh@yopmail.com',
 
     search: 'Android',
     username_supportViewAdmin: 'aquaAdmin',
     password_supportViewAdmin: 'Test1234!',
     email_supportViewAdmin: 'aqua.admin@yopmail.com',
     baseUrl_egEbox: 'https://eboxpayslip.edeja.com/fe.e-box_t/',
-    companyPrefix: 'aqua',
     username_egEbox: 'aquaABBA000100279311',
     password_egEbox: 'Test1234!',
     accountNumber_egEbox: 'ABBA000100279311',
@@ -177,6 +178,8 @@ const environments = {
 
     company: 'Aqua',
     companyPrefix: 'aqua',
+    companyEmail: 'aqua.gmbh@yopmail.com',
+
     search: 'Android',
     username_supportViewAdmin: 'aquaAdmin',
     password_supportViewAdmin: 'Test1234!',
@@ -278,6 +281,8 @@ const environments = {
 
     company: 'Aqua',
     companyPrefix: 'aqua',
+    companyEmail: 'aqua.gmbh@yopmail.com',
+
     search: 'Android',
     username_supportViewAdmin: 'aquaAdmin',
     password_supportViewAdmin: 'Test1234!',
@@ -531,6 +536,8 @@ const environments = {
     ],
   },
 };
+
+const credentials = {}; // Temporary global storage for credentials
 module.exports = defineConfig({
   defaultCommandTimeout: 6000,
   viewportWidth: 1920,
@@ -550,9 +557,17 @@ module.exports = defineConfig({
         getValue(key) {
           return storedValues[key] || null;
         },
+        setCredentials({ extractedUsername, extractedPassword }) {
+          credentials.extractedUsername = extractedUsername;
+          credentials.extractedPassword = extractedPassword;
+          return null;
+        },
+        getCredentials() {
+          return credentials;
+        },
       });
       //  Set executing tests on various environments, targeting appropriate json from const=environments
-      const envConfig = environments['eg_test'];
+      const envConfig = environments['eg_dev'];
       return { ...config, env: { ...config.env, ...envConfig } };
     }, //end
     specPattern: 'cypress/e2e/**/*.{js,jsx,ts,tsx}', // Ensure this matches your structure
@@ -561,3 +576,42 @@ module.exports = defineConfig({
     baseUrl: 'https://www.e-brief.at/fe_t',
   },
 });
+
+// const credentials = {}; // Global storage for credentials
+
+// module.exports = defineConfig({
+//   defaultCommandTimeout: 6000,
+//   viewportWidth: 1920,
+//   viewportHeight: 1080,
+
+//   e2e: {
+//     setupNodeEvents(on, config) {
+//       on('task', {
+//         setCredentials({ username, password }) {
+//           credentials.username = username;
+//           credentials.password = password;
+//           console.log(' Credentials stored:', credentials);
+//           return null;
+//         },
+//         getCredentials() {
+//           if (credentials.username && credentials.password) {
+//             console.log(' Returning stored credentials:', credentials);
+//             return credentials;
+//           } else {
+//             console.error('No stored credentials found!');
+//             return null;
+//           }
+//         },
+//       });
+
+//       return config;
+
+//       const envConfig = environments['eg_dev'];
+//       return { ...config, env: { ...config.env, ...envConfig } };
+//     },
+//     specPattern: 'cypress/e2e/**/*.{js,jsx,ts,tsx}',
+//     chromeWebSecurity: false,
+//     headless: false,
+//     baseUrl: 'https://www.e-brief.at/fe_t',
+//   },
+// });

@@ -1,11 +1,223 @@
-describe('hrManagement - prepare doc for signing (HappyPath)', () => {
+describe('HR - Broadcast delivery to Specific User', () => {
   // Define a variable to store the formatted date and time after document upload
   let uploadDateTime = ''; // Global variable to store upload date & time
 
-  //Prepare document For Signing - From Upload Button
-  it('prepareDocumentForSigningFromUpload', () => {
-    cy.loginToSupportViewAdmin();
-    // Wait for login to complete
+  //Disable hrManagement flag on Company
+  it('Enable hrManagement flag on Company', () => {
+    cy.loginToSupportViewMaster();
+    cy.wait(1500);
+
+    //Remove pop up dilaog
+    cy.get('body').then(($body) => {
+      if ($body.find('.release-note-dialog__close-icon').length > 0) {
+        cy.get('.release-note-dialog__close-icon').click();
+      } else {
+        cy.log('Close icon is NOT present');
+      }
+    });
+    cy.wait(2500);
+
+    //Search for Company by Display Name
+    cy.get('#searchButton>span').click(); //Click on search button
+    cy.wait(1000);
+    cy.fixture('supportView.json').as('payslipSW');
+    cy.get('@payslipSW').then((payslipJson) => {
+      // Use the company name from the cypress.config.js
+      const companyName = Cypress.env('company');
+      // Search for Group by Display Name using the company name
+      cy.get('.search-dialog>form>.form-fields>.searchText-wrap')
+        .eq(0)
+        .type(companyName);
+    });
+    //Find the Search button by button name and click on it
+    cy.wait(1500);
+    cy.get('.search-dialog>form>div>.mat-primary').click();
+    cy.wait(1500);
+
+    //Switch to user section
+    cy.get('.action-buttons > .mdc-button').eq(0).click();
+    cy.wait(1500);
+    //Scroll to the botton
+    cy.get('.mat-mdc-dialog-content').scrollTo('bottom');
+    cy.wait(2500);
+    //Check checkbox
+    cy.get('#hrManagementEnabled').then(($checkbox) => {
+      if (!$checkbox.is(':checked')) {
+        // If the checkbox is not checked, enable it
+        cy.get('#hrManagementEnabled').check();
+        cy.log('Checkbox was not enabled, now enabled.');
+        //Save Edit Company dialog
+        cy.get('button[type="submit"]').click();
+      } else {
+        // If the checkbox is already enabled
+        cy.log('Checkbox is already enabled.');
+        cy.get('.close[data-mat-icon-name="close"]').click();
+      }
+      //Close Edit Company dialog
+      cy.wait(2500);
+      //Logout
+      cy.get('.logout-icon ').click();
+      cy.wait(2000);
+      cy.get('.confirm-buttons > :nth-child(2)').click();
+      // cy.url().should('include', payslipJson.baseUrl); // Validate url'
+      cy.log('Test completed successfully.');
+      cy.wait(2500);
+    }); //end
+  }); //end it
+
+  //Disable Company Admin and Customer Creator Roles and Enable HR and View E-Box Roles
+  it('Disable Company Admin and Customer Creator Roles and Enable HR and View E-Box Roles', () => {
+    // Login as a Master-User using custom command
+    cy.loginToSupportViewMaster();
+    cy.wait(3500);
+
+    //Remove pop up
+    cy.get('body').then(($body) => {
+      if ($body.find('.release-note-dialog__close-icon').length > 0) {
+        cy.get('.release-note-dialog__close-icon').click();
+      } else {
+        cy.log('Close icon is NOT present');
+      }
+    });
+    cy.wait(1500);
+
+    // Search for Company by Display Name
+    cy.get('#searchButton>span').click(); //Click on search button
+    cy.wait(1000);
+    // Search for Group by Display Name using the company name
+    const companyName = Cypress.env('company');
+    // Search for Group by Display Name using the company name
+    cy.get('.search-dialog>form>.form-fields>.searchText-wrap')
+      .eq(0)
+      .type(companyName);
+    //Find the Search button by button name and click on it
+    cy.get('.search-dialog>form>div>.mat-primary').click();
+    cy.wait(1500);
+
+    // Switch on Admin User page
+    cy.get('.mdc-button__label')
+      // Find the button containing "Admin User" or "Admin Benutzer" button
+      .contains(/Admin User|Admin Benutzer/i)
+      .should('be.visible') // Optional: Ensure the button is visible before interacting
+      .click(); // Click the button
+    cy.wait(1500);
+
+    // Switch on Admin user's Role dilaog
+    //Search for Aqua Admin
+    cy.get('.search').click({ force: true });
+    //Search for Admin using username
+    cy.get('input[formcontrolname="userName"]').type(
+      Cypress.env('username_supportViewAdmin')
+    );
+    // Click on Search for Admin User button
+    cy.get('button[type="submit"]').click();
+    cy.wait(2000);
+    //Click on Role
+    cy.get('.mdc-button__label')
+      .contains(/Rechte|Rights/i) // Find the button containing "Rechte" or "Rights"
+      .should('be.visible') // Optional: Ensure the button is visible before interacting
+      .click(); // Click the button
+
+    //Disable ViewEbox And DataSubmitter Roles for specific Admin user
+
+    //List of roles to disable
+    const rolesToDisable = [
+      ['Company Admin', 'Firmen-Administrator'],
+      ['Customer Creator', 'Nutzeranlage'],
+      ['Data Submitter', 'Versand'],
+      // ['View E-Box', 'E-Box ansehen'],
+      // ['HR Manager', 'HR Manager'],
+    ];
+
+    cy.get('.mat-mdc-checkbox > div > .mdc-label')
+      .should('exist') // Ensure checkbox labels exist
+      .each(($label) => {
+        const text = $label.text().trim();
+
+        // Check if text exists in either English or German in rolesToDisable
+        if (rolesToDisable.some(([en, de]) => text === en || text === de)) {
+          cy.wrap($label)
+            .parent()
+            .find('input[type="checkbox"]') // Locate the checkbox input
+            .then(($checkboxInput) => {
+              cy.wrap($checkboxInput)
+                .invoke('prop', 'checked')
+                .then((isChecked) => {
+                  if (isChecked) {
+                    // Disable the role if it is currently checked
+                    cy.wrap($checkboxInput).click({ force: true });
+                    cy.log(`Checkbox for "${text}" was enabled; now disabled.`);
+                  } else {
+                    cy.log(`Checkbox for "${text}" is already disabled.`);
+                  }
+                });
+            });
+        }
+      });
+    cy.wait(1500);
+
+    // Enable HR and View E-Box Roles, for specific Admin user
+    const rolesToEnable = [
+      ['View E-Box', 'E-Box ansehen'],
+      ['HR Manager', 'HR Manager'],
+    ];
+
+    cy.get('.mat-mdc-checkbox > div > .mdc-label')
+      .should('exist') // Ensure checkbox labels exist
+      .each(($label) => {
+        const text = $label.text().trim();
+
+        // Check if text matches any role in either English or German
+        if (rolesToEnable.some(([en, de]) => text === en || text === de)) {
+          cy.wrap($label)
+            .parent()
+            .find('input[type="checkbox"]') // Locate the checkbox input
+            .then(($checkboxInput) => {
+              cy.wrap($checkboxInput)
+                .invoke('prop', 'checked')
+                .then((isChecked) => {
+                  if (!isChecked) {
+                    // Enable the role if it's not already checked
+                    cy.wrap($checkboxInput).click({ force: true });
+                    cy.log(
+                      `Checkbox for "${text}" was not enabled; now enabled.`
+                    );
+                  } else {
+                    cy.log(`Checkbox for "${text}" is already enabled.`);
+                  }
+                });
+            });
+        }
+      });
+
+    cy.wait(1500);
+
+    // Submit the changes
+    cy.get('button[type="submit"]').click();
+    cy.wait(1500);
+
+    // Verify the success message
+    cy.get('.mat-mdc-simple-snack-bar > .mat-mdc-snack-bar-label')
+      .should('be.visible') // Ensure it's visible first
+      .invoke('text') // Get the text of the element
+      .then((snackText) => {
+        const trimmedText = snackText.trim();
+        expect(trimmedText).to.match(/Rights updated|Rechte aktualisiert/);
+      });
+
+    cy.wait(3000);
+    // Logout
+    cy.get('.logout-icon ').click();
+    cy.wait(2000);
+    cy.get('.confirm-buttons > :nth-child(2)').click();
+    cy.url().should('include', Cypress.env('baseUrl')); // Validate url'
+    cy.log('Test completed successfully.');
+    cy.wait(2500);
+  }); //end it
+
+  //Prepare Document For Signing and Broadcast Delivery To Specific User
+  it('Send Delivery to selected-specific user', () => {
+    cy.loginToSupportViewAdmin(); // Login as a master user
     cy.wait(1500);
 
     //Remove pop up
@@ -18,60 +230,94 @@ describe('hrManagement - prepare doc for signing (HappyPath)', () => {
     });
     cy.wait(1500);
 
-    //Click On Upload Personal Document Button
-    cy.get('.upload__document>.mdc-button__label>.upload__document__text')
-      .contains(/Upload Personal Document|Personalisierte Dokumente hochladen/i)
-      .should('be.visible') // Optional: Ensure the button is visible before interacting
-      .click(); // Click the button
+    // Search for Group section
+    cy.get('#searchButton>span').click(); // Click on the search button
+
+    // Search for Group by Display Name using the company name
+    cy.get('.search-dialog>form>.form-fields>.searchText-wrap')
+      .eq(0)
+      .type(Cypress.env('company')); // Use the company name from the cypress.config.js
     cy.wait(1500);
 
-    //Check number of Upload buttons
-    cy.get('.buttons-wrapper > button:visible') // Select only visible buttons
-      .then((buttons) => {
-        const buttonCount = buttons.length; // Count the number of visible buttons
-        if (buttonCount === 2) {
-          cy.log('OK: The number of visible buttons is 2.');
-          expect(buttonCount).to.equal(2); // Add assertion to confirm it's 2
-        } else if (buttonCount === 1) {
-          cy.log('INVALID: The number of visible buttons is 1.');
-          expect(buttonCount).to.equal(
-            2,
-            'Expected 2 visible buttons but found only 1.'
-          ); // Fail the test
-        }
-      });
-    cy.wait(3000);
+    // Find and click the search button
+    cy.get('.search-dialog>form>div>.mat-primary').click();
+    cy.wait(2500);
 
-    //Click On Prepare Document For Signing Button
-    cy.get('.buttons-wrapper>button')
+    // Click the "User" button within the action buttons
+    cy.get('.action-buttons > button > .mdc-button__label')
+      .last() // Select the last matched element
+      .click(); // Click the matched "User" button
+    cy.wait(2500);
+
+    //Click on Select users to deliver documents button
+    cy.get('.button-wraper>button>.mdc-button__label')
       .contains(
-        /Prepare Document For Signing|Dokument zur Unterzeichnung vorbereiten/i
+        /Select users to deliver documents|Benutzer für die Zustellung von Dokumenten auswählen/i
       )
       .should('be.visible') // Optional: Ensure the button is visible before interacting
       .click(); // Click the button
     cy.wait(1500);
 
-    //Uplad valid document (1 A4 pdf file)
-    cy.upload305Dictionary();
-    cy.wait(2000);
-    //Click on dropdown button
-    cy.get(
-      '.mat-mdc-text-field-wrapper>div>.mat-mdc-form-field-infix>mat-select[aria-haspopup="listbox"]'
-    ).click();
-    cy.wait(2500);
-
-    // Find the dropdown item and check if it's selected
-    cy.get('div[role="listbox"]>.mdc-list-item>.mdc-list-item__primary-text')
-      .contains('PDFTABDictionary-305') // Find the dropdown item directly by its text
-      .then(($el) => {
-        // Navigate to the parent element to locate the checkbox state indicator
-        cy.wrap($el)
-
-          .should('exist')
-          .click(); // Ensure the checkbox exists
-      });
+    // Search for the specific user by name
+    cy.get('.dictionary-xml__search-container-input>input').type(
+      Cypress.env('username_egEbox')
+    );
     cy.wait(3500);
 
+    // Find and check the checkbox in the row if it's not already checked
+    cy.get('input[type="checkbox"]').eq(1).click();
+
+    cy.wait(2500);
+    //Click on Next buton
+    cy.get('button>.title')
+      .filter((index, el) => {
+        const text = Cypress.$(el).text().trim();
+        return text === 'Next' || text === 'Nächste';
+      })
+      .click();
+    cy.wait(1500);
+
+    //Click on Prepare Document For Signing
+    cy.get('.buttons-wrapper>button')
+      .filter((index, el) => {
+        const text = Cypress.$(el).text().trim();
+        return (
+          text === 'Prepare Document For Signing' ||
+          text === 'Dokument zur Unterzeichnung vorbereiten'
+        );
+      })
+      .then(($button) => {
+        // Add red border to the button for visibility
+        cy.wrap($button).invoke('css', 'border', '2px solid blue');
+
+        // Wait for 3 seconds
+        cy.wait(3000);
+
+        // Click the button
+        cy.wrap($button).click();
+      });
+
+    //Uplad valid document (x1 A4 pdf file)
+    cy.massUpload();
+    cy.wait(2000);
+    //Add Title
+    // Capture the current date and time in the specified format
+    const now = new Date();
+    const formattedDate = now.toLocaleDateString('de-DE'); // Format as dd.mm.yyyy
+    const formattedTime = now.toLocaleTimeString('de-DE', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    });
+    uploadDateTime = `${formattedDate} ${formattedTime}`;
+    cy.log(`Upload DateTime: ${uploadDateTime}`);
+
+    cy.wait(2500);
+    //Add Delivery Title
+    const title = `HR Delivery For Specific User (pdf) - ${uploadDateTime}`;
+
+    cy.get('input[formcontrolname="subject"]').clear().type(title);
+    cy.wait(1500);
     //Open init session
     cy.intercept('GET', '**/assets/maintanance-config/**').as('initSession');
     //Click on Open Hybridsign button
@@ -95,19 +341,8 @@ describe('hrManagement - prepare doc for signing (HappyPath)', () => {
     }); //open add new signature dialog
     cy.wait(2000);
 
-    // Capture the current date and time in the specified format
-    const now = new Date();
-    const formattedDate = now.toLocaleDateString('de-DE'); // Format as dd.mm.yyyy
-    const formattedTime = now.toLocaleTimeString('de-DE', {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false,
-    });
-    uploadDateTime = `${formattedDate} ${formattedTime}`;
-    cy.log(`Upload DateTime: ${uploadDateTime}`);
-
     //Add Signee name
-    const signee = `HR Document - ${uploadDateTime} for Test Signee`;
+    const signee = `HR Document Created - ${uploadDateTime}, for Test Signee`;
 
     cy.get('input[formcontrolname="signee"]').clear().type(signee); // Enter signee name
     cy.wait(2500);
@@ -125,12 +360,12 @@ describe('hrManagement - prepare doc for signing (HappyPath)', () => {
       .trigger('mousedown', { which: 1, eventConstructor: 'MouseEvent' })
       .trigger('mousemove', {
         which: 1,
-        screenX: 1080,
-        screenY: 430,
-        clientX: 1080,
-        clientY: 430,
-        pageX: 1080,
-        pageY: 430,
+        screenX: 750,
+        screenY: 800,
+        clientX: 750,
+        clientY: 800,
+        pageX: 750,
+        pageY: 800,
         eventConstructor: 'MouseEvent',
       })
       .trigger('mouseup', { force: true });
@@ -165,25 +400,24 @@ describe('hrManagement - prepare doc for signing (HappyPath)', () => {
     );
 
     cy.wait(6000);
+
     cy.get('.dialog-footer>.dialog-actions>button>.title')
-      .contains(/Send|Senden/i)
-      .should('be.visible') // Optional: Ensure the button is visible before interacting
-      .click(); // Click the button
+      .filter((index, el) => {
+        const text = Cypress.$(el).text().trim();
+        return text === 'Send' || text === 'Senden';
+      })
+      .click();
+    cy.wait(3000);
 
-    cy.wait(1500);
-
-    // Verify the success message
-    cy.get('.mat-mdc-simple-snack-bar > .mat-mdc-snack-bar-label')
-      .should('be.visible') // Ensure it's visible first
-      .invoke('text') // Get the text of the element
-      .then((text) => {
-        // Trim the text and validate it
-        const trimmedText = text.trim();
-        expect(trimmedText).to.match(
-          /We are processing in the background|Wir verarbeiten im Hintergrund/
-        );
-      });
-    cy.wait(2500);
+    cy.get(
+      '.mat-mdc-dialog-component-host>.dialog-container>.dialog-footer>.controls>button>.title'
+    )
+      .filter((index, el) => {
+        const text = Cypress.$(el).text().trim();
+        return text === 'Confirm' || text === 'Bestätigen';
+      })
+      .click({ force: true });
+    cy.wait(3000);
 
     // Logout
     cy.get('.logout-icon ').click();
@@ -192,7 +426,7 @@ describe('hrManagement - prepare doc for signing (HappyPath)', () => {
     cy.url().should('include', Cypress.env('baseUrl')); // Validate url'
     cy.log('Test completed successfully.');
     cy.wait(2500);
-  }); // end it
+  }); //end it
 
   //Sign HR Delivery
   it('Ebox user signing HR delivery', () => {
@@ -308,7 +542,7 @@ describe('hrManagement - prepare doc for signing (HappyPath)', () => {
   });
 
   // Admin User is able to check new HR Delivery received in HR page
-  it.only('Admin User checks new delivery received in the HR page in SW', () => {
+  it('Admin User checks new delivery received in the HR page in SW', () => {
     cy.loginToSupportViewAdmin();
     // Wait for login to complete
     cy.wait(1500);
@@ -382,18 +616,13 @@ describe('hrManagement - prepare doc for signing (HappyPath)', () => {
     cy.wait(3000);
     cy.get('.action-buttons>button>.mdc-button__label')
       .parent()
-      // .invoke('removeAttr', 'target') // Remove target="_blank"
+      //.invoke('removeAttr', 'target') // Remove target="_blank"
       .click({ force: true });
 
     // Prevent opening (e-Box) in new tab
     cy.intercept('POST', '/supportView/v1/person/magicLink/createByGroup', {
       statusCode: 200,
     }).as('magicLinkRequest');
-
-    // cy.wait('@magicLinkRequest').then((interception) => {
-    //   const magicLink = interception.response.body.url;
-    //   cy.visit(magicLink);
-    // });
     cy.window().then((win) => {
       cy.stub(win, 'open')
         .callsFake((url) => {
@@ -402,13 +631,7 @@ describe('hrManagement - prepare doc for signing (HappyPath)', () => {
         })
         .as('windowOpen');
     });
-    // cy.wait(['@magicLinkRequest'], { timeout: 3000 }).then((interception) => {
-    //   const magicLink = interception.response.body.url;
-    //   cy.window().then((win) => {
-    //     // win.location.href = magicLink; // This forces navigation in the same tab
-    //   });
-    // });
-    // cy.pause();
+
     cy.wait(4000);
 
     //Remove Cookie
@@ -474,14 +697,5 @@ describe('hrManagement - prepare doc for signing (HappyPath)', () => {
       });
 
     cy.wait(4500);
-
-    // Switch to the second email
-    //cy.iframe('#ifinbox').find('.mctn > .m > button > .lms').eq(1).click();
-
-    // emailSubject(1); // Validate subject of second email
-    // cy.wait(1500);
-    // emailBody(); // Validate second email body
-
-    //cy.wait(4500);
   });
 }); //end describe

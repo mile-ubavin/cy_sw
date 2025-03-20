@@ -1,4 +1,4 @@
-describe('Upload valid Serviceline files, validate Success and Warring messages', () => {
+describe('Sent pdf file', () => {
   //Disable hrManagement flag on Company
   it('Disable hrManagement flag on Company', () => {
     //Import credentials (un/pw) from 'supportView.json' file
@@ -462,7 +462,7 @@ describe('Upload valid Serviceline files, validate Success and Warring messages'
   });
 
   //Work in progress-Admin user Upload can upload valid pdf(dictionary)
-  it('Upload pdfDictionary 305_Dictionary (verify Error amd Success messages)', () => {
+  it('Upload pdfDictionary 305_Dictionary (verify Error and Success messages)', () => {
     cy.loginToSupportViewAdmin();
     // Wait for login to complete
     cy.wait(1500);
@@ -994,7 +994,7 @@ describe('Upload valid Serviceline files, validate Success and Warring messages'
     cy.wait(2500);
   }); //end it
 
-  //Work in progress-Admin user Upload can upload valid pdf(dictionary)
+  //Upload pdfDictionary 305_Dictionary (verify Error amd Success messages)
   it('Upload pdfDictionary 305_Dictionary (verify Error amd Success messages)', () => {
     cy.loginToSupportViewAdmin();
     // Wait for login to complete
@@ -1028,7 +1028,7 @@ describe('Upload valid Serviceline files, validate Success and Warring messages'
           .click();
         cy.wait(1500);
       } else {
-        cy.log('Close icon is NOT present');
+        cy.log('icon is NOT present');
       }
     });
     cy.wait(1500);

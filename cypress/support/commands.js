@@ -285,6 +285,20 @@ Cypress.Commands.add('uploadXMLfile', function () {
     });
 });
 
+// Create new user from XML file
+Cypress.Commands.add('createNewUserFromXMLfile', function () {
+  cy.fixture('JAT-XML_1receiver__(ISS BBcare).xml', 'binary')
+    .then(Cypress.Blob.binaryStringToBlob)
+    .then((fileContent) => {
+      cy.get('#input-file').attachFile({
+        mimeType: 'text/xml',
+        fileContent,
+        filePath: 'JAT-XML_1receiver__(ISS BBcare).xml',
+        fileName: 'JAT-XML_1receiver__(ISS BBcare).xml',
+      });
+    });
+});
+
 // Upload TXT file
 Cypress.Commands.add('uploadTXTfile', function () {
   cy.fixture('TXT_1receiver__(AQUA_ABBA000100279311_ISS BBcare).txt', 'binary')

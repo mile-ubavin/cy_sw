@@ -338,7 +338,7 @@ describe('Send welcome mail via post / EinfachBrief (HappyPath)', () => {
       const companyName = Cypress.env('company');
 
       cy.get('.search-dialog>form>.form-fields>.searchText-wrap')
-        .eq(1)
+        .eq(0)
         .type(companyName);
 
       cy.get('.search-dialog>form>div>.mat-primary').click();
@@ -494,24 +494,24 @@ describe('Send welcome mail via post / EinfachBrief (HappyPath)', () => {
       // });
       // cy.wait(5000);
       cy.pause();
-      // Create the second user (without address)
+      //Create the second user (without address)
 
-      // Click 'Create User' button
-      // cy.get('button > .mdc-button__label')
-      //   .filter((index, el) => {
-      //     const text = Cypress.$(el).text().trim();
-      //     return text === 'Create user' || text === 'Neuen Benutzer Anlegen';
-      //   })
-      //   .click({ force: true });
+      //Click 'Create User' button
+      cy.get('button > .mdc-button__label')
+        .filter((index, el) => {
+          const text = Cypress.$(el).text().trim();
+          return text === 'Create user' || text === 'Neuen Benutzer Anlegen';
+        })
+        .click({ force: true });
 
-      // cy.wait(1500);
-      // // Click on Manual Creation
-      // cy.get('.create_user_dialog_content>.buttons-wrapper>button')
-      //   .filter((index, el) => {
-      //     const text = Cypress.$(el).text().trim();
-      //     return text === 'Manuel Creation' || text === 'Manuelle Anlage';
-      //   })
-      //   .click();
+      cy.wait(1500);
+      // Click on Manual Creation
+      cy.get('.create_user_dialog_content>.buttons-wrapper>button')
+        .filter((index, el) => {
+          const text = Cypress.$(el).text().trim();
+          return text === 'Manuel Creation' || text === 'Manuelle Anlage';
+        })
+        .click();
 
       createUser(Cypress.env('createUserNoAddress')[0]);
 

@@ -1,133 +1,134 @@
-import 'cypress-downloadfile/lib/downloadFileCommand';
-
-describe('R04_Admin User Create E-Box User - Manual.js', () => {
-  function selectRoleIfNotSelected(roles) {
-    cy.get('mat-checkbox .mdc-form-field .mdc-label').then(($labels) => {
-      let allSelected = true;
-
-      roles.forEach((roleText) => {
-        const $label = Cypress._.find($labels, (label) => {
-          return new RegExp(roleText).test(label.textContent);
-        });
-        console.log('label', $label);
-        if ($label) {
-          const $checkbox = $label.closest('mat-checkbox');
-          const $input = Cypress.$($checkbox).find('input[type="checkbox"]');
-          const isChecked = $input.is(':checked');
-
-          if (!isChecked) {
-            allSelected = false;
-            console.log('checkbox 2', $checkbox);
-
-            // Click to select only if it's not already selected
-            cy.wrap($input).click({ force: true });
-          }
-        }
-      });
-
-      if (allSelected) {
-        // All roles are selected, close the dialog
-        cy.log('All roles are already selected. Closing dialog.');
-        cy.get('.close').click({ force: true });
-      } else {
-        // Submit the form after selecting the necessary roles
-        cy.wait(1500); // Wait after clicking the checkboxes
-        cy.get('button[type="submit"]').click({ force: true });
-        cy.wait(1500);
-
-        // Verify Rights updated successfully message
-        cy.get('.mat-mdc-simple-snack-bar > .mat-mdc-snack-bar-label')
-          .should('be.visible') // Ensure it's visible first
-          .invoke('text') // Get the text of the element
-          .then((text) => {
-            const trimmedText = text.trim();
-            expect(trimmedText).to.match(/Rights updated|Rechte aktualisiert/);
-          });
-        cy.wait(1500);
-      }
-    });
-  }
-  const path = require('path');
-
-  it.skip('Master Enable Roles to AdminUser', () => {
-    // Login as Master User using a custom command
+describe('R03_Admn user - Create E-Box User - Manually', () => {
+  //Enable All Roles (except HR Role)
+  it('Enable All Roles, except HR Role for Specific Admin', () => {
+    // Login as a Master-User using custom command
     cy.loginToSupportViewMaster();
     cy.wait(3500);
-    //Search for Company by Display Name
+
+    //Remove pop up
+    cy.get('body').then(($body) => {
+      if ($body.find('.release-note-dialog__close-icon').length > 0) {
+        cy.get('.release-note-dialog__close-icon').click();
+      } else {
+        cy.log('Close icon is NOT present');
+      }
+    });
+    cy.wait(1500);
+
+    // Search for Company by Display Name
     cy.get('#searchButton>span').click(); //Click on search button
     cy.wait(1000);
-
-    // Use the company name from the cypress.config.js
-    const companyName = Cypress.env('company');
     // Search for Group by Display Name using the company name
     cy.get('.search-dialog>form>.form-fields>.searchText-wrap')
-      .eq(1)
-      .type(companyName);
-
+      .eq(0)
+      .type(Cypress.env('company')); // Use the company name from the cypress.config.js
     cy.wait(1500);
     //Find the Search button by button name and click on it
     cy.get('.search-dialog>form>div>.mat-primary').click();
     cy.wait(1500);
 
-    // Switch on Admin User page
-    cy.get('.ng-star-inserted>.action-buttons>button')
-      .contains(/Admin User|Admin Benutzer/)
-      .then(($button) => {
-        if ($button.length > 0) {
-          cy.wrap($button).click({ force: true });
-        }
-      });
-
-    //Search for aquaAdmin by username
-    cy.get('#searchButton').click({ force: true });
+    //Click On Admin UserbButton
+    cy.get('.mdc-button__label')
+      // Find the button containing "Admin User" or "Admin Benutzer" button
+      .contains(/Admin User|Admin Benutzer/i)
+      .should('be.visible') // Optional: Ensure the button is visible before interacting
+      .click(); // Click the button
     cy.wait(1500);
-    cy.get('input[formcontrolname="userName"]')
-      .click()
-      .type(Cypress.env('username_supportViewAdmin')); //Search for aquaAdmin using username
-    cy.get('button[type="submit"]').click(); //Click on Search button
-    cy.wait(2500);
 
-    // Open Role dialog
-    cy.get('.action-buttons>button>.mdc-button__label')
-      .contains(/Rights|Rechte/)
-      .then(($button) => {
-        if ($button.length > 0) {
-          cy.wrap($button).click({ force: true });
+    //Search For Admin And Open Role Dialog
+
+    //Search for Aqua Admin
+    cy.get('.search').click({ force: true });
+    //Search for Admin using username
+    cy.get('input[formcontrolname="userName"]').type(
+      Cypress.env('username_supportViewAdmin')
+    );
+    // Click on Search for Admin User button
+    cy.get('button[type="submit"]').click();
+    cy.wait(2000);
+    //Click on Role
+    cy.get('.mdc-button__label')
+      .contains(/Rechte|Rights/i) // Find the button containing "Rechte" or "Rights"
+      .should('be.visible') // Optional: Ensure the button is visible before interacting
+      .click(); // Click the button
+
+    // Enable All Roles, except HR Role, for specific Admin user
+    const rolesToEnable = [
+      ['Company Admin', 'Firmen-Administrator'],
+      ['Customer Creator', 'Nutzeranlage'],
+      ['Data Submitter', 'Versand'],
+      ['View E-Box', 'E-Box ansehen'],
+      // ['HR Manager', 'HR Manager'],
+    ];
+
+    cy.get('.mat-mdc-checkbox > div > .mdc-label')
+      .should('exist') // Ensure checkbox labels exist
+      .each(($label) => {
+        const text = $label.text().trim();
+
+        // Check if text matches any role in either English or German
+        if (rolesToEnable.some(([en, de]) => text === en || text === de)) {
+          cy.wrap($label)
+            .parent()
+            .find('input[type="checkbox"]') // Locate the checkbox input
+            .then(($checkboxInput) => {
+              cy.wrap($checkboxInput)
+                .invoke('prop', 'checked')
+                .then((isChecked) => {
+                  if (!isChecked) {
+                    // Enable the role if it's not already checked
+                    cy.wrap($checkboxInput).click({ force: true });
+                    cy.log(
+                      `Checkbox for "${text}" was not enabled; now enabled.`
+                    );
+                  } else {
+                    cy.log(`Checkbox for "${text}" is already enabled.`);
+                  }
+                });
+            });
         }
       });
-    cy.wait(2500);
 
-    // Function to select a role only if it's not already selected
+    cy.wait(1500);
 
-    // Call the function with the roles array
-    selectRoleIfNotSelected([
-      /View E-Box|E-Box ansehen/,
-      /Customer Creator|Nutzeranlage/,
-      /Data Submitter|Versand/,
-    ]);
+    // Submit the changes
+    cy.get('button[type="submit"]').click();
+    cy.wait(1500);
 
-    // Select the "Customer Creator" role if not already selected
-    // selectRoleIfNotSelected(/Customer Creator|Nutzeranlage/);
+    // Verify the success message
+    cy.get('.mat-mdc-simple-snack-bar > .mat-mdc-snack-bar-label')
+      .should('be.visible') // Ensure it's visible first
+      .invoke('text') // Get the text of the element
+      .then((snackText) => {
+        const trimmedText = snackText.trim();
+        expect(trimmedText).to.match(/Rights updated|Rechte aktualisiert/);
+      });
 
-    // Select the "Data Submitter" role if not already selected
-    // selectRoleIfNotSelected(/Data Submitter|Versand/);
-    // cy.get('.close').click({ force: true });
-
-    cy.wait(2500);
-    //Logout
+    cy.wait(3000);
+    // Logout
     cy.get('.logout-icon ').click();
     cy.wait(2000);
     cy.get('.confirm-buttons > :nth-child(2)').click();
+    cy.url().should('include', Cypress.env('baseUrl')); // Validate url'
     cy.log('Test completed successfully.');
     cy.wait(2500);
-
-    //********************* Yopmail *********************
   }); //end it
 
-  it.only('Login As AdminUser - Create User Manually by Admin', () => {
-    // Login as Master User using a custom command
+  //Login As Admin user and Create User Manually
+  it('Login As Admin user and Create User Manually', () => {
+    // Login as Admin User using a custom command
     cy.loginToSupportViewAdmin();
     cy.wait(3500);
+    //Remove pop up
+    cy.get('body').then(($body) => {
+      if ($body.find('.release-note-dialog__close-icon').length > 0) {
+        cy.get('.release-note-dialog__close-icon').click();
+      } else {
+        cy.log('Close icon is NOT present');
+      }
+    });
+    cy.wait(1500);
+
     //Search for Company by Display Name
     cy.get('#searchButton>span').click(); //Click on search button
     cy.wait(1000);
@@ -137,7 +138,7 @@ describe('R04_Admin User Create E-Box User - Manual.js', () => {
 
     // Search for Group by Display Name using the company name
     cy.get('.search-dialog>form>.form-fields>.searchText-wrap')
-      .eq(1)
+      .eq(0)
       .type(companyName);
 
     //Find the Search button by button name and click on it
@@ -253,24 +254,18 @@ describe('R04_Admin User Create E-Box User - Manual.js', () => {
           'Benutzer angelegt', // German
         ]);
 
-        // Download credentials
+        // //Download credentials
         // cy.get('.download-bttn').click();
         // cy.wait(1000);
-        // // Get the latest downloaded PDF file using the custom task
-        // // const downloadsDir = downloadsFolder path.normalize(
-        // //   `${Cypress.config('fileServerFolder')}/cypress/downloads/`
-        // // );
 
-        // // const downloadsDir = `${Cypress.config(
-        // //   'fileServerFolder'
-        // // )}/cypress/downloads/`;
-
-        // const downloadsDir = Cypress.env('downloadsFolder');
+        // // Get the latest downloaded PDF file
+        // const downloadsDir = `${Cypress.config(
+        //   'fileServerFolder'
+        // )}/cypress/downloads/`;
         // cy.task('getDownloadedPdf', downloadsDir).then((filePath) => {
         //   expect(filePath).to.not.be.null; // Assert the file exists
         //   cy.log(`Latest PDF File Path: ${filePath}`);
         //   cy.wait(3000);
-        //   m;
         //   // Read the PDF content and open in the same tab using a Blob
         //   cy.readFile(filePath, 'binary').then((pdfBinary) => {
         //     const pdfBlob = Cypress.Blob.binaryStringToBlob(
@@ -285,15 +280,33 @@ describe('R04_Admin User Create E-Box User - Manual.js', () => {
         //     });
         //   });
         // });
-        cy.wait(3500);
+
+        cy.wait(2500);
+
+        //Skip download e-box user's credentials
+        cy.get('.wrapper>.cancel-bttn').click();
+        cy.wait(1500);
+
+        // Logout
+        cy.get('.logout-icon ').click();
+        cy.wait(2000);
+        cy.get('.confirm-buttons > :nth-child(2)').click();
+        cy.url().should('include', Cypress.env('baseUrl')); // Validate url'
+        cy.log('Test completed successfully.');
+        cy.wait(2500);
       });
+  }); //end it
 
-    //********************* Yopmail *********************
-
-    // Visit yopmail application or login page
+  //Yopmail - Confirm email and Change password
+  it('Yopmail - Confirm email and Change password', () => {
+    // Visit yopmail application
     cy.visit('https://yopmail.com/en/');
+
+    // Access the first Admin User object from cypress.config.js
+    const user = Cypress.env('createUser')[0];
     cy.get('#login').type(user.email);
     cy.get('#refreshbut > .md > .material-icons-outlined').click();
+    cy.wait(1500);
     cy.iframe('#ifinbox')
       .find('.mctn > .m > button > .lms')
       .eq(0)
@@ -317,7 +330,7 @@ describe('R04_Admin User Create E-Box User - Manual.js', () => {
         cy.log('Captured text:', usernameFromEmailBody);
 
         //Confirm Email Address  - by clicking on "Jetzt E-Mail Adresse bestätigen" button from Comfirmation email
-
+        cy.wait(1500);
         let initialUrl;
         cy.iframe('#ifmail')
           .find(
@@ -336,19 +349,48 @@ describe('R04_Admin User Create E-Box User - Manual.js', () => {
           )
           .invoke('attr', 'target', '_self') //prevent opening in new tab
           .click();
-        cy.wait(7000);
-        // cy.iframe("#ifmail")
-        //   .find("#onetrust-accept-btn-handler")
-        //   .should("exist")
-        //   .click(); // if exist, Remove Cookie bar
+        //Wait for Cookie bar
+        cy.wait(15000);
+
+        // //Remove Cooki dialog (if shown)
+        if (cy.iframe('#ifmail').find('#onetrust-accept-btn-handler')) {
+          cy.iframe('#ifmail').find('#onetrust-accept-btn-handler').click();
+        } else {
+          cy.log('Cookie dialog is not shown');
+        }
+
+        // Remove Cookie dialog (if shown)
+        // cy.iframe('#ifmail')
+        //   .find('#onetrust-accept-btn-handler', { timeout: 3000 })
+        //   .then(($btn) => {
+        //     if ($btn.length > 0 && $btn.is(':visible')) {
+        //       cy.wrap($btn).click();
+        //       cy.log('Cookie dialog was shown and clicked.');
+        //     } else {
+        //       cy.log('Cookie dialog is not shown.');
+        //     }
+        //   });
+
+        // cy.iframe('#ifmail')
+        //   .find('#onetrust-accept-btn-handler')
+        //   .then(($btn) => {
+        //     if ($btn.length) {
+        //       cy.wrap($btn).click();
+        //     } else {
+        //       cy.log('Cookie dialog is not shown');
+        //     }
+        //   });
+
+        // cy.iframe('#ifmail').find('#onetrust-accept-btn-handler').click();
+
+        cy.wait(8000);
         cy.iframe('#ifmail').find('.button').click();
-        cy.wait(2000);
-
         //Reload inbox
-        cy.get('#refresh').click({ force: true }); //Click on Refresh inbox icon
-        cy.wait(1500);
 
-        //Check Reset Pasword email
+        cy.get('#refresh').click({ force: true }); //Click on Refresh inbox icon
+        cy.wait(5000);
+        //Reset Pasword email
+
         cy.iframe('#ifinbox')
           .find('.mctn > .m > button > .lms')
           .eq(0)
@@ -375,89 +417,107 @@ describe('R04_Admin User Create E-Box User - Manual.js', () => {
           .invoke('attr', 'target', '_self') //prevent opening in new tab
           .click();
         cy.wait(2500);
-        // cy.iframe("#ifmail")
-        //   .find("#onetrust-accept-btn-handler")
-        //   .should("exist")
-        //   .click(); // Remove Cookie bar
 
         //Fill the Set password form
         cy.iframe('#ifmail')
           .find('.input__field-input')
           .eq(0)
           .click()
-          //.type(payslipJson.password_egEbox); //fill the 1st input field
+
           .type(Cypress.env('password_egEbox')); //fill the 1st input field
         cy.iframe('#ifmail').find('.input-eye-icon').eq(0).click(); //Click on Show password icon
 
         cy.iframe('#ifmail')
           .find('.input__field-input')
           .eq(1)
+
           .type(Cypress.env('password_egEbox')); //fill the 1st input field
         cy.iframe('#ifmail').find('.input-eye-icon').eq(1).click(); //Click on Show password icon
         cy.iframe('#ifmail').find('.button').click(); //Click on confirm button
 
-        //********************* Login to ebox 1st time *********************
-
-        //cy.visit(payslipJson.baseUrl_egEbox); //Visit EG E-box login page
-        cy.visit(Cypress.env('baseUrl_egEbox'));
-        cy.wait(5000);
-
-        // Wait for the cookie bar to appear
-        //Remove Cookie
-        cy.get('body').then(($body) => {
-          if ($body.find('#onetrust-policy-title').is(':visible')) {
-            // If the cookie bar is visible, click on it and remove it
-            cy.get('#onetrust-accept-btn-handler').click();
-          } else {
-            // Log that the cookie bar was not visible
-            cy.log('Cookie bar not visible');
-          }
-        }); //End Remove Cookie
-        cy.wait(1500);
-        // Continue with Login
-        cy.get(
-          ':nth-child(1) > .ng-invalid > .input > .input__field-input'
-        ).type(usernameFromEmailBody);
-
-        cy.get('.ng-invalid > .input > .input__field-input').type(
-          Cypress.env('password_egEbox')
-        ); //fill the 1st input field
-
-        cy.wait(1000);
-        cy.get('button[type="submit"]').click(); //Login to E-Brief
-        // cy.wait(6000);
-
-        cy.intercept('POST', '**/rest/v2/deliveries**').as(
-          'openDeliveriesPage'
-        );
-        // cy.get('button[type="submit"]').click();
-
-        cy.wait(['@openDeliveriesPage'], { timeout: 27000 }).then(
-          (interception) => {
-            // Log the intercepted response
-            cy.log('Intercepted response:', interception.response);
-
-            // Assert the response status code
-            expect(interception.response.statusCode).to.eq(200);
-          }
-        );
-
-        // Logout
-        cy.get('.user-title').click();
-        cy.wait(1500);
-        cy.get('.logout-title > a').click();
-        //cy.url().should('include', payslipJson.baseUrl_egEbox); // Validate url
-        cy.url().should('include', Cypress.env('baseUrl_egEbox')); // Validate url
-        cy.log('Test completed successfully.');
+        cy.wait(2000);
       });
   });
 
-  // M A S T E R    U S E R - DELETE ALREADY CREATED USERS
+  //Login to ebox 1st time
+  it('Login to e-Box 1st time', () => {
+    cy.visit(Cypress.env('baseUrl_egEbox'));
+    cy.wait(5000);
+
+    // Wait for the cookie bar to appear
+    //Remove Cookie
+    cy.get('body').then(($body) => {
+      if ($body.find('#onetrust-policy-title').is(':visible')) {
+        // If the cookie bar is visible, click on it and remove it
+        cy.get('#onetrust-accept-btn-handler').click();
+      } else {
+        // Log that the cookie bar was not visible
+        cy.log('Cookie bar not visible');
+      }
+    }); //End Remove Cookie
+    cy.wait(1500);
+    // Create the first user (with address)
+
+    // Access the first Admin User object from cypress.config.js
+    const user = Cypress.env('createUser')[0];
+    // Continue with Login
+    cy.log(Cypress.env('companyPrefix'));
+    cy.get(':nth-child(1) > .ng-invalid > .input > .input__field-input').type(
+      Cypress.env('companyPrefix') + user.username
+    );
+
+    //Cypress.env('manualAddress')
+    cy.get('.ng-invalid > .input > .input__field-input').type(
+      Cypress.env('password_egEbox')
+    );
+
+    // cy.wait(6000);
+
+    // cy.wait(10000);
+    // cy.visit(Cypress.env('eboxDeliveryPage'), {
+    //   failOnStatusCode: false,
+    // });
+    cy.wait(5500);
+
+    cy.intercept('POST', '**/rest/v2/deliveries**').as('openDeliveriesPage');
+    cy.wait(1000);
+    cy.get('button[type="submit"]').click(); //Login to E-Box
+    cy.wait(['@openDeliveriesPage'], { timeout: 37000 }).then(
+      (interception) => {
+        // Log the intercepted response
+        cy.log('Intercepted response:', interception.response);
+
+        // Assert the response status code
+        expect(interception.response.statusCode).to.eq(200);
+        cy.wait(2500);
+      }
+    );
+    cy.wait(7000);
+    // Logout
+    cy.get('.user-title').click();
+    cy.wait(1500);
+    cy.get('.logout-title > a').click();
+    //cy.url().should('include', payslipJson.baseUrl_egEbox); // Validate url
+    cy.url().should('include', Cypress.env('baseUrl_egEbox')); // Validate url
+    cy.log('Test completed successfully.');
+  }); //end it
+
+  //Delete Alredy created Users by Master User
   it('Login As Master User - Delete Alredy created Users', () => {
     // Login as Master User using a custom command
     const user = Cypress.env('createUser')[0];
     cy.loginToSupportViewMaster();
     cy.wait(3500);
+
+    //Remove pop up
+    cy.get('body').then(($body) => {
+      if ($body.find('.release-note-dialog__close-icon').length > 0) {
+        cy.get('.release-note-dialog__close-icon').click();
+      } else {
+        cy.log('Close icon is NOT present');
+      }
+    });
+    cy.wait(1500);
 
     //Search for Group by Display Name
     cy.get('#searchButton>span').click(); //Click on search button
@@ -569,7 +629,7 @@ describe('R04_Admin User Create E-Box User - Manual.js', () => {
     cy.wait(3000);
   }); //end it
 
-  //Y O P M A I L
+  //Yopmail - Clear inbox
   it('Yopmail - Clear inbox', () => {
     const user = Cypress.env('createUser')[0];
 

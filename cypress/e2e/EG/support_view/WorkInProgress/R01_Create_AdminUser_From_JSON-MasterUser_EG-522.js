@@ -476,7 +476,7 @@ describe('Masteruser - Create Admin User From JSON', () => {
         cy.log('Test completed successfully.');
         cy.wait(2500);
       });
-    });
+    }); //end in alias
   }); //end it
 
   it('Master user delete Admin user', () => {
