@@ -517,7 +517,7 @@ describe('Send welcome mail via post/EinfachBrief', () => {
   });
 
   //Login to einfachBrief and check welcome pdf
-  it.only('Login to einfachBrief and check welcome pdf', () => {
+  it('Login to einfachBrief and check welcome pdf', () => {
     cy.visit(Cypress.env('tagesBaseUrl'));
     cy.url().should('include', Cypress.env('tagesBaseUrl'));
 
@@ -591,12 +591,20 @@ describe('Send welcome mail via post/EinfachBrief', () => {
         }
         cy.wait(1500);
 
+        //Open/Preview selected document
+        cy.intercept('POST', '**/getDocumentPreview*').as('previewDoc');
+
         cy.get(
           '.open > .accordion-container > .table-wrapper > tp-table > .table > .table__container > table > tbody > .table__row>td>.icon-magnify'
         )
           .should('be.visible') // Wait for the element to be visible
           .click({ force: true });
-        cy.wait(3000);
+
+        cy.wait('@previewDoc', { timeout: 57000 }).then((interception) => {
+          // Assert the response status code
+          expect(interception.response.statusCode).to.eq(200);
+          cy.wait(1500);
+        });
 
         //Close document preview dialog
         cy.get(
