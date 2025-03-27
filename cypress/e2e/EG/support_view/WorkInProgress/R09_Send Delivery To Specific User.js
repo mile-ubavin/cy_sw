@@ -640,7 +640,7 @@ describe('Broadcast delivery to Specific User', () => {
     cy.wait(2500);
   }); //end it
 
-  //Send delivery to Specific user, when HR role is enabled
+  //Send elivery to Specific user, when HR role is enabled
   it('Send Delivery to selected-specific user', () => {
     cy.loginToSupportViewAdmin(); // Login as a master user
     cy.wait(1500);
@@ -872,13 +872,10 @@ describe('Broadcast delivery to Specific User', () => {
 
     cy.wait(4500);
 
-    // Switch to the second email
-    //cy.iframe('#ifinbox').find('.mctn > .m > button > .lms').eq(1).click();
-
-    // emailSubject(1); // Validate subject of second email
-    // cy.wait(1500);
-    // emailBody(); // Validate second email body
-
-    //cy.wait(4500);
+    // Delete all emails
+    cy.get('.menu>div>#delall')
+      .should('not.be.disabled')
+      .click({ force: true });
+    cy.wait(2500);
   });
 }); //end describe

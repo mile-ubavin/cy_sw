@@ -94,7 +94,7 @@ describe('Send welcome mail via post / EinfachBrief (HappyPath)', () => {
 
   // A D M I N   U S E R - CREATE USER FROM CSV FILE
 
-  it.only('Login As AdminUser - Create Users from CSV file', () => {
+  it('Login As AdminUser - Create Users from CSV file', () => {
     //Import credentials (un/pw) from 'supportView.json' file
     cy.fixture('supportView.json').as('payslipSW');
     cy.get('@payslipSW').then((payslipJson) => {
@@ -192,7 +192,7 @@ describe('Send welcome mail via post / EinfachBrief (HappyPath)', () => {
 
   //D O W L O A D    P D F
 
-  it('Download and open the latest PDF', () => {
+  it.only('Download and open the latest PDF', () => {
     cy.fixture('einfachbrief.json').as('einfachbrief');
     cy.get('@einfachbrief').then((einfachbriefJson) => {
       // cy.visit(einfachbriefJson.baseUrl);

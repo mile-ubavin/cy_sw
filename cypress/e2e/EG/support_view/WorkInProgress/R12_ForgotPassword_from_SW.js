@@ -299,8 +299,6 @@ describe('adminUser-trigger ForgotPassword from SW', () => {
     cy.wait(2500);
   });
 
-  //******************************************************************* */
-
   // Function to generate a random passwords based on Password policy
   function generatePassword(length, criteria) {
     const upperCase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -340,7 +338,7 @@ describe('adminUser-trigger ForgotPassword from SW', () => {
       .join('');
   }
 
-  it('Reset Pass 1st time, vheck valication, Login to SW with newPass end Change it to Test1234', () => {
+  it('Reset Pass 1st time, check valication, Login to SW with newPass end Change it to Test1234', () => {
     // Visit Yopmail
     cy.visit('https://yopmail.com/en/');
 
@@ -813,6 +811,23 @@ describe('adminUser-trigger ForgotPassword from SW', () => {
     cy.get('.confirm-buttons > :nth-child(2)').click();
     cy.url().should('include', Cypress.env('baseUrl')); // Validate URL
     cy.log('Test completed successfully.');
+    cy.wait(2500);
+  });
+
+  it('Yopmail - Delete all emails ', () => {
+    // Visit Yopmail
+    cy.visit('https://yopmail.com/en/');
+
+    // Enter the support admin email
+    cy.get('#login').type(Cypress.env('email_supportViewAdmin'));
+
+    // Click the refresh button
+    cy.get('#refreshbut > .md > .material-icons-outlined').click();
+
+    // Delete all emails if the button is not disabled
+    cy.get('.menu>div>#delall')
+      .should('not.be.disabled')
+      .click({ force: true });
     cy.wait(2500);
   });
 }); //end it

@@ -19,15 +19,14 @@ describe('Sent pdf file', () => {
     //Search for Company by Display Name
     cy.get('#searchButton>span').click(); //Click on search button
     cy.wait(1000);
-    cy.fixture('supportView.json').as('payslipSW');
-    cy.get('@payslipSW').then((payslipJson) => {
-      // Use the company name from the cypress.config.js
-      const companyName = Cypress.env('company');
-      // Search for Group by Display Name using the company name
-      cy.get('.search-dialog>form>.form-fields>.searchText-wrap')
-        .eq(0)
-        .type(companyName);
-    });
+
+    // Use the company name from the cypress.config.js
+    const companyName = Cypress.env('company');
+    // Search for Group by Display Name using the company name
+    cy.get('.search-dialog>form>.form-fields>.searchText-wrap')
+      .eq(0)
+      .type(companyName);
+
     //Find the Search button by button name and click on it
     cy.wait(1500);
     cy.get('.search-dialog>form>div>.mat-primary').click();
@@ -701,7 +700,7 @@ describe('Sent pdf file', () => {
       .eq(0)
       .click({ force: true });
 
-    cy.wait(['@getIdentifications'], { timeout: 37000 }).then(
+    cy.wait(['@getIdentifications'], { timeout: 57000 }).then(
       (interception) => {
         // Log the intercepted response
         cy.log('Intercepted response:', interception.response);

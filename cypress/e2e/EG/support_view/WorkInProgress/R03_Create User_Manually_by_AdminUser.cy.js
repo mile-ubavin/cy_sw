@@ -115,7 +115,7 @@ describe('R03_Admn user - Create E-Box User - Manually', () => {
   }); //end it
 
   //Login As Admin user and Create User Manually
-  it('Login As Admin user and Create User Manually', () => {
+  it('Login As Admin user and Create User from XML file', () => {
     // Login as Admin User using a custom command
     cy.loginToSupportViewAdmin();
     cy.wait(3500);
@@ -389,7 +389,7 @@ describe('R03_Admn user - Create E-Box User - Manually', () => {
 
         cy.get('#refresh').click({ force: true }); //Click on Refresh inbox icon
         cy.wait(5000);
-        //Reset Pasword email
+        //Reset Password email
 
         cy.iframe('#ifinbox')
           .find('.mctn > .m > button > .lms')
@@ -431,7 +431,7 @@ describe('R03_Admn user - Create E-Box User - Manually', () => {
           .find('.input__field-input')
           .eq(1)
 
-          .type(Cypress.env('password_egEbox')); //fill the 1st input field
+          .type(Cypress.env('password_egEbox')); //fill the 2nd input field
         cy.iframe('#ifmail').find('.input-eye-icon').eq(1).click(); //Click on Show password icon
         cy.iframe('#ifmail').find('.button').click(); //Click on confirm button
 

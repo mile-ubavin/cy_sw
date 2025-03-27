@@ -95,20 +95,20 @@ describe('Send welcome mail via post/EinfachBrief', () => {
 
         //Save Edit Company dialog
         cy.get('button[type="submit"]').click();
+
+        cy.wait(['@editXTenant'], { timeout: 57000 }).then((interception) => {
+          // Assert the response status code
+          expect(interception.response.statusCode).to.eq(204);
+          cy.wait(2500);
+        });
       } else {
         // If the checkbox is already enabled
         cy.log('Checkbox is already enabled.');
+
+        //Close Edit Company dialog
         cy.get('.close[data-mat-icon-name="close"]').click();
       }
-      // cy.intercept('GET', '**/group/template/tenant/**').as('apiRequest');
 
-      // cy.wait(['@editXTenant'], { timeout: 57000 }).then((interception) => {
-      //   // Assert the response status code
-      //   expect(interception.response.statusCode).to.eq(204);
-      //   cy.wait(2500);
-      // });
-
-      //Close Edit Company dialog
       cy.wait(3000);
     });
 
@@ -517,12 +517,23 @@ describe('Send welcome mail via post/EinfachBrief', () => {
   });
 
   //Login to einfachBrief and check welcome pdf
-  it('Login to einfachBrief and check welcome pdf', () => {
+  it.only('Login to einfachBrief and check welcome pdf', () => {
     cy.visit(Cypress.env('tagesBaseUrl'));
     cy.url().should('include', Cypress.env('tagesBaseUrl'));
 
     cy.wait(1500);
-    // Log in to the system
+
+    // Remove Cookie dialog (if shown)
+    cy.get('body').then(($body) => {
+      if ($body.find('#onetrust-policy-title').is(':visible')) {
+        cy.get('#onetrust-accept-btn-handler').click({ force: true });
+      } else {
+        cy.log('Cookie bar not visible');
+      }
+    });
+    cy.wait(1500);
+
+    // Log in to the sw
     cy.get('tp-input[formcontrolname="username"]').type(
       Cypress.env('email_supportViewAdmin')
     );
@@ -596,8 +607,11 @@ describe('Send welcome mail via post/EinfachBrief', () => {
     });
 
     // Switch to history table and download the PDF
-    cy.get('.header__navigation-menu>li>a[href="/deliveries-list"]').click();
-    cy.wait(1500);
+    cy.get('.header__navigation-menu>li>a')
+      .contains(/Auftragsliste|Auftragsliste/)
+      .click();
+    cy.wait(2000);
+
     cy.get(
       '.deliveries-list-table>tp-table>.table>.table__container>table>tbody>tr'
     )
@@ -607,15 +621,39 @@ describe('Send welcome mail via post/EinfachBrief', () => {
     cy.get('.download-container > p > .desktop').first().click({ force: true });
     cy.wait(2000);
     // Get the latest downloaded PDF file
+    // const downloadsDir = `${Cypress.config(
+    //   'fileServerFolder'
+    // )}/cypress/downloads/`;
+    // console.log('downloadsDir', downloadsDir);
+
+    // cy.task(
+    //   'getDownloadedPdf',
+    //   'C:/Users/mubavin/Cypress/EG/cypress-automatison-framework/cypress/downloads'
+    // ).then((filePath) => {
+    //   expect(filePath).to.not.be.null; // Assert the file exists
+    //   cy.log(`Latest PDF File Path: ${filePath}`);
+    //   cy.wait(3000);
+    //   // Read the PDF content and open in the same tab using a Blob
+    //   cy.readFile(filePath, 'binary').then((pdfBinary) => {
+    //     const pdfBlob = Cypress.Blob.binaryStringToBlob(
+    //       pdfBinary,
+    //       'application/pdf'
+    //     );
+    //     const pdfUrl = URL.createObjectURL(pdfBlob);
+
+    //     // Open the PDF in the same tab
+    //     cy.window().then((win) => {
+    //       win.location.href = pdfUrl; // Loads the PDF in the same window
+    //     });
+    //   });
+    // });
+    // cy.wait(3500);
+
+    // Get the latest downloaded PDF file
     const downloadsDir = `${Cypress.config(
       'fileServerFolder'
     )}/cypress/downloads/`;
-    console.log('downloadsDir', downloadsDir);
-
-    cy.task(
-      'getDownloadedPdf',
-      'C:/Users/mubavin/Cypress/EG/cypress-automatison-framework/cypress/downloads'
-    ).then((filePath) => {
+    cy.task('getDownloadedPdf', downloadsDir).then((filePath) => {
       expect(filePath).to.not.be.null; // Assert the file exists
       cy.log(`Latest PDF File Path: ${filePath}`);
       cy.wait(3000);

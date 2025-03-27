@@ -33,25 +33,39 @@ const getDownloadedPdf = (downloadsDir) => {
 };
 
 // Task: Download a file from a URL
-const downloadFile = ({ url, destinationPath }) => {
+const downloadFileToFolder = ({ url, fileName }) => {
+  // Define the target downloads folder
+  const downloadsFolder =
+    'C:\\Users\\mubavin\\Cypress\\EG\\cypress-automatison-framework\\cypress\\downloads';
+  const destinationPath = path.join(downloadsFolder, fileName);
+
   return new Promise((resolve, reject) => {
+    // Create a writable stream to the destination file
     const file = fs.createWriteStream(destinationPath);
+
     https
       .get(url, (response) => {
         if (response.statusCode !== 200) {
-          reject(new Error(`Failed to get '${url}' (${response.statusCode})`));
-          return;
+          return reject(
+            new Error(
+              `Failed to download file: ${url} returned status code ${response.statusCode}`
+            )
+          );
         }
+
+        // Pipe the response data into the file
         response.pipe(file);
         file.on('finish', () => {
-          file.close(resolve);
+          file.close(() => {
+            console.log(`File downloaded to ${destinationPath}`);
+            resolve(destinationPath);
+          });
         });
       })
       .on('error', (err) => {
+        // Delete the file on error to avoid partial files
         fs.unlink(destinationPath, (unlinkErr) => {
-          if (unlinkErr) {
-            console.error(`Failed to delete file: ${unlinkErr}`);
-          }
+          if (unlinkErr) console.error(`Error deleting file: ${unlinkErr}`);
         });
         reject(err);
       });
@@ -87,6 +101,7 @@ const environments = {
     username_egEbox: 'aquaABBA000100279311',
     password_egEbox: 'Test1234!',
     accountNumber_egEbox: 'ABBA000100279311',
+    tagesBaseUrl: 'https://tages-post.edeja.com/',
     downloadsFolder:
       'C:/Users/mubavin/Cypress/EG/cypress-automatison-framework/cypress/downloads/',
     dashboardURL: 'https://supportviewpayslip.edeja.com/fe/dashboard/groups',
@@ -127,6 +142,12 @@ const environments = {
         netNumberPhoneNum: '64',
         subscriberNumberPhoneNum: '706360',
         prefixedTitle: 'No Address Data - Title',
+        // Explicitly set address fields to empty strings
+        streetName: '',
+        streetNumber: '',
+        doorNumber: '',
+        zipCode: '',
+        city: '',
       },
     ],
     createUser: [
@@ -190,6 +211,9 @@ const environments = {
     username_egEbox: 'aquaABBA000100279311',
     password_egEbox: 'Test1234!',
     accountNumber_egEbox: 'ABBA000100279311',
+    tagesBaseUrl: 'https://abn-www.einfach-brief.at/fe_t/',
+    downloadsFolder:
+      'C:/Users/mubavin/Cypress/EG/cypress-automatison-framework/cypress/downloads/',
     dashboardURL:
       'https://e-gehaltszettel-t.post-business-solutions.at/fe.e-gehaltszettel_t/dashboard/groups',
     eboxDeliveryPage:
@@ -230,6 +254,12 @@ const environments = {
         netNumberPhoneNum: '64',
         subscriberNumberPhoneNum: '706360',
         prefixedTitle: 'No Address Data - Title',
+        // Explicitly set address fields to empty strings
+        streetName: '',
+        streetNumber: '',
+        doorNumber: '',
+        zipCode: '',
+        city: '',
       },
     ],
     createUser: [
@@ -293,6 +323,9 @@ const environments = {
     username_egEbox: 'aquaABBA000100279311',
     password_egEbox: 'Test1234!',
     accountNumber_egEbox: 'ABBA000100279311',
+    tagesBaseUrl: 'https://www.einfach-brief.at/fe/',
+    downloadsFolder:
+      'C:/Users/mubavin/Cypress/EG/cypress-automatison-framework/cypress/downloads/',
     dashboardURL:
       'https://e-gehaltszettel.post-business-solutions.at/fe.e-gehaltszettel/dashboard/groups',
     eboxDeliveryPage:
@@ -333,6 +366,12 @@ const environments = {
         netNumberPhoneNum: '64',
         subscriberNumberPhoneNum: '706360',
         prefixedTitle: 'No Address Data - Title',
+        // Explicitly set address fields to empty strings
+        streetName: '',
+        streetNumber: '',
+        doorNumber: '',
+        zipCode: '',
+        city: '',
       },
     ],
     createUser: [
@@ -548,7 +587,7 @@ module.exports = defineConfig({
       // Register the downloadFile task
       on('task', {
         getDownloadedPdf,
-        downloadFile,
+        downloadFileToFolder,
         openFile,
         setValue({ key, value }) {
           storedValues[key] = value;
@@ -567,7 +606,7 @@ module.exports = defineConfig({
         },
       });
       //  Set executing tests on various environments, targeting appropriate json from const=environments
-      const envConfig = environments['eg_dev'];
+      const envConfig = environments['eg_test'];
       return { ...config, env: { ...config.env, ...envConfig } };
     }, //end
     specPattern: 'cypress/e2e/**/*.{js,jsx,ts,tsx}', // Ensure this matches your structure
