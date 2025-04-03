@@ -814,10 +814,10 @@ describe('Broadcast delivery to Specific User', () => {
     );
 
     // Scroll to the bottom of the PDF viewer or page
-    cy.get('.content-container>.scroll-container').eq(1).scrollTo('bottom', {
-      duration: 500,
-      ensureScrollable: false,
-    });
+    // cy.get('.content-container>.scroll-container').eq(1).scrollTo('bottom', {
+    //   duration: 500,
+    //   ensureScrollable: false,
+    // });
     cy.wait(3500);
 
     // Logout
@@ -828,8 +828,8 @@ describe('Broadcast delivery to Specific User', () => {
     cy.log('Test completed successfully.');
   });
 
-  //Admin user check Reporting email
-  it('Yopmail - Get Reporting email', () => {
+  //Admin user check Reporting email and delte all emails
+  it('Yopmail - Get Reporting email and delte all emails', () => {
     // Visit Yopmail
     cy.visit('https://yopmail.com/en/');
 

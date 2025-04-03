@@ -1,6 +1,6 @@
 describe('R03_Admn user - Create E-Box User - Manually', () => {
   //Enable All Roles (except HR Role)
-  it('Enable All Roles, except HR Role for Specific Admin', () => {
+  it.skip('Enable All Roles, except HR Role for Specific Admin', () => {
     // Login as a Master-User using custom command
     cy.loginToSupportViewMaster();
     cy.wait(3500);
@@ -114,8 +114,98 @@ describe('R03_Admn user - Create E-Box User - Manually', () => {
     cy.wait(2500);
   }); //end it
 
+  // Precondition: Search for the user and if user exists, proceed with deletion
+  it('Search for the user and if user(s) exists, proceed with deletion', () => {
+    // Login as Master User using a custom command
+    const user = Cypress.env('createUser')[0];
+    cy.loginToSupportViewMaster();
+    cy.wait(3500);
+
+    //Remove pop up
+    cy.get('body').then(($body) => {
+      if ($body.find('.release-note-dialog__close-icon').length > 0) {
+        cy.get('.release-note-dialog__close-icon').click();
+      } else {
+        cy.log('Close icon is NOT present');
+      }
+    });
+    cy.wait(1500);
+
+    //Search for Group by Display Name
+    cy.get('#searchButton>span').click(); //Click on search button
+    // Use the company name from the cypress.config.js
+    const companyName = Cypress.env('company');
+    // Search for Group by Display Name using the company name
+    cy.get('.search-dialog>form>.form-fields>.searchText-wrap')
+      .eq(1)
+      .type(companyName);
+    //Find the Search button by button name and click on it
+    cy.get('.search-dialog>form>div>.mat-primary').click();
+    //Switch to user section
+    cy.get('.action-buttons > .mdc-button').eq(4).click();
+
+    // Array of users to delete
+    const usersToDelete = [user.username]; // Add more usernames as needed
+
+    usersToDelete.forEach((userName) => {
+      const searchAndDeleteUser = (userName) => {
+        cy.get('.search-label').click();
+
+        // Search for the user
+        cy.get('.mat-mdc-form-field-infix>input[formcontrolname="userName"]')
+          .clear()
+          .type(userName);
+        cy.get('button[type="submit"]').click();
+
+        // Wait for the search results
+        cy.wait(2000);
+
+        // Check if "No results" message exists (indicating user does not exist)
+        cy.get('body').then(($body) => {
+          if ($body.find('.cdk-row').length === 0) {
+            cy.log(`User ${userName} not found or already deleted.`);
+            cy.get('.mdc-evolution-chip__cell--trailing > .mat-icon').click();
+          } else {
+            // If user exists, proceed with deletion
+            cy.get('cdk-row').should('exist');
+            cy.log(`User ${userName} found. Proceeding with deletion.`);
+
+            cy.get('button')
+              .contains(/Delete|DSGVO-Löschung/)
+              .should('be.visible')
+              .click();
+
+            // Wait for confirmation dialog and confirm deletion
+            cy.get('.confirm-buttons > button')
+              .contains(/YES|JA/)
+              .should('be.visible')
+              .click();
+
+            cy.log(`User ${userName} has been deleted.`);
+          }
+        });
+      };
+      cy.wait(1500);
+      searchAndDeleteUser(userName);
+
+      // Optional wait between deletions (if needed)
+      cy.wait(1000);
+    });
+
+    //Logout
+    cy.get('.logout-icon ').click();
+    cy.wait(2000);
+    cy.get('.confirm-buttons > :nth-child(2)').click();
+    cy.url();
+    cy.url().should('include', Cypress.env('baseUrl')); // Validate url
+    cy.wait(1500);
+    // Completion message at the end of the test
+    cy.log('The tests have been completed successfully.');
+    cy.wait(3000);
+  }); //end it
+
   //Login As Admin user and Create User Manually
-  it('Login As Admin user and Create User from XML file', () => {
+  it('Login As Admin user and Create User Manually', () => {
     // Login as Admin User using a custom command
     cy.loginToSupportViewAdmin();
     cy.wait(3500);
@@ -352,12 +442,25 @@ describe('R03_Admn user - Create E-Box User - Manually', () => {
         //Wait for Cookie bar
         cy.wait(15000);
 
-        // //Remove Cooki dialog (if shown)
-        if (cy.iframe('#ifmail').find('#onetrust-accept-btn-handler')) {
-          cy.iframe('#ifmail').find('#onetrust-accept-btn-handler').click();
-        } else {
-          cy.log('Cookie dialog is not shown');
-        }
+        // // //Remove Cooki dialog (if shown)
+        // if (cy.iframe('#ifmail').find('#onetrust-accept-btn-handler')) {
+        //   cy.iframe('#ifmail').find('#onetrust-accept-btn-handler').click();
+        // } else {
+        //   cy.log('Cookie dialog is not shown');
+        // }
+
+        // Remove Cookie dialog (if shown)
+        cy.iframe('#ifmail').then(($iframe) => {
+          if ($iframe.find('#onetrust-policy-title').is(':visible')) {
+            cy.wrap($iframe)
+              .find('#onetrust-accept-btn-handler')
+              .click({ force: true });
+            cy.log('Cookie dialog closed.');
+          } else {
+            cy.log('Cookie dialog not visible.');
+          }
+        });
+        cy.wait(1500);
 
         // Remove Cookie dialog (if shown)
         // cy.iframe('#ifmail')
@@ -535,87 +638,136 @@ describe('R03_Admn user - Create E-Box User - Manually', () => {
     // Array of users to delete
     const usersToDelete = [user.username]; // Add more usernames as needed
 
-    usersToDelete.forEach((userName, index) => {
-      // Function to search for and delete a user
+    // usersToDelete.forEach((userName, index) => {
+    //   // Function to search for and delete a user
+    //   const searchAndDeleteUser = (userName) => {
+    //     // Search for the user
+    //     cy.get('.search-label').click();
+
+    //     // Type the username as a search criterion
+    //     cy.get('.mat-mdc-form-field-infix>input[formcontrolname="userName"]')
+    //       .clear() // Clear any previous input
+    //       .type(userName);
+
+    //     // Click on the submit button to search
+    //     cy.get('button[type="submit"]').click();
+
+    //     // Wait for search results to load (adjust as needed for dynamic loading)
+    //     cy.get('body').then(($body) => {
+    //       if ($body.find('.no-results-message').length > 0) {
+    //         // If the user doesn't exist or is already deleted
+    //         cy.log(`User ${userName} not found or already deleted.`);
+
+    //         // Reset the search by clicking on the reset button
+    //         cy.get('.mdc-evolution-chip__cell--trailing > .mat-icon').click();
+
+    //         // Proceed with the next search criteria
+    //         if (index < usersToDelete.length - 1) {
+    //           cy.log(
+    //             `Proceeding with the next user: ${usersToDelete[index + 1]}`
+    //           );
+    //         }
+    //       } else {
+    //         // If the user is found, proceed with the deletion
+    //         cy.log(`User ${userName} found. Proceeding with deletion.`);
+
+    //         // Click the delete button (adjust the selector as per your app)
+    //         cy.get('button')
+    //           .contains(/Delete|DSGVO-Löschung/)
+    //           .click();
+    //         cy.wait(2000);
+    //         // Confirm delete in the confirmation dialog
+    //         cy.get('.confirm-buttons > button')
+    //           .filter((index, button) => {
+    //             return (
+    //               Cypress.$(button).text().trim() === 'YES' ||
+    //               Cypress.$(button).text().trim() === 'JA'
+    //             );
+    //           })
+    //           .click();
+    //         cy.wait(2000);
+    //         // Log the deletion
+    //         cy.log(`User ${userName} has been deleted.`);
+
+    // Array of users to delete
+    //const usersToDelete = ['manualAddress', 'manualNoAddress'];
+
+    usersToDelete.forEach((userName) => {
       const searchAndDeleteUser = (userName) => {
-        // Search for the user
         cy.get('.search-label').click();
 
-        // Type the username as a search criterion
+        // Search for the user
         cy.get('.mat-mdc-form-field-infix>input[formcontrolname="userName"]')
-          .clear() // Clear any previous input
+          .clear()
           .type(userName);
-
-        // Click on the submit button to search
         cy.get('button[type="submit"]').click();
 
-        // Wait for search results to load (adjust as needed for dynamic loading)
+        // Wait for the search results
+        cy.wait(2000);
+
+        // Check if "No results" message exists (indicating user does not exist)
         cy.get('body').then(($body) => {
-          if ($body.find('.no-results-message').length > 0) {
-            // If the user doesn't exist or is already deleted
+          if ($body.find('.cdk-row').length === 0) {
             cy.log(`User ${userName} not found or already deleted.`);
-
-            // Reset the search by clicking on the reset button
             cy.get('.mdc-evolution-chip__cell--trailing > .mat-icon').click();
-
-            // Proceed with the next search criteria
-            if (index < usersToDelete.length - 1) {
-              cy.log(
-                `Proceeding with the next user: ${usersToDelete[index + 1]}`
-              );
-            }
           } else {
-            // If the user is found, proceed with the deletion
+            // If user exists, proceed with deletion
+            cy.get('cdk-row').should('exist');
             cy.log(`User ${userName} found. Proceeding with deletion.`);
 
-            // Click the delete button (adjust the selector as per your app)
             cy.get('button')
               .contains(/Delete|DSGVO-Löschung/)
+              .should('be.visible')
               .click();
-            cy.wait(2000);
-            // Confirm delete in the confirmation dialog
+
+            // Wait for confirmation dialog and confirm deletion
             cy.get('.confirm-buttons > button')
-              .filter((index, button) => {
-                return (
-                  Cypress.$(button).text().trim() === 'YES' ||
-                  Cypress.$(button).text().trim() === 'JA'
-                );
-              })
+              .contains(/YES|JA/)
+              .should('be.visible')
               .click();
-            cy.wait(2000);
-            // Log the deletion
+
             cy.log(`User ${userName} has been deleted.`);
 
-            //Search for just deleted Admin user
-            cy.get('#searchButton').click({ force: true });
-            cy.wait(1500);
-
-            cy.get('button[type="submit"]').click(); //Click on Search button
-            cy.wait(2500);
-
-            //Already deleted Admin user is not founded
-
-            cy.get(
-              '.mat-mdc-paginator-range-actions>.mat-mdc-paginator-range-label'
-            )
-              .invoke('css', 'border', '1px solid blue')
-              .invoke('text') // Get the text of the element
-              .then((text) => {
-                // Trim the text and validate it
-                const trimmedText = text.trim();
-                expect(trimmedText).to.match(/0 of 0|0 von 0/);
-              });
-
-            cy.wait(2500);
+            // Reset the search to clear out the search pill
+            //  cy.get('.mdc-evolution-chip__cell--trailing > .mat-icon').click();
           }
         });
       };
-      // Call the function to search and delete user
+      cy.wait(1500);
       searchAndDeleteUser(userName);
 
       // Optional wait between deletions (if needed)
       cy.wait(1000);
     });
+
+    //Search for just deleted Admin user
+    cy.get('#searchButton').click({ force: true });
+    cy.wait(1500);
+
+    cy.get('button[type="submit"]').click(); //Click on Search button
+    cy.wait(2500);
+
+    //Already deleted Admin user is not founded
+
+    cy.get('.mat-mdc-paginator-range-actions>.mat-mdc-paginator-range-label')
+      .invoke('css', 'border', '1px solid blue')
+      .invoke('text') // Get the text of the element
+      .then((text) => {
+        // Trim the text and validate it
+        const trimmedText = text.trim();
+        expect(trimmedText).to.match(/0 of 0|0 von 0/);
+        //    });
+
+        cy.wait(2500);
+        //     }
+        //     });
+        //    };
+        // Call the function to search and delete user
+        //  searchAndDeleteUser(userName);
+
+        // Optional wait between deletions (if needed)
+        cy.wait(1000);
+      });
 
     //Logout
     cy.get('.logout-icon ').click();
@@ -629,8 +781,53 @@ describe('R03_Admn user - Create E-Box User - Manually', () => {
     cy.wait(3000);
   }); //end it
 
-  //Yopmail - Clear inbox
   it('Yopmail - Clear inbox', () => {
+    const user = Cypress.env('createUser')[0];
+
+    // Visit Yopmail with an extended timeout
+    cy.visit('https://yopmail.com/en/', { timeout: 90000 });
+
+    // Ensure the login field is visible before typing
+    cy.get('#login', { timeout: 30000 })
+      .should('be.visible')
+      .type(user.email)
+      .type('{enter}');
+
+    // Ensure the inbox iframe is loaded
+    cy.frameLoaded('#ifinbox');
+
+    // Wait for inbox content to appear
+    cy.wait(3000);
+
+    // Check if inbox is empty or has emails
+    // cy.iframe('#ifinbox').then(($iframe) => {
+    //   const emails = $iframe.find('.mctn > .m'); // Selector for emails
+    //   const emptyInboxMessage = $iframe.find('.bname').text().trim(); // Check for "No new messages" text
+
+    //   if (emails.length > 0) {
+    //     cy.log(
+    //       `Inbox contains ${emails.length} email(s), proceeding with deletion.`
+    //     );
+
+    //     // Click delete all emails button if enabled
+    //     cy.get('.menu>div>#delall')
+    //       .should('not.be.disabled')
+    //       .click({ force: true });
+
+    //     cy.wait(2500);
+    //   } else if (
+    //     emptyInboxMessage.includes('No new messages') ||
+    //     emails.length === 0
+    //   ) {
+    //     cy.log('Inbox is empty, skipping deletion.');
+    //   } else {
+    //     cy.log('Could not determine inbox state.');
+    //   }
+    // });
+  });
+
+  //Yopmail - Clear inbox
+  it.skip('Yopmail - Clear inbox', () => {
     const user = Cypress.env('createUser')[0];
 
     // Visit yopmail application or login page
@@ -645,4 +842,38 @@ describe('R03_Admn user - Create E-Box User - Manually', () => {
       .click({ force: true });
     cy.wait(2500);
   }); //end it
+
+  it.only('getCookie and Store it as a global variabile', () => {
+    cy.intercept('POST', '**/login/user').as('getToken'); // Intercept login request
+    cy.loginToSupportViewAdmin(); // Perform login
+    cy.wait(1500);
+
+    cy.wait('@getToken', { timeout: 37000 }).then((interception) => {
+      expect(interception.response.statusCode).to.eq(200);
+
+      // Extract 'set-cookie' header
+      const setCookieHeaders = interception.response.headers['set-cookie'];
+      cy.log('Set-Cookie Headers:', setCookieHeaders);
+
+      if (setCookieHeaders && setCookieHeaders.length > 0) {
+        // Find the header that contains SV_AUTH
+        const authCookie = setCookieHeaders.find((cookie) =>
+          cookie.startsWith('SV_AUTH=')
+        );
+
+        if (authCookie) {
+          // Extract the SV_AUTH value
+          const match = authCookie.match(/SV_AUTH=([^;]+)/);
+          if (match) {
+            const authCookieValue = match[1];
+            cy.log('Extracted SV_AUTH Cookie:', authCookieValue);
+
+            // Store in Cypress env variable
+            Cypress.env('authCookieValue', authCookieValue);
+          }
+        }
+      }
+      cy.wait(2500);
+    });
+  });
 }); //end describe

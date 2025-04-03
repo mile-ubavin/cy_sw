@@ -189,6 +189,15 @@ const environments = {
         email: 'otto.testuser@yopmail.com',
       },
     ],
+
+    legacyTestuser: [
+      {
+        legacyURL:
+          'http://10.5.10.34:8085/be.e-gehaltszettel_t/supportView/v1/legacy/submit',
+        email: 'cy.legacy@yopmail.com',
+        username: 'CYLegacyTestuser',
+      },
+    ],
   },
   eg_test: {
     baseUrl:
@@ -301,6 +310,14 @@ const environments = {
         email: 'otto.testuser@yopmail.com',
       },
     ],
+    legacyTestuser: [
+      {
+        legacyURL:
+          'https://e-gehaltszettel-t.post-business-solutions.at/be.e-gehaltszettel_t/supportView/v1/legacy/submit',
+        email: 'cy.legacy@yopmail.com',
+        username: 'CYLegacyTestuser',
+      },
+    ],
   },
   eg_prod: {
     baseUrl:
@@ -411,6 +428,14 @@ const environments = {
       {
         accountNumber: 'ottoTestuser',
         email: 'otto.testuser@yopmail.com',
+      },
+    ],
+    legacyTestuser: [
+      {
+        legacyURL:
+          'https://e-gehaltszettel.post-business-solutions.at/be.e-gehaltszettel/supportView/v1/legacy/submit',
+        email: 'cy.legacy@yopmail.com',
+        username: 'CYLegacyTestuser',
       },
     ],
   },
@@ -574,6 +599,16 @@ const environments = {
       'nutzungsbedingungen/',
     ],
   },
+  ebrief_test: {
+    baseUrl: 'https://www.e-brief.at/fe_t/login',
+    username_kiam: 'kiam.t.mile@yopmail.com',
+    password_kiam: 'Test1234!',
+  },
+  ebrief_prod: {
+    baseUrl: 'https://www.e-brief.at/fe/login',
+    username_kiam: 'anna.testuser@yopmail.com',
+    password_kiam: 'Test1234!',
+  },
 };
 
 const credentials = {}; // Temporary global storage for credentials
@@ -606,7 +641,7 @@ module.exports = defineConfig({
         },
       });
       //  Set executing tests on various environments, targeting appropriate json from const=environments
-      const envConfig = environments['eg_test'];
+      const envConfig = environments['ebrief_test'];
       return { ...config, env: { ...config.env, ...envConfig } };
     }, //end
     specPattern: 'cypress/e2e/**/*.{js,jsx,ts,tsx}', // Ensure this matches your structure

@@ -107,6 +107,119 @@ describe('Register User from xml file', () => {
     cy.wait(2500);
   });
 
+  //Enable Craete user Role
+  it('Enable Craete user Roles ', () => {
+    // Login as a Master-User using custom command
+    cy.loginToSupportViewMaster();
+    cy.wait(3500);
+
+    //Remove pop up
+    cy.get('body').then(($body) => {
+      if ($body.find('.release-note-dialog__close-icon').length > 0) {
+        cy.get('.release-note-dialog__close-icon').click();
+      } else {
+        cy.log('Close icon is NOT present');
+      }
+    });
+    cy.wait(1500);
+
+    // Search for Company by Display Name
+    cy.get('#searchButton>span').click(); //Click on search button
+    cy.wait(1000);
+    // Search for Group by Display Name using the company name
+    cy.get('.search-dialog>form>.form-fields>.searchText-wrap')
+      .eq(0)
+      .type(Cypress.env('company')); // Use the company name from the cypress.config.js
+    cy.wait(1500);
+    //Find the Search button by button name and click on it
+    cy.get('.search-dialog>form>div>.mat-primary').click();
+    cy.wait(1500);
+
+    //Click On Admin UserbButton
+    cy.get('.mdc-button__label')
+      // Find the button containing "Admin User" or "Admin Benutzer" button
+      .contains(/Admin User|Admin Benutzer/i)
+      .should('be.visible') // Optional: Ensure the button is visible before interacting
+      .click(); // Click the button
+    cy.wait(1500);
+
+    //Search For Admin And Open Role Dialog
+    cy.get('.search').click({ force: true });
+    //Search for Admin using username
+    cy.get('input[formcontrolname="userName"]').type(
+      Cypress.env('username_supportViewAdmin')
+    );
+    // Click on Search for Admin User button
+    cy.get('button[type="submit"]').click();
+    cy.wait(2000);
+    //Click on Role
+    cy.get('.mdc-button__label')
+      .contains(/Rechte|Rights/i) // Find the button containing "Rechte" or "Rights"
+      .should('be.visible')
+      .click(); // Click the button
+
+    // Enable All Roles, except HR Role, for specific Admin user
+    const rolesToEnable = [
+      ['Company Admin', 'Firmen-Administrator'],
+      ['Customer Creator', 'Nutzeranlage'],
+      ['Data Submitter', 'Versand'],
+      ['View E-Box', 'E-Box ansehen'],
+      // ['HR Manager', 'HR Manager'],
+    ];
+
+    cy.get('.mat-mdc-checkbox > div > .mdc-label')
+      .should('exist') // Ensure checkbox labels exist
+      .each(($label) => {
+        const text = $label.text().trim();
+
+        // Check if text matches any role in either English or German
+        if (rolesToEnable.some(([en, de]) => text === en || text === de)) {
+          cy.wrap($label)
+            .parent()
+            .find('input[type="checkbox"]') // Locate the checkbox input
+            .then(($checkboxInput) => {
+              cy.wrap($checkboxInput)
+                .invoke('prop', 'checked')
+                .then((isChecked) => {
+                  if (!isChecked) {
+                    // Enable the role if it's not already checked
+                    cy.wrap($checkboxInput).click({ force: true });
+                    cy.log(
+                      `Checkbox for "${text}" was not enabled; now enabled.`
+                    );
+                  } else {
+                    cy.log(`Checkbox for "${text}" is already enabled.`);
+                  }
+                });
+            });
+        }
+      });
+
+    cy.wait(1500);
+
+    // Submit the changes
+    cy.get('button[type="submit"]').click();
+    cy.wait(1500);
+
+    // Verify the success message
+    cy.get('.mat-mdc-simple-snack-bar > .mat-mdc-snack-bar-label')
+      .should('be.visible') // Ensure it's visible first
+      .invoke('text') // Get the text of the element
+      .then((snackText) => {
+        const trimmedText = snackText.trim();
+        expect(trimmedText).to.match(/Rights updated|Rechte aktualisiert/);
+      });
+
+    cy.wait(3000);
+    // Logout
+    cy.get('.logout-icon ').click();
+    cy.wait(2000);
+    cy.get('.confirm-buttons > :nth-child(2)').click();
+    cy.url().should('include', Cypress.env('baseUrl')); // Validate url'
+    cy.log('Test completed successfully.');
+    cy.wait(2500);
+  }); //end it
+
   //Register User from xml file
   it('Register User from xml file', () => {
     cy.loginToSupportViewAdmin();
@@ -398,14 +511,14 @@ describe('Register User from xml file', () => {
       // Log the deletion
       cy.log(`User ${creds.extractedUsername} has been deleted.`);
 
-      //Search for just deleted Admin user
+      //Search for just deleted user
       cy.get('#searchButton').click({ force: true });
       cy.wait(1500);
 
       cy.get('button[type="submit"]').click(); //Click on Search button
       cy.wait(2500);
 
-      //Already deleted Admin user is not founded
+      //Already deleted user is not founded
 
       cy.get('.mat-mdc-paginator-range-actions>.mat-mdc-paginator-range-label')
         .invoke('css', 'border', '1px solid blue')

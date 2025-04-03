@@ -138,9 +138,68 @@ import 'cypress-iframe';
 // })
 
 //******************************************  E-Brief   ******************************/
+//Login to e-Brief (c)2025
+Cypress.Commands.add('loginToEBrief', () => {
+  // Visit E-Brief login page
+  cy.visit(Cypress.env('baseUrl'), { failOnStatusCode: false });
+  cy.wait(1000);
+
+  // Accept Cookies if present
+  cy.get('body').then(($body) => {
+    if ($body.find('#onetrust-accept-btn-handler').length > 0) {
+      cy.get('#onetrust-accept-btn-handler').click();
+      cy.wait(1000);
+    }
+  });
+
+  // Click on "Jetzt Anmelden" to switch to Kiam login page
+  cy.contains('button', 'Jetzt Anmelden')
+    .should('be.visible')
+    .and('be.enabled')
+    .click();
+
+  // Handle cross-origin authentication
+  cy.origin('https://kiamabn.b2clogin.com', () => {
+    // Suppress known exceptions
+    cy.on('uncaught:exception', (err) => {
+      if (err.message.includes('Cannot set properties of null')) {
+        return false; // Ignore and continue test
+      }
+    });
+
+    // Wait for input fields to exist before interacting
+    cy.get('body').then(($body) => {
+      if ($body.find('#signInName').length === 0) {
+        cy.log('Login page not fully loaded, reloading...');
+        cy.reload();
+      }
+    });
+
+    // Wait for input fields to be visible
+    cy.get('#signInName', { timeout: 15000 })
+      .should('exist')
+      .should('be.visible')
+      .focus()
+      .clear()
+      .type(Cypress.env('username_kiam'), { delay: 50 });
+
+    cy.get('#password', { timeout: 15000 })
+      .should('exist')
+      .should('be.visible')
+      .focus()
+      .clear()
+      .type(Cypress.env('password_kiam'), { delay: 50 });
+
+    // Click login button
+    cy.get('button[type="submit"]').should('be.visible').click();
+  });
+
+  // Ensure redirect back to E-Brief
+  cy.url({ timeout: 10000 }).should('include', '/deliveries');
+});
 
 //Custom commands: Taken data from json file and login to E-Brief
-Cypress.Commands.add('loginToEBrief', () => {
+Cypress.Commands.add('loginToEBrief_depricate', () => {
   cy.visit('/'); //Taken from base url
   cy.url().should('include', '/'); //Validating url on the dashboard page
   cy.wait(1000);

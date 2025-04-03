@@ -1,0 +1,56 @@
+PBRequest/2.0
+Type: FileSubmission
+PackageType: Plain
+Timing: Synchronous
+UserID: aquaAdmin
+Password: Test1234!
+
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<PBCustomerCreationRequest>
+</PBCustomerCreationRequest>
+
+ <?xml version="1.0" encoding="iso-8859-1" ?>
+<!DOCTYPE PBCustomerCreationData PUBLIC "" "PBCustomerCreationData.dtd">
+<PBCustomerCreationData>
+  <LanguageCode>GER</LanguageCode>
+  <ProviderID>ATEBPP</ProviderID>
+  <Brand>ATEBPP</Brand>
+  <Application>BILL2C</Application>
+  <NewBusinessUnit>
+  	<ContractNr>ExternalRegistration</ContractNr>
+    <Name>Ing. CY Legacy Testmann</Name>
+    <BusinessUnitType>Consumer</BusinessUnitType>
+    <Address>
+      <Street>Street</Street>
+      <ZIP>1111</ZIP>
+      <Town>City</Town>
+      <Country>AT</Country>
+      <Email>cy.legacy@yopmail.com</Email>
+    </Address>
+    <ProvisionCode>BNK</ProvisionCode>
+    <NotificationSettings>
+      <NotificationSubscription>
+        <LanguageCode>GER</LanguageCode>
+        <Event EventParameter="daily">InvoiceCreation</Event>
+        <Channel>Email</Channel>
+        <ReceiverAddress>cy.legacy@yopmail.com</ReceiverAddress>
+      </NotificationSubscription>
+    </NotificationSettings>
+  </NewBusinessUnit>
+  <NewUser>
+    <UserID>CYLegacyTestuser</UserID> 
+    <Password>Test1234!</Password>
+    <LastName>CY Testuser</LastName>
+    <FirstName>LegacyTestuser</FirstName>
+    <DateOfBirth>19720212</DateOfBirth>
+    <Salutation>m</Salutation>
+    <Title>Ing.</Title>
+    <Email>cy.legacy@yopmail.com</Email>
+  </NewUser>
+  <BillerRegistrationSettings>
+    <BillerRegistration>
+      <BillersInvoiceRecipientID>0000000100279311CY</BillersInvoiceRecipientID>
+      <SystemsBillerID>AQUA</SystemsBillerID>
+    </BillerRegistration>
+  </BillerRegistrationSettings>
+</PBCustomerCreationData>

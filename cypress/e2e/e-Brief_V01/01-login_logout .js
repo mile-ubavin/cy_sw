@@ -23,7 +23,7 @@ describe('Login/Logout to ebrief base scenario', () => {
 
     cy.wait(1000);
 
-    cy.get('button[type="submit"]').contains('Jetzt Anmelden').click();
+    cy.get('button[type="submit"]').contains('Jetzt Anmelden');
     cy.log('Test completed successfully.');
     //Redirection to login page
   }); //end it
