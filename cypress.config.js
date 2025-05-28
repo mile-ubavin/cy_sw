@@ -1,8 +1,178 @@
+// const { defineConfig } = require('cypress');
+// const fs = require('fs');
+// const path = require('path');
+// const https = require('https');
+// const storedValues = {};
+
+// Top-level Node imports
 const { defineConfig } = require('cypress');
 const fs = require('fs');
 const path = require('path');
 const https = require('https');
+const Seven = require('node-7z');
+const sevenBin = require('7zip-bin');
+const StreamZip = require('node-stream-zip');
+//const pdfjsLib = require('pdfjs-dist/legacy/build/pdf.js'); // Legacy import
+const pdfParse = require('pdf-parse');
+const axios = require('axios');
+
+//New 2025
+
+async function downloadZipAndReadFirstPdf() {
+  const downloadUrl = 'https://www.yopmail.com/path-to-your-zip.zip'; // Replace with actual URL
+
+  // Download the ZIP
+  const zipName = 'downloaded.zip';
+  const zipPath = path.join(__dirname, zipName);
+  const response = await axios.get(downloadUrl, {
+    responseType: 'arraybuffer',
+  });
+  fs.writeFileSync(zipPath, response.data);
+
+  console.log('Downloaded ZIP------------------------>>>:', zipName);
+
+  // Extract ZIP
+  const zip = new AdmZip(zipPath);
+  const zipEntries = zip.getEntries();
+
+  const pdfEntry = zipEntries.find((e) =>
+    e.entryName.toLowerCase().endsWith('.pdf')
+  );
+  if (!pdfEntry) throw new Error('No PDF file found in ZIP');
+
+  console.log('Found PDF in ZIP:', pdfEntry.entryName);
+
+  // Extract PDF content
+  const pdfBuffer = pdfEntry.getData();
+  const pdfData = await pdfParse(pdfBuffer);
+  console.log('PDF Text Preview:', pdfData.text.slice(0, 500)); // Log first 500 chars
+
+  return true;
+}
+
 const storedValues = {};
+
+// Define custom ZIP extractor task (✓ correct location)
+function extractPasswordProtectedZip({ zipFilePath, password, outputDir }) {
+  return new Promise((resolve) => {
+    try {
+      const fs = require('fs');
+      const Seven = require('node-7z');
+      const sevenBin = require('7zip-bin');
+
+      cy.log(
+        '------------------------------------------------>>>',
+        zipFilePath
+      );
+
+      if (!fs.existsSync(zipFilePath)) {
+        return resolve({ success: false, error: 'ZIP file not found' });
+      }
+
+      fs.mkdirSync(outputDir, { recursive: true });
+
+      // Build options dynamically
+      const options = {
+        $bin: sevenBin.path7za,
+        overwrite: 'a', // always overwrite
+      };
+
+      if (password && password.trim() !== '') {
+        options.p = password;
+      }
+
+      const extractor = Seven.extractFull(zipFilePath, outputDir, options);
+      let errorOccurred = false;
+
+      extractor.on('data', (entry) => {
+        console.log(`Extracted: ${entry.file}`);
+      });
+
+      extractor.on('end', () => {
+        if (errorOccurred) return;
+        const files = fs.readdirSync(outputDir);
+        const pdfCount = files.filter((f) => f.endsWith('.pdf')).length;
+        resolve({ success: true, pdfCount });
+      });
+
+      extractor.on('error', (err) => {
+        errorOccurred = true;
+        resolve({ success: false, error: err.message });
+      });
+    } catch (err) {
+      resolve({ success: false, error: err.message });
+    }
+  });
+}
+
+// Reusable task: Get newest ZIP
+function getDownloadedZIP(downloadsDir) {
+  const files = fs.readdirSync(downloadsDir);
+
+  const zipFiles = files
+    .filter((f) => f.endsWith('.zip'))
+    .map((f) => {
+      const fullPath = path.join(downloadsDir, f);
+      return { fullPath, time: fs.statSync(fullPath).mtime };
+    })
+    .sort((a, b) => b.time - a.time);
+
+  return zipFiles.length > 0 ? zipFiles[0].fullPath : null;
+}
+
+// Reusable task: Open password-protected PDF (direct, not from ZIP)
+function openPasswordProtectedPdf({ pdfPath, password }) {
+  return new Promise(async (resolve) => {
+    try {
+      const data = new Uint8Array(fs.readFileSync(pdfPath));
+      const loadingTask = pdfjsLib.getDocument({ data, password });
+      const pdfDoc = await loadingTask.promise;
+      resolve({ success: true, numPages: pdfDoc.numPages });
+    } catch (err) {
+      resolve({ success: false, error: err.message });
+    }
+  });
+}
+
+// function const openFile = async (filePath) => {
+//   const { default: open } = await import('open'); // Dynamic import
+//   return open(filePath).catch((err) => {
+//     console.error(`Failed to open file: ${err.message}`);
+//     throw err;
+//   });
+// };
+
+//--------------------------------------->>>
+
+// function getDownloadedZIP(downloadsDir) {
+//   // Read all file names in the downloads directory
+//   const files = fs.readdirSync(downloadsDir);
+
+//   // Filter for only `.zip` files and map them to full path + modified time
+//   const zipFiles = files
+//     .filter((f) => f.endsWith('.zip'))
+//     .map((f) => {
+//       const fullPath = path.join(downloadsDir, f);
+//       return { fullPath, time: fs.statSync(fullPath).mtime };
+//     })
+//     .sort((a, b) => b.time - a.time); // Sort files from newest to oldest
+
+//   // Return the full path of the newest ZIP file, or null if none found
+//   return zipFiles.length > 0 ? zipFiles[0].fullPath : null;
+// }
+
+// function openPasswordProtectedPdf({ pdfPath, password }) {
+//   return new Promise(async (resolve) => {
+//     try {
+//       const data = new Uint8Array(fs.readFileSync(pdfPath));
+//       const loadingTask = pdfjsLib.getDocument({ data, password });
+//       const pdfDoc = await loadingTask.promise;
+//       resolve({ success: true, numPages: pdfDoc.numPages });
+//     } catch (err) {
+//       resolve({ success: false, error: err.message });
+//     }
+//   });
+// }
 
 // Task: Get the latest downloaded PDF file
 const getDownloadedPdf = (downloadsDir) => {
@@ -601,13 +771,22 @@ const environments = {
   },
   ebrief_test: {
     baseUrl: 'https://www.e-brief.at/fe_t/login',
-    username_kiam: 'kiam.t.mile@yopmail.com',
+    username_kiam: 'kiam.t.andrej@yopmail.com',
     password_kiam: 'Test1234!',
+    origin: 'https://kiamabn.b2clogin.com',
   },
   ebrief_prod: {
     baseUrl: 'https://www.e-brief.at/fe/login',
     username_kiam: 'anna.testuser@yopmail.com',
     password_kiam: 'Test1234!',
+    origin: 'https://login.post.at',
+  },
+  hs_post_test: {
+    baseUrl:
+      'https://hybridsign-t.post-business-solutions.at/hybridsign/sa/sh/',
+    manager_1: '1_manager@yopmail.com',
+    rootUrl: 'hybridsign-t.post-business-solutions.at',
+    origin: 'https://kiamabn.b2clogin.com',
   },
 };
 
@@ -621,7 +800,11 @@ module.exports = defineConfig({
     setupNodeEvents(on, config) {
       // Register the downloadFile task
       on('task', {
+        extractPasswordProtectedZip,
+        downloadZipAndReadFirstPdf,
+        openPasswordProtectedPdf,
         getDownloadedPdf,
+        getDownloadedZIP,
         downloadFileToFolder,
         openFile,
         setValue({ key, value }) {
@@ -639,9 +822,21 @@ module.exports = defineConfig({
         getCredentials() {
           return credentials;
         },
+        getExtractedPdf(folder) {
+          const fs = require('fs');
+          const path = require('path');
+
+          const pdfs = fs.readdirSync(folder).filter((f) => f.endsWith('.pdf'));
+          if (pdfs.length > 0) {
+            return path.join(folder, pdfs[0]);
+          }
+          return null;
+        },
+
+        /*********************************** */
       });
       //  Set executing tests on various environments, targeting appropriate json from const=environments
-      const envConfig = environments['ebrief_test'];
+      const envConfig = environments['eg_dev'];
       return { ...config, env: { ...config.env, ...envConfig } };
     }, //end
     specPattern: 'cypress/e2e/**/*.{js,jsx,ts,tsx}', // Ensure this matches your structure
@@ -650,42 +845,3 @@ module.exports = defineConfig({
     baseUrl: 'https://www.e-brief.at/fe_t',
   },
 });
-
-// const credentials = {}; // Global storage for credentials
-
-// module.exports = defineConfig({
-//   defaultCommandTimeout: 6000,
-//   viewportWidth: 1920,
-//   viewportHeight: 1080,
-
-//   e2e: {
-//     setupNodeEvents(on, config) {
-//       on('task', {
-//         setCredentials({ username, password }) {
-//           credentials.username = username;
-//           credentials.password = password;
-//           console.log(' Credentials stored:', credentials);
-//           return null;
-//         },
-//         getCredentials() {
-//           if (credentials.username && credentials.password) {
-//             console.log(' Returning stored credentials:', credentials);
-//             return credentials;
-//           } else {
-//             console.error('No stored credentials found!');
-//             return null;
-//           }
-//         },
-//       });
-
-//       return config;
-
-//       const envConfig = environments['eg_dev'];
-//       return { ...config, env: { ...config.env, ...envConfig } };
-//     },
-//     specPattern: 'cypress/e2e/**/*.{js,jsx,ts,tsx}',
-//     chromeWebSecurity: false,
-//     headless: false,
-//     baseUrl: 'https://www.e-brief.at/fe_t',
-//   },
-// });

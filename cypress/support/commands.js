@@ -84,6 +84,7 @@
 import 'cypress-file-upload';
 import 'cypress-keycloak-commands';
 import 'cypress-iframe';
+const path = require('path');
 
 // import '@4tw/cypress-drag-drop';
 
@@ -159,7 +160,7 @@ Cypress.Commands.add('loginToEBrief', () => {
     .click();
 
   // Handle cross-origin authentication
-  cy.origin('https://kiamabn.b2clogin.com', () => {
+  cy.origin(Cypress.env('origin'), () => {
     // Suppress known exceptions
     cy.on('uncaught:exception', (err) => {
       if (err.message.includes('Cannot set properties of null')) {
@@ -191,7 +192,7 @@ Cypress.Commands.add('loginToEBrief', () => {
       .type(Cypress.env('password_kiam'), { delay: 50 });
 
     // Click login button
-    cy.get('button[type="submit"]').should('be.visible').click();
+    cy.get('#next').should('be.visible').click({ force: true });
   });
 
   // Ensure redirect back to E-Brief
@@ -417,6 +418,89 @@ Cypress.Commands.add('uploadPDFdictionary305', () => {
         fileName: '305_Dictionary_(AQUA_ABBA000100279311).pdf',
       });
     });
+});
+
+// Upload ZIP file (contains PDF and XML files)
+Cypress.Commands.add('uploadZipFile', () => {
+  const fileName =
+    'ZIP__ServiceLine_and_XML_inside_(tid=AQUA_gid=ABBA000100279311).zip';
+
+  cy.fixture(fileName, 'binary')
+    .then(Cypress.Blob.binaryStringToBlob)
+    .then((fileContent) => {
+      cy.get('#input-file').attachFile({
+        fileContent,
+        fileName,
+        mimeType: 'application/zip',
+        encoding: 'utf-8', // optional
+      });
+    });
+});
+
+// Upload 7z file (contains PDF and XML files)
+Cypress.Commands.add('upload7zFile', () => {
+  const fileName =
+    '7z__ServiceLine_and_XML_inside_(tid=AQUA_gid=ABBA000100279311).7z';
+
+  cy.fixture(fileName, 'binary')
+    .then(Cypress.Blob.binaryStringToBlob)
+    .then((fileContent) => {
+      cy.get('#input-file').attachFile({
+        fileContent,
+        fileName,
+        mimeType: 'application/x-7z-compressed',
+        encoding: 'utf-8', // optional
+      });
+    });
+});
+
+//Upload Multiple files (xml, txt, serviceline, pdf, zip, 7z)
+Cypress.Commands.add('uploadMultipleTestFiles', () => {
+  const filesToUpload = [
+    {
+      fileName: 'XML_1receiver__(AQUA_ABBA000100279311_ISS BBcare).xml',
+      mimeType: 'text/xml',
+    },
+    {
+      fileName: 'TXT_1receiver__(AQUA_ABBA000100279311_ISS BBcare).txt',
+      mimeType: 'text/plain',
+    },
+    {
+      fileName: 'Serviceline-tid=AQUA_gid=ABBA000100279311.pdf',
+      mimeType: 'application/pdf',
+    },
+    {
+      fileName:
+        'Serviceline- 2Receivers_VALID_AND_INVALID_TID_(tid=AQUA_gid=ABBA000100279311).pdf',
+      mimeType: 'application/pdf',
+    },
+    {
+      fileName: '305_Dictionary_(AQUA_ABBA000100279311).pdf',
+      mimeType: 'application/pdf',
+    },
+    {
+      fileName:
+        'ZIP__ServiceLine_and_XML_inside_(tid=AQUA_gid=ABBA000100279311).zip',
+      mimeType: 'application/zip',
+    },
+    {
+      fileName:
+        '7z__ServiceLine_and_XML_inside_(tid=AQUA_gid=ABBA000100279311).7z',
+      mimeType: 'application/x-7z-compressed',
+    },
+  ];
+
+  filesToUpload.forEach(({ fileName, mimeType }) => {
+    cy.fixture(fileName, 'binary')
+      .then(Cypress.Blob.binaryStringToBlob)
+      .then((fileContent) => {
+        cy.get('#input-file').attachFile({
+          fileContent,
+          fileName,
+          mimeType,
+        });
+      });
+  });
 });
 
 // Upload Attachment
@@ -871,5 +955,58 @@ Cypress.Commands.add('openDownloadedFile', (fileName) => {
   });
 });
 
-//Drag and Drop
-// import 'cypress-drag-drop';
+//***********************************Hybridsign************************** */
+//Upload pdf
+Cypress.Commands.add('uploadPDF', () => {
+  cy.fixture('Demo_DOC.pdf', 'binary')
+    .then(Cypress.Blob.binaryStringToBlob)
+    .then((fileContent) => {
+      cy.get('input[type="file"]').should('exist').attachFile({
+        fileContent,
+        fileName: 'Demo_DOC.pdf',
+        mimeType: 'application/pdf',
+        encoding: 'utf-8',
+      });
+    });
+});
+
+//***************************** Tages **************************************
+
+Cypress.Commands.add('downloadBinary', (url, filename) => {
+  const downloads = Cypress.config('downloadsFolder');
+  return cy.request({ url, encoding: 'binary' }).then((resp) => {
+    const filePath = path.join(downloads, filename);
+    // Return the cy.writeFile() promise, then yield filePath:
+    return cy.writeFile(filePath, resp.body, 'binary').then(() => filePath);
+  });
+});
+
+//********************************TEMPORALY ******************************* */
+
+Cypress.Commands.add('downloadZipFromYopmail', () => {
+  cy.visit('https://yopmail.com/en/');
+
+  // Enter email (from env variable or hardcoded fallback)
+  const email = Cypress.env('email_supportViewAdmin');
+  cy.get('#login').type(email);
+
+  // Click refresh
+  cy.get('#refreshbut > .md > .material-icons-outlined').click();
+  cy.wait(1500);
+
+  // Check subject line inside inbox frame
+  cy.iframe('#ifinbox')
+    .find('.mctn > .m > button > .lms')
+    .eq(0)
+    .should('include.text', 'e-Gehaltszettel - Neue Nutzer');
+  cy.wait(2500);
+
+  // Click download link inside email
+  cy.iframe('#ifmail').find('.yscrollbar>a>i').eq(0).click({ multiple: true });
+
+  // Optional: wait for download or log downloaded files
+  const downloadsDir = `${Cypress.config(
+    'fileServerFolder'
+  )}/cypress/downloads/`;
+  cy.log('Download directory:', downloadsDir);
+});

@@ -69,7 +69,7 @@ describe('Login, Create_delivery-Upload_doc(pdf), Logout', () => {
     });
 
     cy.log('Test completed successfully.');
-    cy.wait(3500);
+    cy.wait(8500);
 
     // Logout
     cy.get('.user-title').click();

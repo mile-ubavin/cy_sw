@@ -1,4 +1,108 @@
 describe('Enable and Disable XML templates provided from JSON', () => {
+  //Disable xml teplates by Masteruser
+  it('Disable XML templates by Masteruser', () => {
+    cy.loginToSupportViewMaster(); // Login as a master user
+    cy.wait(2000);
+
+    //Remove pop up
+    cy.get('body').then(($body) => {
+      if ($body.find('.release-note-dialog__close-icon').length > 0) {
+        cy.get('.release-note-dialog__close-icon').click();
+      } else {
+        cy.log('Close icon is NOT present');
+      }
+    });
+    cy.wait(1500);
+
+    cy.intercept('GET', '**/group/template/tenant/**').as('apiRequest');
+
+    // Search for Group section
+    cy.get('#searchButton>span').click(); // Click on the search button
+
+    // Search for Group by Display Name using the company name
+    cy.get('.search-dialog>form>.form-fields>.searchText-wrap')
+      .eq(0)
+      .type(Cypress.env('company')); // Use the company name from the cypress.config.js
+    cy.wait(1500);
+
+    // Find and click the search button
+    cy.get('.search-dialog>form>div>.mat-primary').click();
+    cy.wait(1500);
+
+    // Search for XML Template button and click it
+    cy.get('.mdc-button__label')
+      .contains(/Assign XML Template|XML Template zuweisen/i)
+      .should('be.visible')
+      .click();
+
+    cy.get('table > tbody > tr').each(($el, index) => {
+      cy.log(`Element ${index + 1}: ${$el.text()}`);
+    });
+
+    // Get the array of search criteria names from Cypress environment variables
+    const disableXML = Cypress.env('disableXML');
+    const searchCriteria = disableXML.map((item) => item.name); // Extract all names
+
+    cy.log('Search Criteria:', searchCriteria);
+
+    // Process the response
+    cy.wait('@apiRequest').then((interception) => {
+      cy.log(`Status Code: ${interception.response.statusCode}`);
+      const responseBody = interception.response.body;
+      cy.log('Response Body:', responseBody);
+
+      // Filter assigned elements based on search criteria
+      const assignedTrueElements = responseBody.filter(
+        (item) => searchCriteria.includes(item.name) && item.assigned
+      );
+
+      if (assignedTrueElements.length > 0) {
+        // Uncheck each matching element in the DOM
+        assignedTrueElements.forEach((item) => {
+          cy.log(`Unchecking item: ${item.name}`);
+          cy.get('table > tbody > tr').each(($row) => {
+            if ($row.text().includes(item.name)) {
+              cy.wrap($row)
+                .find('td:first-child input[type="checkbox"]')
+                .should('be.visible')
+                .uncheck({ force: true });
+              cy.wait(500);
+            }
+          });
+        });
+      } else {
+        cy.log('No items to uncheck. All items are already unchecked.');
+      }
+    });
+    cy.wait(1000);
+
+    // Click the save button if there are items to uncheck
+    cy.get('.dictionary-xml__actions>button>.title')
+      .contains(/Save|Übernehmen/i)
+      .should('be.visible')
+      .click();
+
+    // Verify the success message
+    cy.get('.mat-mdc-simple-snack-bar > .mat-mdc-snack-bar-label')
+      .should('be.visible')
+      .invoke('text')
+      .then((text) => {
+        const trimmedText = text.trim();
+        expect(trimmedText).to.match(
+          /XML template was assigned successfully|XML Template wurde erfolgreich zugewiesen/
+        );
+      });
+    cy.wait(2500);
+
+    // Logout
+    cy.get('.logout-icon').click();
+    cy.wait(2000);
+    cy.get('.confirm-buttons > :nth-child(2)').click();
+    cy.url().should('include', Cypress.env('baseUrl')); // Validate URL
+    cy.log('Test completed successfully.');
+    cy.wait(2500);
+  });
+
   //Admin user Upload XML file before enabling templated
   it('Failed upload XML file - before enabling template', () => {
     cy.loginToSupportViewAdmin();
@@ -426,109 +530,5 @@ describe('Enable and Disable XML templates provided from JSON', () => {
     // emailBody(); // Validate second email body
 
     //cy.wait(4500);
-  });
-
-  //Disable xml teplates by Masteruser
-  it('Disable XML templates by Masteruser', () => {
-    cy.loginToSupportViewMaster(); // Login as a master user
-    cy.wait(2000);
-
-    //Remove pop up
-    cy.get('body').then(($body) => {
-      if ($body.find('.release-note-dialog__close-icon').length > 0) {
-        cy.get('.release-note-dialog__close-icon').click();
-      } else {
-        cy.log('Close icon is NOT present');
-      }
-    });
-    cy.wait(1500);
-
-    cy.intercept('GET', '**/group/template/tenant/**').as('apiRequest');
-
-    // Search for Group section
-    cy.get('#searchButton>span').click(); // Click on the search button
-
-    // Search for Group by Display Name using the company name
-    cy.get('.search-dialog>form>.form-fields>.searchText-wrap')
-      .eq(0)
-      .type(Cypress.env('company')); // Use the company name from the cypress.config.js
-    cy.wait(1500);
-
-    // Find and click the search button
-    cy.get('.search-dialog>form>div>.mat-primary').click();
-    cy.wait(1500);
-
-    // Search for XML Template button and click it
-    cy.get('.mdc-button__label')
-      .contains(/Assign XML Template|XML Template zuweisen/i)
-      .should('be.visible')
-      .click();
-
-    cy.get('table > tbody > tr').each(($el, index) => {
-      cy.log(`Element ${index + 1}: ${$el.text()}`);
-    });
-
-    // Get the array of search criteria names from Cypress environment variables
-    const disableXML = Cypress.env('disableXML');
-    const searchCriteria = disableXML.map((item) => item.name); // Extract all names
-
-    cy.log('Search Criteria:', searchCriteria);
-
-    // Process the response
-    cy.wait('@apiRequest').then((interception) => {
-      cy.log(`Status Code: ${interception.response.statusCode}`);
-      const responseBody = interception.response.body;
-      cy.log('Response Body:', responseBody);
-
-      // Filter assigned elements based on search criteria
-      const assignedTrueElements = responseBody.filter(
-        (item) => searchCriteria.includes(item.name) && item.assigned
-      );
-
-      if (assignedTrueElements.length > 0) {
-        // Uncheck each matching element in the DOM
-        assignedTrueElements.forEach((item) => {
-          cy.log(`Unchecking item: ${item.name}`);
-          cy.get('table > tbody > tr').each(($row) => {
-            if ($row.text().includes(item.name)) {
-              cy.wrap($row)
-                .find('td:first-child input[type="checkbox"]')
-                .should('be.visible')
-                .uncheck({ force: true });
-              cy.wait(500);
-            }
-          });
-        });
-      } else {
-        cy.log('No items to uncheck. All items are already unchecked.');
-      }
-    });
-    cy.wait(1000);
-
-    // Click the save button if there are items to uncheck
-    cy.get('.dictionary-xml__actions>button>.title')
-      .contains(/Save|Übernehmen/i)
-      .should('be.visible')
-      .click();
-
-    // Verify the success message
-    cy.get('.mat-mdc-simple-snack-bar > .mat-mdc-snack-bar-label')
-      .should('be.visible')
-      .invoke('text')
-      .then((text) => {
-        const trimmedText = text.trim();
-        expect(trimmedText).to.match(
-          /XML template was assigned successfully|XML Template wurde erfolgreich zugewiesen/
-        );
-      });
-    cy.wait(2500);
-
-    // Logout
-    cy.get('.logout-icon').click();
-    cy.wait(2000);
-    cy.get('.confirm-buttons > :nth-child(2)').click();
-    cy.url().should('include', Cypress.env('baseUrl')); // Validate URL
-    cy.log('Test completed successfully.');
-    cy.wait(2500);
   });
 }); //end describe

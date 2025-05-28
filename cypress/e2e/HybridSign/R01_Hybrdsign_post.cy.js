@@ -1,6 +1,281 @@
-describe('R03_Admn user - Create E-Box User - Manually', () => {
+describe('R01_Hybridsign_POST', () => {
+  it.only('upload documet and start signature flow', () => {
+    // Visit E-Brief login page
+    cy.visit(Cypress.env('baseUrl'), { failOnStatusCode: false });
+    cy.wait(1000);
+
+    //Validate  Upload title
+    cy.get('.upload__title')
+      .should('be.visible') // Ensure it's visible first
+      .invoke('text') // Get the text of the element
+      .then((snackText) => {
+        const trimmedText = snackText.trim();
+        expect(trimmedText).to.match(/Datei per Drag und Drop ablegen oder/);
+      });
+
+    cy.get('.label-checkbox')
+      .should('be.visible') // Ensure it's visible first
+      .invoke('text') // Get the text of the element
+      .then((snackText) => {
+        const trimmedText = snackText.trim();
+        expect(trimmedText).to.match(
+          /Ich will einen Signaturlauf an mehrere Personen versenden./
+        );
+      });
+
+    //Click on check box
+    cy.get('#checkbox').click();
+
+    //Validate email label
+    cy.get('.email > label')
+      .should('be.visible')
+      .invoke('text')
+      .then((labelText) => {
+        const trimmed = labelText.trim().replace(/\s+/g, ' '); // Normalize whitespace
+        expect(trimmed).to.match(
+          /Bitte geben Sie Ihre E-Mail Adresse ein, auf der Sie das von allen Parteien unterschriebene Dokument empfangen wollen:/
+        );
+      });
+
+    cy.get('.email-error')
+      .should('be.visible')
+      .invoke('text')
+      .then((snackText) => {
+        const trimmedText = snackText.trim();
+
+        expect(trimmedText).to.match(/Pflichtfeld./);
+      });
+
+    cy.wait(2500);
+    cy.get('.input__field-input').type(Cypress.env('manager_1'));
+
+    //Enter text into text area field
+    const getRandomUmlautString = (length) => {
+      const umlautChars =
+        'äöüÄÖÜßabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+      let result = '';
+      for (let i = 0; i < length; i++) {
+        result += umlautChars.charAt(
+          Math.floor(Math.random() * umlautChars.length)
+        );
+      }
+      return result;
+    };
+
+    const now = new Date();
+    const currentTime = now.toLocaleTimeString('de-DE');
+    const formattedDate = now.toLocaleDateString('de-DE'); // dd.mm.yyyy
+
+    const randomUmlaut = getRandomUmlautString(200);
+
+    // Build text with line breaks replaced by `\n` for `textarea`
+    const textInsideTextArea = `Hello World,\n\nTime: ${currentTime},\n${randomUmlaut}\n) //${formattedDate}`;
+
+    cy.get('textarea').type(textInsideTextArea, { delay: 0 }); // optional: adjust `delay` for realistic typing
+
+    cy.wait(2000);
+    cy.intercept('POST', '**/init').as('openInitSession');
+    //Upload pdf
+    cy.uploadPDF();
+
+    cy.wait('@openInitSession', { timeout: 37000 }).then((interception) => {
+      expect(interception.response.statusCode).to.eq(200);
+    });
+    //Click on button to start signature flow
+    cy.get('.start-workflow>.mdc-button__label')
+      .contains(/ Signaturlauf starten/)
+      .should('be.visible')
+      .click(); // Click the button
+    cy.wait(3500);
+
+    //Valodate txt and url
+    cy.get('.endscreen-content>p')
+      .should('be.visible')
+      .invoke('text')
+      .then((snackText) => {
+        const trimmedText = snackText.trim();
+
+        expect(trimmedText).to.match(
+          /Der Unterschriftenlauf wird durchgeführt. Sie erhalten ein E-Mail, sobald alle Parteien unterschrieben haben./
+        );
+      });
+
+    cy.url().should('include', '/signature-flow'); // => validate url
+    // });
+    cy.wait(1000);
+  });
+
+  //Yopmail - Confirm email and Change password
+  it.only('Yopmail - Confirm email and Change password', () => {
+    // Visit yopmail application
+    cy.visit('https://yopmail.com/en/');
+
+    // Access the first Admin User object from cypress.config.js
+
+    cy.get('#login').type(Cypress.env('manager_1'));
+    cy.get('#refreshbut > .md > .material-icons-outlined').click();
+    cy.wait(1500);
+    cy.iframe('#ifinbox')
+      .find('.mctn > .m > button > .lms')
+      .eq(0)
+      .should('include.text', 'Dokument(e) zum Unterzeichnen'); //Validate subject of Verification email
+
+    // cy.iframe('#ifmail')
+    //   .find(
+    //     '#mail>div>div:nth-child(2)>div:nth-child(3)>table>tbody>tr>td>p:nth-child(2)>span'
+    //   )
+    //   .invoke('text')
+    //   .then((innerText) => {
+    //     const startIndex =
+    //       innerText.indexOf('Hier ist Ihr Benutzername:') +
+    //       'Hier ist Ihr Benutzername:'.length;
+    //     const endIndex = innerText.indexOf('Bitte bestätigen Sie');
+
+    //     const usernameFromEmailBody = innerText
+    //       .substring(startIndex, endIndex)
+    //       .trim();
+
+    //     cy.log('Captured text:', usernameFromEmailBody);
+
+    //Confirm Email Address  - by clicking on "Jetzt E-Mail Adresse bestätigen" button from Comfirmation email
+    cy.wait(1500);
+    let initialUrl;
+    cy.iframe('#ifmail')
+      .find(
+        '#mail>div>div:nth-child(2)>div:nth-child(3)>table>tbody>tr>td>p:nth-child(3)>span'
+      )
+      .should('include.text', 'hybridSign Dokument')
+      .invoke('attr', 'href')
+      .then((href) => {
+        // Log link text
+        cy.log(`The href attribute is: ${href}`);
+      });
+    cy.wait(2000);
+    // cy.iframe('#ifmail')
+    //   .find(
+    //     '#mail>div>div:nth-child(2)>div:nth-child(3)>table>tbody>tr>td>p:nth-child(3)>a'
+    //   )
+    //   .should('include.text', 'hybridSign Dokument')
+    //   .invoke('removeAttr', 'target')
+    //   .invoke('removeAttr', 'onclick') // Optional: prevent JS handlers
+    //   .click();
+
+    cy.iframe('#ifmail')
+      .find('a')
+      .filter((index, el) => el.href.includes(Cypress.env('rootUrl')))
+      // .first()
+      .should('have.attr', 'href')
+      .then((href) => {
+        cy.log(`Going to click link: ${href}`);
+        cy.wrap(href).as('hybridLink');
+      });
+
+    cy.get('@hybridLink').then((href) => {
+      cy.visit(href, { failOnStatusCode: false }); // or force click if you want to simulate the user action
+    });
+
+    //Wait for Cookie bar
+    // cy.wait(5000);
+    cy.pause();
+    // // //Remove Cooki dialog (if shown)
+    // if (cy.iframe('#ifmail').find('#onetrust-accept-btn-handler')) {
+    //   cy.iframe('#ifmail').find('#onetrust-accept-btn-handler').click();
+    // } else {
+    //   cy.log('Cookie dialog is not shown');
+    // }
+
+    // Remove Cookie dialog (if shown)
+    cy.iframe('#ifmail').then(($iframe) => {
+      if ($iframe.find('#onetrust-policy-title').is(':visible')) {
+        cy.wrap($iframe)
+          .find('#onetrust-accept-btn-handler')
+          .click({ force: true });
+        cy.log('Cookie dialog closed.');
+      } else {
+        cy.log('Cookie dialog not visible.');
+      }
+    });
+    cy.wait(1500);
+
+    // Remove Cookie dialog (if shown)
+    // cy.iframe('#ifmail')
+    //   .find('#onetrust-accept-btn-handler', { timeout: 3000 })
+    //   .then(($btn) => {
+    //     if ($btn.length > 0 && $btn.is(':visible')) {
+    //       cy.wrap($btn).click();
+    //       cy.log('Cookie dialog was shown and clicked.');
+    //     } else {
+    //       cy.log('Cookie dialog is not shown.');
+    //     }
+    //   });
+
+    // cy.iframe('#ifmail')
+    //   .find('#onetrust-accept-btn-handler')
+    //   .then(($btn) => {
+    //     if ($btn.length) {
+    //       cy.wrap($btn).click();
+    //     } else {
+    //       cy.log('Cookie dialog is not shown');
+    //     }
+    //   });
+
+    // cy.iframe('#ifmail').find('#onetrust-accept-btn-handler').click();
+
+    cy.wait(8000);
+    cy.iframe('#ifmail').find('.button').click();
+    //Reload inbox
+
+    cy.get('#refresh').click({ force: true }); //Click on Refresh inbox icon
+    cy.wait(5000);
+    //Reset Password email
+
+    cy.iframe('#ifinbox')
+      .find('.mctn > .m > button > .lms')
+      .eq(0)
+
+      .should('include.text', 'Passwort zurücksetzen e-Gehaltszettel Portal'); //Validate subject of Verification email
+    let initialUrl_pass;
+    cy.iframe('#ifmail')
+      .find(
+        '#mail>div>div:nth-child(2)>div:nth-child(3)>table>tbody>tr>td>p:nth-child(4)>span>a'
+      )
+      .should('include.text', 'Neues Passwort erstellen ')
+      .invoke('attr', 'href')
+      .then((href) => {
+        // Log link text
+        cy.log(`The href attribute is: ${href}`);
+      });
+    cy.iframe('#ifmail')
+      .find(
+        '#mail>div>div:nth-child(2)>div:nth-child(3)>table>tbody>tr>td>p:nth-child(4)>span>a'
+      )
+      .invoke('attr', 'target', '_self') //prevent opening in new tab
+      .click();
+    cy.wait(2500);
+
+    //Fill the Set password form
+    cy.iframe('#ifmail')
+      .find('.input__field-input')
+      .eq(0)
+      .click()
+
+      .type(Cypress.env('password_egEbox')); //fill the 1st input field
+    cy.iframe('#ifmail').find('.input-eye-icon').eq(0).click(); //Click on Show password icon
+
+    cy.iframe('#ifmail')
+      .find('.input__field-input')
+      .eq(1)
+
+      .type(Cypress.env('password_egEbox')); //fill the 2nd input field
+    cy.iframe('#ifmail').find('.input-eye-icon').eq(1).click(); //Click on Show password icon
+    cy.iframe('#ifmail').find('.button').click(); //Click on confirm button
+
+    cy.wait(2000);
+    // });
+  });
+
   //Enable All Roles (except HR Role)
-  it('Enable All Roles, except HR Role for Specific Admin', () => {
+  it.skip('Enable All Roles, except HR Role for Specific Admin', () => {
     // Login as a Master-User using custom command
     cy.loginToSupportViewMaster();
     cy.wait(3500);
@@ -112,96 +387,6 @@ describe('R03_Admn user - Create E-Box User - Manually', () => {
     cy.url().should('include', Cypress.env('baseUrl')); // Validate url'
     cy.log('Test completed successfully.');
     cy.wait(2500);
-  }); //end it
-
-  // Precondition: Search for the user and if user exists, proceed with deletion
-  it('Search for the user and if user(s) exists, proceed with deletion', () => {
-    // Login as Master User using a custom command
-    const user = Cypress.env('createUser')[0];
-    cy.loginToSupportViewMaster();
-    cy.wait(3500);
-
-    //Remove pop up
-    cy.get('body').then(($body) => {
-      if ($body.find('.release-note-dialog__close-icon').length > 0) {
-        cy.get('.release-note-dialog__close-icon').click();
-      } else {
-        cy.log('Close icon is NOT present');
-      }
-    });
-    cy.wait(1500);
-
-    //Search for Group by Display Name
-    cy.get('#searchButton>span').click(); //Click on search button
-    // Use the company name from the cypress.config.js
-    const companyName = Cypress.env('company');
-    // Search for Group by Display Name using the company name
-    cy.get('.search-dialog>form>.form-fields>.searchText-wrap')
-      .eq(1)
-      .type(companyName);
-    //Find the Search button by button name and click on it
-    cy.get('.search-dialog>form>div>.mat-primary').click();
-    //Switch to user section
-    cy.get('.action-buttons > .mdc-button').eq(4).click();
-
-    // Array of users to delete
-    const usersToDelete = [user.username]; // Add more usernames as needed
-
-    usersToDelete.forEach((userName) => {
-      const searchAndDeleteUser = (userName) => {
-        cy.get('.search-label').click();
-
-        // Search for the user
-        cy.get('.mat-mdc-form-field-infix>input[formcontrolname="userName"]')
-          .clear()
-          .type(userName);
-        cy.get('button[type="submit"]').click();
-
-        // Wait for the search results
-        cy.wait(2000);
-
-        // Check if "No results" message exists (indicating user does not exist)
-        cy.get('body').then(($body) => {
-          if ($body.find('.cdk-row').length === 0) {
-            cy.log(`User ${userName} not found or already deleted.`);
-            cy.get('.mdc-evolution-chip__cell--trailing > .mat-icon').click();
-          } else {
-            // If user exists, proceed with deletion
-            cy.get('cdk-row').should('exist');
-            cy.log(`User ${userName} found. Proceeding with deletion.`);
-
-            cy.get('button')
-              .contains(/Delete|DSGVO-Löschung/)
-              .should('be.visible')
-              .click();
-
-            // Wait for confirmation dialog and confirm deletion
-            cy.get('.confirm-buttons > button')
-              .contains(/YES|JA/)
-              .should('be.visible')
-              .click();
-
-            cy.log(`User ${userName} has been deleted.`);
-          }
-        });
-      };
-      cy.wait(1500);
-      searchAndDeleteUser(userName);
-
-      // Optional wait between deletions (if needed)
-      cy.wait(1000);
-    });
-
-    //Logout
-    cy.get('.logout-icon ').click();
-    cy.wait(2000);
-    cy.get('.confirm-buttons > :nth-child(2)').click();
-    cy.url();
-    cy.url().should('include', Cypress.env('baseUrl')); // Validate url
-    cy.wait(1500);
-    // Completion message at the end of the test
-    cy.log('The tests have been completed successfully.');
-    cy.wait(3000);
   }); //end it
 
   //Login As Admin user and Create User Manually
@@ -542,292 +727,8 @@ describe('R03_Admn user - Create E-Box User - Manually', () => {
       });
   });
 
-  //Login to ebox 1st time
-  it('Login to e-Box 1st time', () => {
-    cy.visit(Cypress.env('baseUrl_egEbox'));
-    cy.wait(5000);
-
-    // Wait for the cookie bar to appear
-    //Remove Cookie
-    cy.get('body').then(($body) => {
-      if ($body.find('#onetrust-policy-title').is(':visible')) {
-        // If the cookie bar is visible, click on it and remove it
-        cy.get('#onetrust-accept-btn-handler').click();
-      } else {
-        // Log that the cookie bar was not visible
-        cy.log('Cookie bar not visible');
-      }
-    }); //End Remove Cookie
-    cy.wait(1500);
-    // Create the first user (with address)
-
-    // Access the first Admin User object from cypress.config.js
-    const user = Cypress.env('createUser')[0];
-    // Continue with Login
-    cy.log(Cypress.env('companyPrefix'));
-    cy.get(':nth-child(1) > .ng-invalid > .input > .input__field-input').type(
-      Cypress.env('companyPrefix') + user.username
-    );
-
-    //Cypress.env('manualAddress')
-    cy.get('.ng-invalid > .input > .input__field-input').type(
-      Cypress.env('password_egEbox')
-    );
-
-    // cy.wait(6000);
-
-    // cy.wait(10000);
-    // cy.visit(Cypress.env('eboxDeliveryPage'), {
-    //   failOnStatusCode: false,
-    // });
-    cy.wait(5500);
-
-    cy.intercept('POST', '**/rest/v2/deliveries**').as('openDeliveriesPage');
-    cy.wait(1000);
-    cy.get('button[type="submit"]').click(); //Login to E-Box
-    cy.wait(['@openDeliveriesPage'], { timeout: 37000 }).then(
-      (interception) => {
-        // Log the intercepted response
-        cy.log('Intercepted response:', interception.response);
-
-        // Assert the response status code
-        expect(interception.response.statusCode).to.eq(200);
-        cy.wait(2500);
-      }
-    );
-    cy.wait(7000);
-    // Logout
-    cy.get('.user-title').click();
-    cy.wait(1500);
-    cy.get('.logout-title > a').click();
-    //cy.url().should('include', payslipJson.baseUrl_egEbox); // Validate url
-    cy.url().should('include', Cypress.env('baseUrl_egEbox')); // Validate url
-    cy.log('Test completed successfully.');
-  }); //end it
-
-  //Delete Alredy created Users by Master User
-  it('Login As Master User - Delete Alredy created Users', () => {
-    // Login as Master User using a custom command
-    const user = Cypress.env('createUser')[0];
-    cy.loginToSupportViewMaster();
-    cy.wait(3500);
-
-    //Remove pop up
-    cy.get('body').then(($body) => {
-      if ($body.find('.release-note-dialog__close-icon').length > 0) {
-        cy.get('.release-note-dialog__close-icon').click();
-      } else {
-        cy.log('Close icon is NOT present');
-      }
-    });
-    cy.wait(1500);
-
-    //Search for Group by Display Name
-    cy.get('#searchButton>span').click(); //Click on search button
-    // Use the company name from the cypress.config.js
-    const companyName = Cypress.env('company');
-    // Search for Group by Display Name using the company name
-    cy.get('.search-dialog>form>.form-fields>.searchText-wrap')
-      .eq(1)
-      .type(companyName);
-    //Find the Search button by button name and click on it
-    cy.get('.search-dialog>form>div>.mat-primary').click();
-    //Switch to user section
-    cy.get('.action-buttons > .mdc-button').eq(4).click();
-
-    // Array of users to delete
-    const usersToDelete = [user.username]; // Add more usernames as needed
-
-    // usersToDelete.forEach((userName, index) => {
-    //   // Function to search for and delete a user
-    //   const searchAndDeleteUser = (userName) => {
-    //     // Search for the user
-    //     cy.get('.search-label').click();
-
-    //     // Type the username as a search criterion
-    //     cy.get('.mat-mdc-form-field-infix>input[formcontrolname="userName"]')
-    //       .clear() // Clear any previous input
-    //       .type(userName);
-
-    //     // Click on the submit button to search
-    //     cy.get('button[type="submit"]').click();
-
-    //     // Wait for search results to load (adjust as needed for dynamic loading)
-    //     cy.get('body').then(($body) => {
-    //       if ($body.find('.no-results-message').length > 0) {
-    //         // If the user doesn't exist or is already deleted
-    //         cy.log(`User ${userName} not found or already deleted.`);
-
-    //         // Reset the search by clicking on the reset button
-    //         cy.get('.mdc-evolution-chip__cell--trailing > .mat-icon').click();
-
-    //         // Proceed with the next search criteria
-    //         if (index < usersToDelete.length - 1) {
-    //           cy.log(
-    //             `Proceeding with the next user: ${usersToDelete[index + 1]}`
-    //           );
-    //         }
-    //       } else {
-    //         // If the user is found, proceed with the deletion
-    //         cy.log(`User ${userName} found. Proceeding with deletion.`);
-
-    //         // Click the delete button (adjust the selector as per your app)
-    //         cy.get('button')
-    //           .contains(/Delete|DSGVO-Löschung/)
-    //           .click();
-    //         cy.wait(2000);
-    //         // Confirm delete in the confirmation dialog
-    //         cy.get('.confirm-buttons > button')
-    //           .filter((index, button) => {
-    //             return (
-    //               Cypress.$(button).text().trim() === 'YES' ||
-    //               Cypress.$(button).text().trim() === 'JA'
-    //             );
-    //           })
-    //           .click();
-    //         cy.wait(2000);
-    //         // Log the deletion
-    //         cy.log(`User ${userName} has been deleted.`);
-
-    // Array of users to delete
-    //const usersToDelete = ['manualAddress', 'manualNoAddress'];
-
-    usersToDelete.forEach((userName) => {
-      const searchAndDeleteUser = (userName) => {
-        cy.get('.search-label').click();
-
-        // Search for the user
-        cy.get('.mat-mdc-form-field-infix>input[formcontrolname="userName"]')
-          .clear()
-          .type(userName);
-        cy.get('button[type="submit"]').click();
-
-        // Wait for the search results
-        cy.wait(2000);
-
-        // Check if "No results" message exists (indicating user does not exist)
-        cy.get('body').then(($body) => {
-          if ($body.find('.cdk-row').length === 0) {
-            cy.log(`User ${userName} not found or already deleted.`);
-            cy.get('.mdc-evolution-chip__cell--trailing > .mat-icon').click();
-          } else {
-            // If user exists, proceed with deletion
-            cy.get('cdk-row').should('exist');
-            cy.log(`User ${userName} found. Proceeding with deletion.`);
-
-            cy.get('button')
-              .contains(/Delete|DSGVO-Löschung/)
-              .should('be.visible')
-              .click();
-
-            // Wait for confirmation dialog and confirm deletion
-            cy.get('.confirm-buttons > button')
-              .contains(/YES|JA/)
-              .should('be.visible')
-              .click();
-
-            cy.log(`User ${userName} has been deleted.`);
-
-            // Reset the search to clear out the search pill
-            //  cy.get('.mdc-evolution-chip__cell--trailing > .mat-icon').click();
-          }
-        });
-      };
-      cy.wait(1500);
-      searchAndDeleteUser(userName);
-
-      // Optional wait between deletions (if needed)
-      cy.wait(1000);
-    });
-
-    //Search for just deleted Admin user
-    cy.get('#searchButton').click({ force: true });
-    cy.wait(1500);
-
-    cy.get('button[type="submit"]').click(); //Click on Search button
-    cy.wait(2500);
-
-    //Already deleted Admin user is not founded
-
-    cy.get('.mat-mdc-paginator-range-actions>.mat-mdc-paginator-range-label')
-      .invoke('css', 'border', '1px solid blue')
-      .invoke('text') // Get the text of the element
-      .then((text) => {
-        // Trim the text and validate it
-        const trimmedText = text.trim();
-        expect(trimmedText).to.match(/0 of 0|0 von 0/);
-        //    });
-
-        cy.wait(2500);
-        //     }
-        //     });
-        //    };
-        // Call the function to search and delete user
-        //  searchAndDeleteUser(userName);
-
-        // Optional wait between deletions (if needed)
-        cy.wait(1000);
-      });
-
-    //Logout
-    cy.get('.logout-icon ').click();
-    cy.wait(2000);
-    cy.get('.confirm-buttons > :nth-child(2)').click();
-    cy.url();
-    cy.url().should('include', Cypress.env('baseUrl')); // Validate url
-    cy.wait(1500);
-    // Completion message at the end of the test
-    cy.log('The tests have been completed successfully.');
-    cy.wait(3000);
-  }); //end it
-
-  it('Yopmail - Clear inbox', () => {
-    const user = Cypress.env('createUser')[0];
-
-    // Visit Yopmail with an extended timeout
-    cy.visit('https://yopmail.com/en/', { timeout: 90000 });
-
-    // Ensure the login field is visible before typing
-    cy.get('#login', { timeout: 30000 })
-      .should('be.visible')
-      .type(user.email)
-      .type('{enter}');
-
-    // Ensure the inbox iframe is loaded
-    cy.frameLoaded('#ifinbox');
-
-    // Wait for inbox content to appear
-    cy.wait(3000);
-
-    // Check if inbox is empty or has emails
-    // cy.iframe('#ifinbox').then(($iframe) => {
-    //   const emails = $iframe.find('.mctn > .m'); // Selector for emails
-    //   const emptyInboxMessage = $iframe.find('.bname').text().trim(); // Check for "No new messages" text
-
-    //   if (emails.length > 0) {
-    //     cy.log(
-    //       `Inbox contains ${emails.length} email(s), proceeding with deletion.`
-    //     );
-
-    //     // Click delete all emails button if enabled
-    //     cy.get('.menu>div>#delall')
-    //       .should('not.be.disabled')
-    //       .click({ force: true });
-
-    //     cy.wait(2500);
-    //   } else if (
-    //     emptyInboxMessage.includes('No new messages') ||
-    //     emails.length === 0
-    //   ) {
-    //     cy.log('Inbox is empty, skipping deletion.');
-    //   } else {
-    //     cy.log('Could not determine inbox state.');
-    //   }
-    // });
-  });
-
   //Yopmail - Clear inbox
-  it('Yopmail - Clear inbox', () => {
+  it.skip('Yopmail - Clear inbox', () => {
     const user = Cypress.env('createUser')[0];
 
     // Visit yopmail application or login page
@@ -843,7 +744,7 @@ describe('R03_Admn user - Create E-Box User - Manually', () => {
     cy.wait(2500);
   }); //end it
 
-  it.skip('getCookie and Store it as a global variabile', () => {
+  it('getCookie and Store it as a global variabile', () => {
     cy.intercept('POST', '**/login/user').as('getToken'); // Intercept login request
     cy.loginToSupportViewAdmin(); // Perform login
     cy.wait(1500);

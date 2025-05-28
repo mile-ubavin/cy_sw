@@ -230,14 +230,21 @@ describe('R03_Create User -Manual.js', () => {
           .invoke('attr', 'target', '_self') //prevent opening in new tab
           .click();
         //Wait for Cookie bar
-        cy.wait(15000);
+        cy.wait(8000);
 
-        // //Remove Cooki dialog (if shown)
-        if (cy.iframe('#ifmail').find('#onetrust-accept-btn-handler')) {
-          cy.iframe('#ifmail').find('#onetrust-accept-btn-handler').click();
-        } else {
-          cy.log('Cookie dialog is not shown');
-        }
+        //Remove cookie
+        cy.iframe('#ifmail') // Ensure you're in the iframe
+          .find('#onetrust-accept-btn-handler', { timeout: 10000 }) // Allow for a longer timeout to handle dynamic loading
+          .should('be.visible') // Ensure the button is visible
+          .then(($btn) => {
+            if ($btn.length > 0) {
+              cy.log('Cookie dialog is shown, clicking accept');
+              cy.wrap($btn).click({ force: true });
+            } else {
+              cy.log('Cookie dialog is not shown');
+            }
+          })
+          .wait(1000); // Add a small wait to make sure the action is captured
 
         // Remove Cookie dialog (if shown)
         // cy.iframe('#ifmail')
@@ -280,6 +287,7 @@ describe('R03_Create User -Manual.js', () => {
             'Passwort zurücksetzen e-Gehaltszettel Portal'
           ); //Validate subject of Verification email
         let initialUrl_pass;
+        cy.wait(3500);
         cy.iframe('#ifmail')
           .find(
             '#mail>div>div:nth-child(2)>div:nth-child(3)>table>tbody>tr>td>p:nth-child(4)>span>a'
@@ -513,16 +521,27 @@ describe('R03_Create User -Manual.js', () => {
   it('Yopmail - Clear inbox', () => {
     const user = Cypress.env('createUser')[0];
 
-    // Visit yopmail application or login page
+    // Visit Yopmail
     cy.visit('https://yopmail.com/en/');
-    cy.get('#login').type(user.email);
-    cy.wait(1500);
-    cy.get('#refreshbut > .md > .material-icons-outlined').click();
-    cy.wait(1500);
-    // Delete all emails if the button is not disabled
-    cy.get('.menu>div>#delall')
-      .should('not.be.disabled')
-      .click({ force: true });
-    cy.wait(2500);
-  }); //end it
+    cy.get('#login', { timeout: 10000 }).should('be.visible').type(user.email);
+    cy.get('#refreshbut > .md > .material-icons-outlined')
+      .should('be.visible')
+      .click();
+
+    // Wait for inbox to load
+    cy.wait(2000);
+
+    // Check and click delete all button if it's enabled
+    cy.get('.menu>div>#delall', { timeout: 10000 }).then(($btn) => {
+      if (!$btn.is(':disabled')) {
+        cy.wrap($btn).click({ force: true });
+        cy.log('Inbox cleared.');
+      } else {
+        cy.log('Delete all button is disabled. Inbox may already be empty.');
+      }
+    });
+
+    // Optional: confirm inbox is empty
+    cy.iframe('#ifinbox').find('div.mctn').should('not.contain', '.m'); // no emails should remain
+  });
 }); //end describe

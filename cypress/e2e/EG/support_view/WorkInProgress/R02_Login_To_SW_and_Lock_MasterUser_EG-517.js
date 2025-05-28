@@ -59,7 +59,7 @@ describe('Invalid Login Attempts and Account Lock Test', () => {
   }); //end it
 
   // Scenario 2: Verify trimming password - fail login
-  it('Verify trimming password prevents login', () => {
+  it.only('Verify trimming password prevents login', () => {
     cy.visit(Cypress.env('baseUrl'), {
       failOnStatusCode: false,
     });

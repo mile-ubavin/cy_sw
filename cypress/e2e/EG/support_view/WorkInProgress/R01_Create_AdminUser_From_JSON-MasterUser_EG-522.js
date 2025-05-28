@@ -479,6 +479,222 @@ describe('Masteruser - Create Admin User From JSON', () => {
     }); //end in alias
   }); //end it
 
+  //(c) 2025
+
+  it.skip('Get Credentials from emails and Login as a New Admin', () => {
+    const adminUser = Cypress.env('createAdminUser')[0];
+
+    // Visit the Yopmail inbox
+    cy.visit('https://yopmail.com/en/');
+    cy.get('#login').type(adminUser.email);
+    cy.get('#refreshbut > .md > .material-icons-outlined').click();
+
+    cy.iframe('#ifinbox')
+      .find('.mctn > .m > button > .lms')
+      .then((emails) => {
+        const emailList = [...emails];
+
+        let usernameEmailIndex = -1;
+        let passwordEmailIndex = -1;
+
+        for (let i = 0; i < emailList.length; i++) {
+          const subject = emailList[i].textContent.trim();
+          if (
+            usernameEmailIndex === -1 &&
+            subject.includes(
+              'Neuer Benutzer e-Gehaltszettel Portal – Benutzername'
+            )
+          ) {
+            usernameEmailIndex = i;
+          } else if (
+            passwordEmailIndex === -1 &&
+            subject.includes('Neuer Benutzer e-Gehaltszettel Portal – Passwort')
+          ) {
+            passwordEmailIndex = i;
+          }
+
+          if (usernameEmailIndex !== -1 && passwordEmailIndex !== -1) {
+            break;
+          }
+        }
+
+        if (usernameEmailIndex !== -1) {
+          cy.iframe('#ifinbox')
+            .find('.mctn > .m > button > .lms')
+            .eq(usernameEmailIndex)
+            .click()
+            .wait(1500);
+
+          cy.iframe('#ifmail')
+            .find(
+              '#mail>div>div:nth-child(2)>div:nth-child(3)>table>tbody>tr>td>p:nth-child(2)>span'
+            )
+            .invoke('text')
+            .then((innerText) => {
+              const startIndex =
+                innerText.indexOf('Hier ist Ihr Benutzername:') +
+                'Hier ist Ihr Benutzername:'.length;
+              const usernameFromEmailBody = innerText
+                .substring(startIndex)
+                .trim();
+
+              cy.wrap(usernameFromEmailBody).as('capturedUsername');
+              Cypress.env('usernameFromEmailBody', usernameFromEmailBody);
+
+              expect(usernameFromEmailBody).to.equal(adminUser.username);
+              cy.log('Username:', usernameFromEmailBody);
+            });
+        }
+
+        if (passwordEmailIndex !== -1) {
+          cy.iframe('#ifinbox')
+            .find('.mctn > .m > button > .lms')
+            .eq(passwordEmailIndex)
+            .click()
+            .wait(1500);
+
+          cy.iframe('#ifmail')
+            .find(
+              '#mail>div>div:nth-child(2)>div:nth-child(3)>table>tbody>tr>td>p:nth-child(2)>span'
+            )
+            .invoke('text')
+            .then((innerText) => {
+              const startIndex =
+                innerText.indexOf('hier ist Ihr Passwort:') +
+                'hier ist Ihr Passwort:'.length;
+              const passwordFromEmailBody = innerText
+                .substring(startIndex)
+                .trim();
+
+              cy.wrap(passwordFromEmailBody).as('capturedPassword');
+              Cypress.env('passwordFromEmailBody', passwordFromEmailBody);
+
+              cy.log('Password:', passwordFromEmailBody);
+            });
+        }
+      });
+
+    // Login and validate behavior
+    cy.wait(2500);
+    cy.intercept('GET', '**/supportView/v1/generalInfo**').as('visitURL');
+    cy.visit(Cypress.env('baseUrl'), { failOnStatusCode: false });
+
+    cy.wait(['@visitURL'], { timeout: 27000 }).then((interception) => {
+      expect(interception.response.statusCode).to.eq(200);
+    });
+
+    cy.url().should('include', '/login');
+
+    cy.get('@capturedUsername').then((username) => {
+      cy.get('@capturedPassword').then((password) => {
+        cy.get('input[formcontrolname="username"]').type(username);
+        cy.get('input[formcontrolname="password"]').type(password);
+        cy.wait(1500);
+        cy.get('button[type="submit"]').click();
+
+        cy.wait(2500);
+        cy.visit(Cypress.env('dashboardURL'), {
+          failOnStatusCode: false,
+        });
+        cy.wait(5500);
+
+        cy.get('body').then(($body) => {
+          if ($body.find('.release-note-dialog__close-icon').length > 0) {
+            cy.get('.release-note-dialog__close-icon').click();
+          }
+        });
+
+        const buttonLabelsCompaniesPage = [
+          { en: 'Upload Document', de: 'Personalisierte Dokumente hochladen' },
+          { en: 'Mass Upload', de: 'Massensendung hochladen' },
+          { en: 'User', de: 'Benutzer' },
+        ];
+        cy.get('button > .mdc-button__label').each(($button) => {
+          cy.wrap($button)
+            .invoke('text')
+            .then((text) => {
+              const trimmedText = text.trim();
+              const isValid = buttonLabelsCompaniesPage.some(
+                (label) => label.en === trimmedText || label.de === trimmedText
+              );
+              expect(isValid, `Unexpected button label: "${trimmedText}"`).to.be
+                .true;
+            });
+        });
+
+        cy.get('button > .mdc-button__label')
+          .filter((index, el) => {
+            const text = Cypress.$(el).text().trim();
+            return text === 'User' || text === 'Benutzer';
+          })
+          .click();
+        cy.wait(1500);
+
+        const buttonLabels = [
+          {
+            en: 'Select users to deliver documents',
+            de: 'Benutzer für die Zustellung von Dokumenten auswählen',
+          },
+          { en: 'Create User', de: 'Neuen Benutzer Anlegen' },
+          { en: 'Edit', de: 'Bearbeiten' },
+          { en: 'Password reset', de: 'Passwort wiederherstellen' },
+          { en: 'Open E-Box', de: 'E-Box Öffnen' },
+        ];
+
+        cy.get('button > .mdc-button__label').each(($button) => {
+          cy.wrap($button)
+            .invoke('text')
+            .then((text) => {
+              const trimmedText = text.trim();
+              const isValid = buttonLabels.some(
+                (label) => label.en === trimmedText || label.de === trimmedText
+              );
+              expect(isValid, `Unexpected button label: "${trimmedText}"`).to.be
+                .true;
+            });
+        });
+
+        cy.get('.menu-trigger>.mat-mdc-menu-trigger>.user-display-name').click({
+          force: true,
+        });
+        cy.wait(2000);
+        cy.get('.password-bttn').click({ force: true });
+        cy.wait(1500);
+
+        cy.get('@capturedPassword').then((password) => {
+          cy.get('input[formcontrolname="oldPassword"]').type(password);
+          cy.get('button>mat-icon[data-mat-icon-name="password_invisible"]')
+            .eq(0)
+            .click({ force: true });
+          cy.wait(1000);
+          cy.get('input[formcontrolname="newPassword"]').type(
+            Cypress.env('password_supportViewAdmin')
+          );
+          cy.get('button>mat-icon[data-mat-icon-name="password_invisible"]')
+            .eq(0)
+            .click({ force: true });
+          cy.wait(1000);
+          cy.get('input[formcontrolname="confirmedNewPassword"]').type(
+            Cypress.env('password_supportViewAdmin')
+          );
+          cy.get('button>mat-icon[data-mat-icon-name="password_invisible"]')
+            .eq(0)
+            .click({ force: true });
+          cy.wait(1000);
+        });
+
+        cy.get('.button-container>button[type="submit"]').click({
+          force: true,
+        });
+
+        cy.get('.logout-icon ').click();
+        cy.wait(2000);
+        cy.get('.confirm-buttons > :nth-child(2)').click();
+        cy.log('Test completed successfully.');
+      });
+    });
+  });
+
   it('Master user delete Admin user', () => {
     const companyName = Cypress.env('company');
     const adminUser = Cypress.env('createAdminUser')[0];
