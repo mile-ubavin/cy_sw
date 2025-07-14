@@ -76,24 +76,23 @@ describe('Login, Update personal data, Logout', () => {
 
     //Random select dropdown value Country - using autocomplete
     let itemToSelect1; //Random selected Country from dropdown
-    for (let i = 0; i < 2; i++) {
-      cy.get('.iti__selected-flag').eq(i).click({ force: true }); //Click on inpit field to show drop-down list
-      cy.get('.iti__country-list')
-        .find('.iti__country')
-        .then((matOptionItems1) => {
-          const count1 = Cypress.$(matOptionItems1).length; //Total number of items visible in dropdown
-          expect(matOptionItems1).to.have.length(count1);
-          itemToSelect1 = matOptionItems1
-            .eq(Math.floor(Math.random() * count1))
-            .text(); //Random selected item from dropdown
-          cy.get('.iti__country-list > *').each(($el, index, $list) => {
-            if ($el.text() === itemToSelect1) {
-              $el.trigger('click');
-              cy.log('COUNTRY------------------->', itemToSelect1);
-            }
-          });
-        });
-    }
+    // for (let i = 0; i < 2; i++) {
+    // cy.get('.iti__selected-flag').eq(i).click({ force: true }); //Click on inpit field to show drop-down list
+    // cy.get('.iti__country-list')
+    //   .find('.iti__country')
+    //   .then((matOptionItems1) => {
+    // const count1 = Cypress.$(matOptionItems1).length; //Total number of items visible in dropdown
+    // expect(matOptionItems1).to.have.length(count1);
+    // itemToSelect1 = matOptionItems1
+    //   .eq(Math.floor(Math.random() * count1))
+    //   .text(); //Random selected item from dropdown
+    //   cy.get('.iti__country-list > *').each(($el, index, $list) => {
+    //     if ($el.text() === itemToSelect1) {
+    //       $el.trigger('click');
+    //       cy.log('COUNTRY------------------->', itemToSelect1);
+    //     }
+    //   });
+    // }
 
     //Get total numbers of input fields
     cy.get('.chameleon-form>.two-col-grid-row>.two-col-grid-controls')

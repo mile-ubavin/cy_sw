@@ -1,0 +1,3 @@
+givenName;familyName;streetName;houseNumber;zipCode;city;country;dateOfBirth;sex;accountNumber;phoneNumber;email;sendToPrint;sendCredentialToPrint
+NoEmailNoTelephone;Testuser 07770;Main Street 1234;53A;1111;City;AT;1972-02-12;;NoEmailNoPhone-07770;;;false;false
+NoEmailNoTelephone;Testuser 08880;Main Street;53A;1111;City;AT;1972-02-12;male;NoEmailNoPhone-08880;;;false;false

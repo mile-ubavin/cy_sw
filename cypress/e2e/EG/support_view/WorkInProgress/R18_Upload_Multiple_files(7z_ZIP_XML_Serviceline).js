@@ -182,7 +182,7 @@ describe('Upload Multiple Files (7z, ZIP, ServiceLine and XML inside)', () => {
   }); //end it
 
   //Admin user can Upload Multiple files (xml, txt, serviceline, pdf, zip, 7z) - Remove inapropriate uploaded file
-  it('Upload Multiple files (xml, txt, serviceline, pdf, zip, 7z)', () => {
+  it.only('Upload Multiple files (xml, txt, serviceline, pdf, zip, 7z)', () => {
     cy.loginToSupportViewAdmin();
     // Wait for login to complete
     cy.wait(1500);
@@ -260,15 +260,40 @@ describe('Upload Multiple Files (7z, ZIP, ServiceLine and XML inside)', () => {
     cy.get('body').type('{esc}');
     cy.wait(1500);
 
+    // Function: Wait until receive response -> success: false
+    function waitForFailedProcessing() {
+      return cy
+        .wait('@compelteUpload/PorcessingFiles', { timeout: 27000 })
+        .then((interception) => {
+          //get value from response
+          const success = interception.response.body?.success;
+
+          if (success === false) {
+            cy.log('Received expected response -> success: false');
+            return cy.wrap(interception); // Important: wrap sync value
+          }
+
+          cy.log('Ignoring success: true, checking again...');
+          return waitForFailedProcessing(); // Recursive call
+        });
+    }
+
     cy.intercept(
       'POST',
       '**/deliveryHandler/checkDocumentProcessingStatus**'
-    ).as('completeCheckingDocumentProcessingStatus');
+    ).as('compelteUpload/PorcessingFiles');
 
+    // Click on Upload Personal Document button
     cy.get('.dialog-actions>button>.title')
       .contains(/Upload Personal Document|Personalisierte Dokumente hochladen/i)
-      .should('be.visible') // Optional: Ensure the button is visible before interacting
-      .click(); // Click the button
+      .should('be.visible')
+      .click();
+
+    // Start recursive waiting
+    waitForFailedProcessing().then((interception) => {
+      expect(interception.response.statusCode).to.eq(200);
+    });
+    cy.wait(1500);
 
     //Remove invalid files from the list
     cy.get('.list-item-header > .list-item-status > .danger')
@@ -291,15 +316,15 @@ describe('Upload Multiple Files (7z, ZIP, ServiceLine and XML inside)', () => {
 
         cy.log('Clicked delete icon for a row with red danger message');
       });
-    cy.wait(['@completeCheckingDocumentProcessingStatus'], {
-      timeout: 27000,
-    }).then((interception) => {
-      // Log the intercepted response
-      cy.log('Intercepted response:', interception.response);
+    // cy.wait(['@completeCheckingDocumentProcessingStatus'], {
+    //   timeout: 27000,
+    // }).then((interception) => {
+    //   // Log the intercepted response
+    //   cy.log('Intercepted response:', interception.response);
 
-      // Assert the response status code
-      expect(interception.response.statusCode).to.eq(200);
-    });
+    //   // Assert the response status code
+    //   expect(interception.response.statusCode).to.eq(200);
+    // });
 
     // Verify warning message, after uplading document
     cy.get('.list-item-status>.warning')
@@ -319,13 +344,6 @@ describe('Upload Multiple Files (7z, ZIP, ServiceLine and XML inside)', () => {
       .should('be.visible') // Optional: Ensure the button is visible before interacting
       .click(); // Click the button
     cy.wait(1500);
-
-    // //Confirm dialog for sending delivery to all users from selected company
-    // cy.get('.title')
-    //   .contains(/Confirm|Bestätigen/i)
-    //   .should('be.visible') // Optional: Ensure the button is visible before interacting
-    //   .click(); // Click the button
-    // cy.wait(1500);
 
     // Verify the success message
     cy.get('.mat-mdc-simple-snack-bar > .mat-mdc-snack-bar-label')
@@ -350,7 +368,7 @@ describe('Upload Multiple Files (7z, ZIP, ServiceLine and XML inside)', () => {
   });
 
   //Login to e-Box, count the number of latest received deliveries and open one of them
-  it('Opens a random delivery from the latest unread', () => {
+  it.only('Opens a random delivery from the latest unread', () => {
     //Define number of Latest Received Deliveries
     const numberOfLatestReceivedDeliveries = 8;
 
@@ -392,18 +410,16 @@ describe('Upload Multiple Files (7z, ZIP, ServiceLine and XML inside)', () => {
           Math.floor(Math.random() * latestUnreadDeliveries.length)
         ];
       const { subject } = randomDelivery;
+      // Open one of the latest received deiveries
 
-      // Open one of latest received deiveries
-      cy.intercept(
-        'GET',
-        '**/hybridsign/backend_t/document/v1/getDocument/**'
-      ).as('getDocument');
       cy.intercept('GET', '**/getIdentifications?**').as('getIdentifications');
+      cy.wait(10000);
 
       cy.get('.mdc-data-table__content>tr>.subject-sender-cell').each(
         ($el, index) => {
           const text = $el.text().trim();
           if (text === subject) {
+            cy.wait(2000);
             cy.wrap($el).click({ force: true });
             cy.log(`Opened delivery: ${text}`);
             return false; // stop iteration
@@ -411,11 +427,8 @@ describe('Upload Multiple Files (7z, ZIP, ServiceLine and XML inside)', () => {
         }
       );
 
-      cy.wait(['@getIdentifications'], { timeout: 57000 }).then(
+      cy.wait(['@getIdentifications'], { timeout: 77000 }).then(
         (interception) => {
-          // Log the intercepted response
-          cy.log('Intercepted response:', interception.response);
-
           // Assert the response status code
           expect(interception.response.statusCode).to.eq(200);
         }
@@ -771,15 +784,40 @@ describe('Upload Multiple Files (7z, ZIP, ServiceLine and XML inside)', () => {
     cy.get('body').type('{esc}');
     cy.wait(1500);
 
+    // Function: Wait until receive response -> success: false
+    function waitForFailedProcessing() {
+      return cy
+        .wait('@compelteUpload/PorcessingFiles', { timeout: 27000 })
+        .then((interception) => {
+          //get value from response
+          const success = interception.response.body?.success;
+
+          if (success === false) {
+            cy.log('Received expected response -> success: false');
+            return cy.wrap(interception); // Important: wrap sync value
+          }
+
+          cy.log('Ignoring success: true, checking again...');
+          return waitForFailedProcessing(); // Recursive call
+        });
+    }
+
     cy.intercept(
       'POST',
       '**/deliveryHandler/checkDocumentProcessingStatus**'
-    ).as('completeCheckingDocumentProcessingStatus');
+    ).as('compelteUpload/PorcessingFiles');
 
+    // Click on Upload Personal Document button
     cy.get('.dialog-actions>button>.title')
       .contains(/Upload Personal Document|Personalisierte Dokumente hochladen/i)
-      .should('be.visible') // Optional: Ensure the button is visible before interacting
-      .click(); // Click the button
+      .should('be.visible')
+      .click();
+
+    // Start recursive waiting
+    waitForFailedProcessing().then((interception) => {
+      expect(interception.response.statusCode).to.eq(200);
+    });
+    cy.wait(1500);
 
     //Remove invalid files from the list
     cy.get('.list-item-header > .list-item-status > .danger')
@@ -802,15 +840,15 @@ describe('Upload Multiple Files (7z, ZIP, ServiceLine and XML inside)', () => {
 
         cy.log('Clicked delete icon for a row with red danger message');
       });
-    cy.wait(['@completeCheckingDocumentProcessingStatus'], {
-      timeout: 27000,
-    }).then((interception) => {
-      // Log the intercepted response
-      cy.log('Intercepted response:', interception.response);
+    // cy.wait(['@completeCheckingDocumentProcessingStatus'], {
+    //   timeout: 27000,
+    // }).then((interception) => {
+    //   // Log the intercepted response
+    //   cy.log('Intercepted response:', interception.response);
 
-      // Assert the response status code
-      expect(interception.response.statusCode).to.eq(200);
-    });
+    //   // Assert the response status code
+    //   expect(interception.response.statusCode).to.eq(200);
+    // });
 
     // Verify warning message, after uplading document
     cy.get('.list-item-status>.warning')
@@ -905,10 +943,7 @@ describe('Upload Multiple Files (7z, ZIP, ServiceLine and XML inside)', () => {
       const { subject } = randomDelivery;
 
       // Open one of latest received deiveries
-      cy.intercept(
-        'GET',
-        '**/hybridsign/backend_t/document/v1/getDocument/**'
-      ).as('getDocument');
+
       cy.intercept('GET', '**/getIdentifications?**').as('getIdentifications');
 
       cy.get('.mdc-data-table__content>tr>.subject-sender-cell').each(

@@ -15,6 +15,7 @@ const StreamZip = require('node-stream-zip');
 //const pdfjsLib = require('pdfjs-dist/legacy/build/pdf.js'); // Legacy import
 const pdfParse = require('pdf-parse');
 const axios = require('axios');
+const Papa = require('papaparse');
 
 //New 2025
 
@@ -202,11 +203,31 @@ const getDownloadedPdf = (downloadsDir) => {
   }
 };
 
+// Task: Get the latest downloaded CSV file
+const getDownloadedCSV = (downloadsDir) => {
+  try {
+    const files = fs.readdirSync(downloadsDir);
+    const csvFiles = files
+      .filter((file) => file.endsWith('.csv'))
+      .map((file) => {
+        const fullPath = path.join(downloadsDir, file);
+        const stats = fs.statSync(fullPath);
+        return { fullPath, time: stats.mtime };
+      });
+
+    csvFiles.sort((a, b) => b.time - a.time);
+
+    return csvFiles.length > 0 ? csvFiles[0].fullPath : null;
+  } catch (err) {
+    console.error('Error finding CSV file:', err);
+    return null;
+  }
+};
+
 // Task: Download a file from a URL
 const downloadFileToFolder = ({ url, fileName }) => {
   // Define the target downloads folder
-  const downloadsFolder =
-    'C:\\Users\\mubavin\\Cypress\\EG\\cypress-automatison-framework\\cypress\\downloads';
+  const downloadsFolder = 'C:\\..cypress\\downloads';
   const destinationPath = path.join(downloadsFolder, fileName);
 
   return new Promise((resolve, reject) => {
@@ -804,6 +825,7 @@ module.exports = defineConfig({
         downloadZipAndReadFirstPdf,
         openPasswordProtectedPdf,
         getDownloadedPdf,
+        getDownloadedCSV,
         getDownloadedZIP,
         downloadFileToFolder,
         openFile,
@@ -832,11 +854,15 @@ module.exports = defineConfig({
           }
           return null;
         },
+        openCSV(filePath) {
+          exec(`start "" "${filePath}"`);
+          return null;
+        },
 
         /*********************************** */
       });
       //  Set executing tests on various environments, targeting appropriate json from const=environments
-      const envConfig = environments['eg_dev'];
+      const envConfig = environments['eg_test'];
       return { ...config, env: { ...config.env, ...envConfig } };
     }, //end
     specPattern: 'cypress/e2e/**/*.{js,jsx,ts,tsx}', // Ensure this matches your structure

@@ -72,7 +72,7 @@ describe('Login, Create_delivery-Upload_doc(pdf), Logout', () => {
     cy.wait(8500);
 
     // Logout
-    cy.get('.user-title').click();
+    cy.get('.user-title').click({ force: true });
     cy.wait(2000);
     cy.contains('Logout').click();
     cy.url().should('include', Cypress.env('baseUrl')); // Validate landing page URL

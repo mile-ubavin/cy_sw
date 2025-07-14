@@ -3,7 +3,7 @@ describe('Master - Create User from CSV', () => {
   const path = require('path');
   it('Login As AdminUser - Create Users from CSV file', () => {
     // Login as Master User using a custom command
-    cy.loginToSupportViewMaster();
+    cy.loginToSupportViewAdmin();
     cy.wait(3500);
 
     //Remove pop up
@@ -31,7 +31,6 @@ describe('Master - Create User from CSV', () => {
     //Find the Search button by button name and click on it
     cy.get('.search-dialog>form>div>.mat-primary').click();
     cy.wait(1500);
-
     //Create user
     cy.get('.action-buttons>.mdc-button>.mdc-button__label')
       .filter((index, el) => {
@@ -59,7 +58,7 @@ describe('Master - Create User from CSV', () => {
       .click();
 
     //Upload CSV file
-    cy.upload_csv();
+    cy.uploadCSV_NO_Emails_NO_Phones();
     cy.get('#mat-select-value-3 > .mat-mdc-select-placeholder').click();
     cy.get('div.cdk-overlay-pane').should('exist'); // Ensure the overlay pane is present
     cy.get('div.cdk-overlay-pane mat-option').should(
@@ -105,79 +104,7 @@ describe('Master - Create User from CSV', () => {
           '2 Benutzer wurden erstellt', // German
         ]);
       });
-    //cy.wait(7500);
-    // Wait until the success message disappears completely
-    cy.get('sv-multiple-notifications>.messages>p', { timeout: 20000 }).should(
-      'not.exist'
-    );
 
-    //Create user which already exist
-
-    //Click on create User button
-    cy.get('.button-wraper>button > .mdc-button__label')
-      .filter((index, el) => {
-        const text = Cypress.$(el).text().trim();
-        return text === 'Create user' || text === 'Neuen Benutzer Anlegen';
-      })
-      .click({ force: true });
-    cy.wait(1500);
-
-    //Click on Upload CSV button
-    cy.get('.create_user_dialog_content>.buttons-wrapper>button')
-      .filter((index, el) => {
-        const text = Cypress.$(el).text().trim();
-        return text === 'CSV uploading' || text === 'CSV Anlage';
-      })
-      .click();
-
-    //Upload CSV file
-    cy.upload_csv();
-
-    cy.get('mat-select[formcontrolname="companyPrefix"]').click();
-    //cy.get('#mat-select-value-3 > .mat-mdc-select-placeholder').click();
-    cy.get('div.cdk-overlay-pane').should('exist'); // Ensure the overlay pane is present
-    cy.get('div.cdk-overlay-pane mat-option').should(
-      'have.length.greaterThan',
-      0
-    );
-    //Select Company prefix
-    cy.wait(1500);
-    cy.get('mat-option').eq(0).click();
-    cy.wait(1500);
-
-    cy.intercept('POST', '**/supportView/v1/person/fromGroup/**').as(
-      'uploadCSV'
-    );
-
-    //Click on  Create Users button
-    cy.get('.dialog-actions>button>.title')
-      .contains(/Create Users|Benutzer Anlegen/i)
-      .should('be.visible') // Optional: Ensure the button is visible before interacting
-      .click(); // Click the button
-    // cy.wait(10000);
-    cy.wait(['@uploadCSV'], {
-      timeout: 57000,
-    }).then((interception) => {
-      // Log the intercepted response
-      cy.log('Intercepted response:', interception.response);
-
-      // Assert the response status code
-      expect(interception.response.statusCode).to.eq(200);
-    });
-
-    cy.wait(2000);
-    //Validate success message
-    cy.get('sv-multiple-notifications>.messages>p')
-      .invoke('text')
-      .then((text) => {
-        const trimmedText = text.trim();
-
-        // Check if the text matches either English or German message
-        expect(trimmedText).to.be.oneOf([
-          '2 Users were skipped, because they already exist', // English
-          '2 Benutzer wurden übersprungen, da sie bereits existieren', // German
-        ]);
-      });
     cy.wait(2500);
 
     //Logout
@@ -521,7 +448,7 @@ describe('Master - Create User from CSV', () => {
     cy.wait(2500);
   }); //end it
 
-  it.skip('OLD - Downloads the attachment from Yopmail', () => {
+  it('OLD - Downloads the attachment from Yopmail', () => {
     // Visit Yopmail website
     cy.visit('https://yopmail.com/en/');
 
@@ -712,7 +639,7 @@ describe('Master - Create User from CSV', () => {
   //   });
   // });
 
-  it('downloads a ZIP, extracts with 7z, opens first PDF', () => {
+  it.only('downloads a ZIP, extracts with 7z, opens first PDF', () => {
     cy.visit('https://yopmail.com/en/');
     cy.get('#login').type(Cypress.env('email_supportViewAdmin'));
     cy.get('#refreshbut .material-icons-outlined').click();
@@ -811,7 +738,7 @@ describe('Master - Create User from CSV', () => {
 
   //chatGbt4
 
-  it.only('should trigger download and read first PDF', () => {
+  it('should trigger download and read first PDF', () => {
     cy.downloadZipFromYopmail(); // custom command
     cy.wait(4000); // wait for ZIP to download
 

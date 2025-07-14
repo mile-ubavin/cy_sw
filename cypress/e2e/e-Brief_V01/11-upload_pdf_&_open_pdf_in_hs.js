@@ -25,28 +25,28 @@ describe('Login, Crete_delivery-Upload_doc(pdf), Logout', () => {
   }); //end it
 
   //Open doc in hs and sign pdf using Touch-Signatur sign. method
-  // it("Open doc in hs and sign pdf using Touch-Signatur sign. method", () => {
-  //   cy.visit("/deliveries");
+  // it('Open doc in hs and sign pdf using Touch-Signatur sign. method', () => {
+  //   cy.visit('/deliveries');
 
-  //   cy.get(":nth-child(1) > .documents-cell > .full-cell-text-content").click({
+  //   cy.get(':nth-child(1) > .documents-cell > .full-cell-text-content').click({
   //     force: true,
   //   }); //select first delivery, open document details
-  //   cy.get(".delivery-document").first().click({ force: true }); //open document in hs (from doc. details)
+  //   cy.get('.delivery-document').first().click({ force: true }); //open document in hs (from doc. details)
   //   cy.wait(4000);
-  //   cy.get(".signatures-container>.signature-actions>a").click({ force: true }); //open add new signature dialog
-  //   cy.get("#mat-input-5").clear().type("Change position of signature dialog"); //Clear Input field & Enter signee name
-  //   cy.get(".mat-mdc-dialog-actions > .mat-accent").click({ force: true }); //Confirm Signee name
+  //   cy.get('.signatures-container>.signature-actions>a').click({ force: true }); //open add new signature dialog
+  //   cy.get('#mat-input-5').clear().type('Change position of signature dialog'); //Clear Input field & Enter signee name
+  //   cy.get('.mat-mdc-dialog-actions > .mat-accent').click({ force: true }); //Confirm Signee name
   //   //Sign documet using Touch-Signatur
   //   cy.get('.sign-methods-container>button[title="Touch-Signatur"]').click({
   //     force: true,
   //   });
-  //   cy.get(".sign-canvas").then((res) =>
+  //   cy.get('.sign-canvas').then((res) =>
   //     console.log(res[0].getBoundingClientRect())
   //   );
-  //   cy.get(".sign-canvas")
-  //     .trigger("mouseover")
-  //     .trigger("mousedown", { which: 1, eventConstructor: "MouseEvent" })
-  //     .trigger("mousemove", {
+  //   cy.get('.sign-canvas')
+  //     .trigger('mouseover')
+  //     .trigger('mousedown', { which: 1, eventConstructor: 'MouseEvent' })
+  //     .trigger('mousemove', {
   //       which: 1,
   //       screenX: 720,
   //       screenY: 920,
@@ -54,11 +54,11 @@ describe('Login, Crete_delivery-Upload_doc(pdf), Logout', () => {
   //       clientY: 920,
   //       pageX: 720,
   //       pageY: 920,
-  //       eventConstructor: "MouseEvent",
+  //       eventConstructor: 'MouseEvent',
   //     })
-  //     .trigger("mouseup", { force: true });
+  //     .trigger('mouseup', { force: true });
   //   cy.wait(2000);
-  //   cy.get(".mat-dialog-actions > .mat-accent").click({ force: true }); //Click on confirm button
+  //   cy.get('.mat-dialog-actions > .mat-accent').click({ force: true }); //Click on confirm button
   // });
 
   //Open doc in hs, change position of signature dilog, sign it and Save changes
@@ -88,18 +88,18 @@ describe('Login, Crete_delivery-Upload_doc(pdf), Logout', () => {
         eventConstructor: 'MouseEvent',
       });
     //.trigger('mouseup', { force: true })
-    //Scroll to the top
-    cy.get('.scrollbar-thumb')
-      .trigger('mouseover')
-      .trigger('mousedown', { which: 1, eventConstructor: 'MouseEvent' })
-      .trigger('mousemove', {
-        which: 1,
-        screenY: 220,
-        clientY: 220,
-        pageY: 220,
-        eventConstructor: 'MouseEvent',
-      })
-      .trigger('mouseup', { force: true }); //End scroll
+    // //Scroll to the top
+    // cy.get('.scrollbar-thumb')
+    //   .trigger('mouseover')
+    //   .trigger('mousedown', { which: 1, eventConstructor: 'MouseEvent' })
+    //   .trigger('mousemove', {
+    //     which: 1,
+    //     screenY: 220,
+    //     clientY: 220,
+    //     pageY: 220,
+    //     eventConstructor: 'MouseEvent',
+    //   })
+    //   .trigger('mouseup', { force: true }); //End scroll
     cy.wait(2000);
     cy.get(
       '.placer-actions > .mat-accent > .mat-mdc-button-touch-target'

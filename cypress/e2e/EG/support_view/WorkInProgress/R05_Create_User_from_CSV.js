@@ -1,6 +1,95 @@
 describe('Master - Create User from CSV', () => {
-  // A D M I N   U S E R - CREATE USER FROM CSV FILE
+  // Precondition: Search for the user and if user exists, proceed with deletion
+  it('Search for the user and if user(s) exists, proceed with deletion', () => {
+    // Login as Master User using a custom command
+    const user = Cypress.env('createUser')[0];
+    cy.loginToSupportViewMaster();
+    cy.wait(3500);
 
+    //Remove pop up
+    cy.get('body').then(($body) => {
+      if ($body.find('.release-note-dialog__close-icon').length > 0) {
+        cy.get('.release-note-dialog__close-icon').click();
+      } else {
+        cy.log('Close icon is NOT present');
+      }
+    });
+    cy.wait(1500);
+
+    //Search for Group by Display Name
+    cy.get('#searchButton>span').click(); //Click on search button
+    // Use the company name from the cypress.config.js
+    const companyName = Cypress.env('company');
+    // Search for Group by Display Name using the company name
+    cy.get('.search-dialog>form>.form-fields>.searchText-wrap')
+      .eq(1)
+      .type(companyName);
+    //Find the Search button by button name and click on it
+    cy.get('.search-dialog>form>div>.mat-primary').click();
+    //Switch to user section
+    cy.get('.action-buttons > .mdc-button').eq(4).click();
+
+    // Array of users to delete
+    const usersToDelete = ['otto', 'emma']; // Add more usernames as needed
+
+    usersToDelete.forEach((userName) => {
+      const searchAndDeleteUser = (userName) => {
+        cy.get('.search-label').click();
+
+        // Search for the user
+        cy.get('.mat-mdc-form-field-infix>input[formcontrolname="userName"]')
+          .clear()
+          .type(userName);
+        cy.get('button[type="submit"]').click();
+
+        // Wait for the search results
+        cy.wait(2000);
+
+        // Check if "No results" message exists (indicating user does not exist)
+        cy.get('body').then(($body) => {
+          if ($body.find('.cdk-row').length === 0) {
+            cy.log(`User ${userName} not found or already deleted.`);
+            cy.get('.mdc-evolution-chip__cell--trailing > .mat-icon').click();
+          } else {
+            // If user exists, proceed with deletion
+            cy.get('cdk-row').should('exist');
+            cy.log(`User ${userName} found. Proceeding with deletion.`);
+
+            cy.get('button')
+              .contains(/Delete|DSGVO-Löschung/)
+              .should('be.visible')
+              .click();
+
+            // Wait for confirmation dialog and confirm deletion
+            cy.get('.confirm-buttons > button')
+              .contains(/YES|JA/)
+              .should('be.visible')
+              .click();
+
+            cy.log(`User ${userName} has been deleted.`);
+          }
+        });
+      };
+      cy.wait(1500);
+      searchAndDeleteUser(userName);
+
+      // Optional wait between deletions (if needed)
+      cy.wait(1000);
+    });
+
+    //Logout
+    cy.get('.logout-icon ').click();
+    cy.wait(2000);
+    cy.get('.confirm-buttons > :nth-child(2)').click();
+    cy.url();
+    cy.url().should('include', Cypress.env('baseUrl')); // Validate url
+    cy.wait(1500);
+    // Completion message at the end of the test
+    cy.log('The tests have been completed successfully.');
+    cy.wait(3000);
+  }); //end it
+
+  // A D M I N   U S E R - CREATE USER FROM CSV FILE
   it('Login As AdminUser - Create Users from CSV file', () => {
     // Login as Master User using a custom command
     cy.loginToSupportViewMaster();
@@ -518,6 +607,25 @@ describe('Master - Create User from CSV', () => {
     cy.get('.confirm-buttons > :nth-child(2)').click();
     cy.url().should('include', Cypress.env('baseUrl'));
     cy.log('Test completed successfully.');
+    cy.wait(2500);
+  }); //end it
+
+  //Y O P M A I L
+  it('Yopmail - Clear inbox', () => {
+    const legacyTestuser = Cypress.env('legacyTestuser')[0];
+
+    // Visit yopmail application or login page
+    cy.visit('https://yopmail.com/en/');
+    // Access the first Admin User object from cypress.config.js
+    const csvTestuser = Cypress.env('csvTestuser')[0];
+    cy.get('#login').type(csvTestuser.email);
+    cy.wait(1500);
+    cy.get('#refreshbut > .md > .material-icons-outlined').click();
+    cy.wait(3500);
+    // Delete all emails if the button is not disabled
+    cy.get('.menu>div>#delall')
+      .should('not.be.disabled')
+      .click({ force: true });
     cy.wait(2500);
   }); //end it
 }); //end describe

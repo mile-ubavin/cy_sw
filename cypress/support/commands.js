@@ -84,6 +84,8 @@
 import 'cypress-file-upload';
 import 'cypress-keycloak-commands';
 import 'cypress-iframe';
+import 'cypress-wait-until';
+
 const path = require('path');
 
 // import '@4tw/cypress-drag-drop';
@@ -542,6 +544,21 @@ Cypress.Commands.add('uploadDocument', function () {
           }); //end
       });
   });
+});
+
+//uploadCSV_NO_Emails_NO_Phones
+
+Cypress.Commands.add('uploadCSV_NO_Emails_NO_Phones', function () {
+  cy.fixture('CSV_2persons_NoEmails_NoPhone.csv', 'binary')
+    .then(Cypress.Blob.binaryStringToBlob)
+    .then((fileContent) => {
+      cy.get('.dialog-content>.upload-section>div>form>input').attachFile({
+        fileContent,
+        filePath: 'CSV_2persons_NoEmails_NoPhone.csv',
+        fileName: 'CSV_2persons_NoEmails_NoPhone.csv',
+        mimeType: 'text/csv',
+      });
+    });
 });
 
 //*Custom commands: Taken data from json file
