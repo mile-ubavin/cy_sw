@@ -1,0 +1,13 @@
+lfdNr_Auftrag;Verkaufsburo;Auftraggeber;Regulierer;Rechnungsempf;Warenempfänger;Zahlungsbedingung;Bestellnummer;Vertrag;Wunschlieferdatum;Preisdatum;Leisterstdatum;Kartennummer;Submission;Kopftext;Zusatzleistungen Kopf;Materialnummer;Menge;Gewicht;Anzahl Pakete;Anzahl Palette;Titel;GZ;FaktID;Auftrag;ZMAN;ZMA1;Positionstext;Zusatzleistungen Position;Ende
+1;403;1234567;;;;;e-Gehaltszettel / EBPP;;20250630;;;;;;;60107009;53;;;;;;;;;31,32;IY9VDV LearnSmart Academy;;X
+1;430;1234567;;;;;e-Gehaltszettel / EBPP;;20250630;;;;;;;60107012;1;;;;;;;;;49;Add-On Digitale Signatur und Mitarbeiter upload;;X
+1;403;QA007;;;;;e-Gehaltszettel / EBPP;;20250630;;;;;;;60107009;198;;;;;;;;;117,00;FIRMA_XY TasteBuds Café;;X
+1;430;QA007;;;;;e-Gehaltszettel / EBPP;;20250630;;;;;;;60107012;1;;;;;;;;;49;Add-On Digitale Signatur und Mitarbeiter upload;;X
+1;403;1111;;;;;e-Gehaltszettel / EBPP;;20250630;;;;;;;60107009;9;;;;;;;;;5,32;FIRMA_A ServicePro Experts;;X
+1;403;sap;;;;;e-Gehaltszettel / EBPP;;20250630;;;;;;;60107009;22;;;;;;;;;13,00;000_QA TechNova Solutions;;X
+1;430;androidSap;;;;;e-Gehaltszettel / EBPP;;20250630;;;;;;;60107012;1;;;;;;;;;49;Add-On Digitale Signatur und Mitarbeiter upload;;X
+1;430;Sap Abba;;;;;e-Gehaltszettel / EBPP;;20250630;;;;;;;60107012;1;;;;;;;;;49;Add-On Digitale Signatur und Mitarbeiter upload;;X
+1;430;All111111;;;;;e-Gehaltszettel / EBPP;;20250630;;;;;;;60107012;1;;;;;;;;;49;Add-On Digitale Signatur und Mitarbeiter upload;;X
+1;430;Dev Test 00000;;;;;e-Gehaltszettel / EBPP;;20250630;;;;;;;60107012;1;;;;;;;;;49;Add-On Digitale Signatur und Mitarbeiter upload;;X
+1;430;test;;;;;e-Gehaltszettel / EBPP;;20250630;;;;;;;60107012;1;;;;;;;;;49;Add-On Digitale Signatur und Mitarbeiter upload;;X
+2;403;SAP Aqua;;;;;e-Gehaltszettel / EBPP;;20250630;;;;;;;60107026;90;;;;;;;;;41,40;AQUA AQUA GmbH;;X
