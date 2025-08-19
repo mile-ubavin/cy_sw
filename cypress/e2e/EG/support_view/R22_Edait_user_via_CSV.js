@@ -1,4 +1,4 @@
-describe('Master - Create User from CSV and Update User data', () => {
+describe('Create and Update User`s data from CSV file', () => {
   // Precondition: Search for the user and if user exists, proceed with deletion
   it('Search for the user and if user(s) exist, proceed with deletion', () => {
     const user = Cypress.env('createUser')[0];
@@ -80,7 +80,7 @@ describe('Master - Create User from CSV and Update User data', () => {
     cy.log('The tests have been completed successfully.');
   });
 
-  // A D M I N   U S E R - CREATE USER FROM CSV FILE and UPDATE HIS PERSONAL DATA
+  // M A S T E R  U S E R - CREATE USER FROM CSV FILE and UPDATE HIS PERSONAL DATA
   it('Login As AdminUser - Create Users from CSV file', () => {
     // Login as Master User using a custom command
     cy.loginToSupportViewMaster();
@@ -450,8 +450,7 @@ describe('Master - Create User from CSV and Update User data', () => {
         cy.wait(2500);
       }
     );
-    cy.wait(7000);
-    cy.pause();
+    cy.wait(5000);
 
     // Logout
     cy.get('.user-title').click();
@@ -870,8 +869,8 @@ describe('Master - Create User from CSV and Update User data', () => {
     cy.wait(1500);
   }); //end it
 
-  //Login to e-Box and check does email is nor confirm anymore
-  it('Login to e-Box and check does email is nor confirm anymore', () => {
+  //Login to e-Box and check does email is not confirm anymore
+  it('Login to e-Box and check does email is not confirm anymore', () => {
     cy.visit(Cypress.env('baseUrl_egEbox'));
     cy.wait(5000);
 
@@ -938,7 +937,6 @@ describe('Master - Create User from CSV and Update User data', () => {
         ]);
       });
 
-    cy.pause();
     // Logout
     cy.get('.user-title').click();
     cy.wait(1500);
@@ -949,7 +947,7 @@ describe('Master - Create User from CSV and Update User data', () => {
   });
 
   // M A S T E R    U S E R - DELETE ALREADY CREATED USERS
-  it('Search for the user and if user(s) exist, proceed with deletion', () => {
+  it('Delete already created user', () => {
     const user = Cypress.env('createUser')[0];
     cy.loginToSupportViewMaster();
     cy.wait(3500);
