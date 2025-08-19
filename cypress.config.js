@@ -271,6 +271,7 @@ const openFile = async (filePath) => {
     throw err;
   });
 };
+
 const environments = {
   eg_dev: {
     usernameFromEmailBody: '',
@@ -809,7 +810,217 @@ const environments = {
     rootUrl: 'hybridsign-t.post-business-solutions.at',
     origin: 'https://kiamabn.b2clogin.com',
   },
-};
+  tages_dev: {
+    usernameFromEmailBody: '',
+    passwordFromEmailBody: '',
+    baseUrl: 'https://tages-post.edeja.com/login',
+
+    username_stundung: 'k40.tages-post.testuser@yopmail.com',
+    password_stundung: 'Test1234!',
+
+    username_crteditCard: 'qa.testuser@yopmail.com',
+    password_crteditCard: 'Test1234!',
+
+    username_ILV: 'k106.tages-post.testuser@yopmail.com',
+    password_ILV: 'Test1234!',
+
+    headerLinks: [
+      'Home',
+      'Neue Sendung',
+      'Offene Sendungen',
+      'Auftragsliste',
+      'Preise',
+      'Tarifrechner',
+      'Häufige Fragen',
+      'Vorlagen',
+    ],
+
+    sendungen: ['Neue Sendung', 'Offene Sendungen', 'Auftragsliste'],
+
+    weiterführendeLinks: [
+      'Preise',
+      'Tarifrechner',
+      'Häufige Fragen',
+      'Vorlagen',
+    ],
+
+    // solutionsData: {
+    //   solutionsTitle: [
+    //     'e-Gehaltszettel',
+    //     'e-Signaturlösung',
+    //     'Posteingangslösungen',
+    //   ],
+    //   solutionsP: [
+    //     'Mitarbeiter*innen erhalten Gehalts- und Lohnabrechnungen papierlos und Sie profitieren von verbesserten Workflows durch die direkte Anbindung an das Lohnverrechnungssystem.',
+    //     'Unterzeichnen Sie Dokumente, Verträge und mehr einfach digital, auch direkt am Point-of-Sale. So erhöht sich der Komfort für Ihre Kund*innen und vermeiden Medienbrüche.',
+    //     'Ob Rechnungen, Formulare, Bestellungen oder der komplette Posteingang – wir digitalisieren Ihre eingehenden Sendungen für eine automatisierte Weiterverarbeitung.',
+    //     ,
+    //   ],
+    //   solutionsLinks: [
+    //     'Weiter zu e-Gehaltszettel',
+    //     'Weiter zu e-Signaturlösung',
+    //     'Weiter zu Posteingangslösungen',
+    //   ],
+    // },
+
+    solutionsTitle: [
+      'e-Gehaltszettel',
+      'e-Signaturlösung',
+      'Posteingangslösungen',
+    ],
+    solutionsP: [
+      'Mitarbeiter*innen erhalten Gehalts- und Lohnabrechnungen papierlos und Sie profitieren von verbesserten Workflows durch die direkte Anbindung an das Lohnverrechnungssystem.',
+      'Unterzeichnen Sie Dokumente, Verträge und mehr einfach digital, auch direkt am Point-of-Sale. So erhöht sich der Komfort für Ihre Kund*innen und vermeiden Medienbrüche.',
+
+      'Ob Rechnungen, Formulare, Bestellungen oder der komplette Posteingang – wir digitalisieren Ihre eingehenden Sendungen für eine automatisierte Weiterverarbeitung.',
+    ],
+    solutionsLinks: [
+      'Weiter zu e-Gehaltszettel',
+      'Weiter zu e-Signaturlösung',
+      'Weiter zu Posteingangslösungen',
+    ],
+    footerTitle: [
+      'HOTLINE: +43 800 2088 23',
+      'SERVICES',
+      'RECHTLICHE HINWEISE',
+    ],
+    footerLinks: [
+      'Servicezeiten:',
+      'Montag – Donnerstag (werktags): 08:00 – 17:00',
+      'Freitag (werktags): 08:00 – 14:00',
+      'Servicezeiten:',
+      'Servicezeiten:',
+      'Servicezeiten:',
+      'Servicezeiten:',
+      'Servicezeiten:',
+      'Servicezeiten:',
+      'Servicezeiten:',
+      'Servicezeiten:',
+      'Servicezeiten:',
+    ],
+
+    // headerLinks: [
+    //   'Home',
+    //   'Neue Sendung',
+    //   'Offene Sendungen',
+    //   'Auftragsliste',
+    //   'Preise',
+    //   'Tarifrechner',
+    //   'Häufige Fragen',
+    //   'Vorlagen',
+    // ],
+
+    //   company: 'Aqua',
+    //   companyPrefix: 'aqua',
+    //   companyEmail: 'aqua.gmbh@yopmail.com',
+
+    //   search: 'Android',
+    //   username_supportViewAdmin: 'aquaAdmin',
+    //   password_supportViewAdmin: 'Test1234!',
+    //   email_supportViewAdmin: 'aqua.admin@yopmail.com',
+    //   baseUrl_egEbox: 'https://eboxpayslip.edeja.com/fe.e-box_t/',
+    //   username_egEbox: 'aquaABBA000100279311',
+    //   password_egEbox: 'Test1234!',
+    //   accountNumber_egEbox: 'ABBA000100279311',
+    //   tagesBaseUrl: 'https://tages-post.edeja.com/',
+    //   downloadsFolder:
+    //     'C:/Users/mubavin/Cypress/EG/cypress-automatison-framework/cypress/downloads/',
+    //   dashboardURL: 'https://supportviewpayslip.edeja.com/fe/dashboard/groups',
+    //   eboxDeliveryPage: 'https://eboxpayslip.edeja.com/fe.e-box_t/deliveries',
+    //   enableXML: [
+    //     { id: 'T101', name: 'BB Care' },
+    //     { id: 'T102', name: 'Beiersdorfer' },
+    //     { id: 'L103', name: 'ISS' },
+    //   ],
+    //   disableXML: [
+    //     { id: 'T101', name: 'BB Care' },
+    //     { id: 'T102', name: 'Beiersdorfer' },
+    //   ],
+    //   enablePDFDictionary: [
+    //     { name: 'PDFTABDictionary-200' },
+    //     { name: 'PDFTABDictionary-301' },
+    //     { name: 'PDFTABDictionary-305' },
+    //   ],
+    //   disablePDFDictionary: [
+    //     { name: 'PDFTABDictionary-200' },
+    //     { name: 'PDFTABDictionary-301' },
+    //   ],
+    //   createAdminUser: [
+    //     {
+    //       firstName: 'Mustermann',
+    //       lastName: 'Admin',
+    //       username: 'maxmustermannAdmin',
+    //       email: 'max-mustermann@yopmail.com',
+    //     },
+    //   ],
+    //   createUserNoAddress: [
+    //     {
+    //       firstName: 'No Address',
+    //       lastName: 'Manual',
+    //       username: 'manualNoAddress',
+    //       email: 'manual.no-address@yopmail.com',
+    //       countryCodePhoneNum: '+43',
+    //       netNumberPhoneNum: '64',
+    //       subscriberNumberPhoneNum: '706360',
+    //       prefixedTitle: 'No Address Data - Title',
+    //       // Explicitly set address fields to empty strings
+    //       streetName: '',
+    //       streetNumber: '',
+    //       doorNumber: '',
+    //       zipCode: '',
+    //       city: '',
+    //     },
+    //   ],
+    //   createUser: [
+    //     {
+    //       firstName: 'Address Data',
+    //       lastName: 'Manual',
+    //       username: 'manualAddress',
+    //       email: 'manual.addres-data@yopmail.com',
+    //       countryCodePhoneNum: '+43',
+    //       netNumberPhoneNum: '64',
+    //       subscriberNumberPhoneNum: '707777',
+    //       streetName: 'Test Strasse',
+    //       streetNumber: '17',
+    //       doorNumber: '7',
+    //       zipCode: '8010',
+    //       city: 'Graz',
+    //       prefixedTitle: 'Address Data - Title',
+    //     },
+    //   ],
+    //   companyData: [
+    //     {
+    //       companyDispayName: 'Gmbh',
+    //       description: 'Description GmbH',
+    //       email: 'gmbh.sw@yopmail.com',
+    //       sapCustomerNumber: '0000000777',
+    //       streetName: 'Maine Strasse',
+    //       doorNumber: 'doorNumber/17',
+    //       zipCode: '8010',
+    //       city: 'Maresse',
+    //       userPrefix: 'uPr',
+    //       subcompanyPrefix: 'sPr',
+    //       subcompanyName: 'sNm',
+    //       prefixLength: '10',
+    //     },
+    //   ],
+    //   csvTestuser: [
+    //     {
+    //       accountNumber: 'ottoTestuser',
+    //       email: 'otto.testuser@yopmail.com',
+    //     },
+    //   ],
+
+    //   legacyTestuser: [
+    //     {
+    //       legacyURL:
+    //         'http://10.5.10.34:8085/be.e-gehaltszettel_t/supportView/v1/legacy/submit',
+    //       email: 'cy.legacy@yopmail.com',
+    //       username: 'CYLegacyTestuser',
+    //     },
+    //   ],
+  },
+}; //end environmets
 
 const credentials = {}; // Temporary global storage for credentials
 module.exports = defineConfig({
@@ -858,11 +1069,74 @@ module.exports = defineConfig({
           exec(`start "" "${filePath}"`);
           return null;
         },
+        readHeaderLinks() {
+          // Always read the file fresh to avoid stale values
+          const configPath = path.resolve(__dirname, 'cypress.config.js');
+          const fileContent = fs.readFileSync(configPath, 'utf-8');
+
+          // Use regex to extract headerLinks array
+          const match = fileContent.match(/headerLinks:\s*\[([\s\S]*?)\]/);
+          if (match) {
+            return match[1]
+              .split(',')
+              .map((s) => s.replace(/['"\n\r]/g, '').trim())
+              .filter(Boolean);
+          }
+          return [];
+        },
+        readSendungenLinks() {
+          // Always read the file fresh to avoid stale values
+          const configPath = path.resolve(__dirname, 'cypress.config.js');
+          const fileContent = fs.readFileSync(configPath, 'utf-8');
+
+          // Use regex to extract headerLinks array
+          const match = fileContent.match(/sendungen:\s*\[([\s\S]*?)\]/);
+          if (match) {
+            return match[1]
+              .split(',')
+              .map((s) => s.replace(/['"\n\r]/g, '').trim())
+              .filter(Boolean);
+          }
+          return [];
+        },
+        readWeiterführendeLinks() {
+          // Always read the file fresh to avoid stale values
+          const configPath = path.resolve(__dirname, 'cypress.config.js');
+          const fileContent = fs.readFileSync(configPath, 'utf-8');
+
+          // Use regex to extract headerLinks array
+          const match = fileContent.match(
+            /weiterführendeLinks:\s*\[([\s\S]*?)\]/
+          );
+          if (match) {
+            return match[1]
+              .split(',')
+              .map((s) => s.replace(/['"\n\r]/g, '').trim())
+              .filter(Boolean);
+          }
+          return [];
+        },
+        getSolutionsData() {
+          const configPath = path.resolve(__dirname, '../cypress.config.js');
+          const fileContent = fs.readFileSync(configPath, 'utf-8');
+
+          // Use regex to extract the solutionsData object from the file content
+          const solutionsDataMatch = fileContent.match(
+            /solutionsData:\s*({[\s\S]*?})/
+          );
+
+          if (solutionsDataMatch) {
+            const solutionsData = JSON.parse(solutionsDataMatch[1]);
+            return solutionsData;
+          }
+
+          return {}; // Return empty if not found
+        },
 
         /*********************************** */
       });
       //  Set executing tests on various environments, targeting appropriate json from const=environments
-      const envConfig = environments['eg_test'];
+      const envConfig = environments['eg_dev'];
       return { ...config, env: { ...config.env, ...envConfig } };
     }, //end
     specPattern: 'cypress/e2e/**/*.{js,jsx,ts,tsx}', // Ensure this matches your structure

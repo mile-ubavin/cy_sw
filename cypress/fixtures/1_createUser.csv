@@ -1,0 +1,2 @@
+givenName;familyName;streetName;houseNumber;zipCode;city;country;dateOfBirth;sex;accountNumber;phoneNumber;email;sendToPrint;sendCredentialToPrint;updateUser;deactivateUser
+Testuser;Create OttO;New Straße;1A;1111;NewCity;AT;1972-02-12;male;ottoTestuser;+3816411111111111;otto.testuser@yopmail.com;true;false;false;true

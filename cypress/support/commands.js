@@ -546,6 +546,79 @@ Cypress.Commands.add('uploadDocument', function () {
   });
 });
 
+//Upadaate User's data via CSV
+//-------------------------------------
+//createNewUser_viaCSV
+Cypress.Commands.add('createNewUser_viaCSV', function () {
+  cy.fixture('1_createUser.csv', 'binary')
+    .then(Cypress.Blob.binaryStringToBlob)
+    .then((fileContent) => {
+      cy.get('.dialog-content>.upload-section>div>form>input').attachFile({
+        fileContent,
+        filePath: '1_createUser.csv',
+        fileName: '1_createUser.csv',
+        mimeType: 'text/csv',
+      });
+    });
+});
+
+//2_updateUser_viaCSV
+Cypress.Commands.add('updateUser_viaCSV', function () {
+  cy.fixture('2_updateUser.csv', 'binary')
+    .then(Cypress.Blob.binaryStringToBlob)
+    .then((fileContent) => {
+      cy.get('.dialog-content>.upload-section>div>form>input').attachFile({
+        fileContent,
+        filePath: '2_updateUser.csv',
+        fileName: '2_updateUser.csv',
+        mimeType: 'text/csv',
+      });
+    });
+});
+
+//3_invalidEmail__updateUserViaCSVFailed
+Cypress.Commands.add('invalidEmail__updateUserViaCSVFailed', function () {
+  cy.fixture('3_invalidEmail_updateUser.csv', 'binary')
+    .then(Cypress.Blob.binaryStringToBlob)
+    .then((fileContent) => {
+      cy.get('.dialog-content>.upload-section>div>form>input').attachFile({
+        fileContent,
+        filePath: '3_invalidEmail_updateUser.csv',
+        fileName: '3_invalidEmail_updateUser.csv',
+        mimeType: 'text/csv',
+      });
+    });
+});
+
+//4_invalidZipCode__updateUserViaCSVFailed
+Cypress.Commands.add('invalidZipCode__updateUserViaCSVFailed', function () {
+  cy.fixture('4_invalidZipCode_updateUser.csv', 'binary')
+    .then(Cypress.Blob.binaryStringToBlob)
+    .then((fileContent) => {
+      cy.get('.dialog-content>.upload-section>div>form>input').attachFile({
+        fileContent,
+        filePath: '4_invalidZipCode_updateUser.csv',
+        fileName: '4_invalidZipCode_updateUser.csv',
+        mimeType: 'text/csv',
+      });
+    });
+});
+
+//5_updateUser_False__updateUserViaCSVFailed
+Cypress.Commands.add('updateUser_False__updateUserViaCSVFailed', function () {
+  cy.fixture('5_updateUser_False.csv', 'binary')
+    .then(Cypress.Blob.binaryStringToBlob)
+    .then((fileContent) => {
+      cy.get('.dialog-content>.upload-section>div>form>input').attachFile({
+        fileContent,
+        filePath: '5_updateUser_False.csv',
+        fileName: '5_updateUser_False.csv',
+        mimeType: 'text/csv',
+      });
+    });
+});
+//-------------------------------------
+
 //uploadCSV_NO_Emails_NO_Phones
 
 Cypress.Commands.add('uploadCSV_NO_Emails_NO_Phones', function () {
