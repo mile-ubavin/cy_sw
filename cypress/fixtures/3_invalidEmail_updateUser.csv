@@ -1,2 +1,2 @@
-givenName;familyName;streetName;houseNumber;zipCode;city;country;dateOfBirth;sex;accountNumber;phoneNumber;email;sendToPrint;sendCredentialToPrint;updateUser;deactivateUser
-Testuser;Updated OTTO User;Update Straße;7BB;7770;UpdateCity;AT;1982-01-10;female;ottoTestuser;+381642826462;invalid-email-format.yopmail.com;false;false;true;false
+givenName;familyName;streetName;houseNumber;zipCode;city;country;dateOfBirth;sex;accountNumber;phoneNumber;email;sendToPrint;sendCredentialToPrint;updateUser;userStatus
+Testuser;Updated OTTO User;Update Straße;7BB;7770;UpdateCity;AT;1982-01-10;female;ottoTestuser;+381642826462;invalid-email-format.yopmail.com;false;false;true;true

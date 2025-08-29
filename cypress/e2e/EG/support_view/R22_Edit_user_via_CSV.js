@@ -125,7 +125,7 @@ describe('Create and Update User`s data from CSV file', () => {
     cy.get('.button-wraper>button > .mdc-button__label')
       .filter((index, el) => {
         const text = Cypress.$(el).text().trim();
-        return text === 'Create user' || text === 'Neuen Benutzer Anlegen';
+        return text === 'Create/Update' || text === 'Anlegen/Updaten';
       })
       .click({ force: true });
     cy.wait(1500);
@@ -134,7 +134,10 @@ describe('Create and Update User`s data from CSV file', () => {
     cy.get('.create_user_dialog_content>.buttons-wrapper>button')
       .filter((index, el) => {
         const text = Cypress.$(el).text().trim();
-        return text === 'CSV uploading' || text === 'CSV Anlage';
+        return (
+          text === 'Create/Update user with CSV' ||
+          text === 'CSV Anlage/Update '
+        );
       })
       .click();
 
@@ -156,11 +159,10 @@ describe('Create and Update User`s data from CSV file', () => {
       'uploadCSV'
     );
 
-    //Click on  Create Users button
-    cy.get('.dialog-actions>button>.title')
-      .contains(/Create Users|Benutzer Anlegen/i)
-      .should('be.visible') // Optional: Ensure the button is visible before interacting
-      .click(); // Click the button
+    cy.get('.dialog-actions button')
+      .contains(/Create\/Update|CSV Anlage\/Update/)
+      .click({ force: true });
+
     // cy.wait(10000);
     cy.wait(['@uploadCSV'], {
       timeout: 57000,
@@ -397,7 +399,7 @@ describe('Create and Update User`s data from CSV file', () => {
       });
   });
 
-  //Login to e-Box 1st time
+  //New user is Login to e-Box 1st time
   it('Login to e-Box 1st time', () => {
     cy.visit(Cypress.env('baseUrl_egEbox'));
     cy.wait(5000);
@@ -461,8 +463,8 @@ describe('Create and Update User`s data from CSV file', () => {
     cy.log('Test completed successfully.');
   });
 
-  // A D M I N   U S E R - UPDATE USER PERSONAL DATA
-  it('Login As AdminUser - updateUser from CSV file', () => {
+  // A D M I N   U S E R - UPDATE USER`S PERSONAL DATA
+  it('Login As MasterUser - updateUser from CSV file', () => {
     // Login as Master User using a custom command
     cy.loginToSupportViewMaster();
     cy.wait(3500);
@@ -545,7 +547,7 @@ describe('Create and Update User`s data from CSV file', () => {
     cy.get('.button-wraper>button > .mdc-button__label')
       .filter((index, el) => {
         const text = Cypress.$(el).text().trim();
-        return text === 'Create user' || text === 'Neuen Benutzer Anlegen';
+        return text === 'Create/Update' || text === 'Anlegen/Updaten';
       })
       .click({ force: true });
     cy.wait(1500);
@@ -554,7 +556,10 @@ describe('Create and Update User`s data from CSV file', () => {
     cy.get('.create_user_dialog_content>.buttons-wrapper>button')
       .filter((index, el) => {
         const text = Cypress.$(el).text().trim();
-        return text === 'CSV uploading' || text === 'CSV Anlage';
+        return (
+          text === 'Create/Update user with CSV' ||
+          text === 'CSV Anlage/Update '
+        );
       })
       .click();
 
@@ -578,10 +583,9 @@ describe('Create and Update User`s data from CSV file', () => {
     );
 
     //Click on  Create Users button
-    cy.get('.dialog-actions>button>.title')
-      .contains(/Create Users|Benutzer Anlegen/i)
-      .should('be.visible') // Optional: Ensure the button is visible before interacting
-      .click(); // Click the button
+    cy.get('.dialog-actions button')
+      .contains(/Create\/Update|CSV Anlage\/Update/)
+      .click({ force: true });
     // cy.wait(10000);
     cy.wait(['@uploadCSV'], {
       timeout: 57000,
@@ -615,7 +619,7 @@ describe('Create and Update User`s data from CSV file', () => {
     cy.get('.button-wraper>button > .mdc-button__label')
       .filter((index, el) => {
         const text = Cypress.$(el).text().trim();
-        return text === 'Create user' || text === 'Neuen Benutzer Anlegen';
+        return text === 'Create/Update' || text === 'Anlegen/Updaten';
       })
       .click({ force: true });
     cy.wait(1500);
@@ -624,7 +628,10 @@ describe('Create and Update User`s data from CSV file', () => {
     cy.get('.create_user_dialog_content>.buttons-wrapper>button')
       .filter((index, el) => {
         const text = Cypress.$(el).text().trim();
-        return text === 'CSV uploading' || text === 'CSV Anlage';
+        return (
+          text === 'Create/Update user with CSV' ||
+          text === 'CSV Anlage/Update '
+        );
       })
       .click();
 
@@ -649,9 +656,9 @@ describe('Create and Update User`s data from CSV file', () => {
 
     //Click on  Create Users button
     cy.get('.dialog-actions>button>.title')
-      .contains(/Create Users|Benutzer Anlegen/i)
-      .should('be.visible') // Optional: Ensure the button is visible before interacting
-      .click(); // Click the button
+      .contains(/Create\/Update|CSV Anlage\/Update/)
+      .click({ force: true });
+
     // cy.wait(10000);
     cy.wait(['@uploadCSV'], {
       timeout: 57000,
@@ -684,7 +691,7 @@ describe('Create and Update User`s data from CSV file', () => {
     cy.get('.button-wraper>button > .mdc-button__label')
       .filter((index, el) => {
         const text = Cypress.$(el).text().trim();
-        return text === 'Create user' || text === 'Neuen Benutzer Anlegen';
+        return text === 'Create/Update' || text === 'Anlegen/Updaten';
       })
       .click({ force: true });
     cy.wait(1500);
@@ -693,7 +700,10 @@ describe('Create and Update User`s data from CSV file', () => {
     cy.get('.create_user_dialog_content>.buttons-wrapper>button')
       .filter((index, el) => {
         const text = Cypress.$(el).text().trim();
-        return text === 'CSV uploading' || text === 'CSV Anlage';
+        return (
+          text === 'Create/Update user with CSV' ||
+          text === 'CSV Anlage/Update '
+        );
       })
       .click();
 
@@ -717,10 +727,9 @@ describe('Create and Update User`s data from CSV file', () => {
     );
 
     //Click on  Create Users button
-    cy.get('.dialog-actions>button>.title')
-      .contains(/Create Users|Benutzer Anlegen/i)
-      .should('be.visible') // Optional: Ensure the button is visible before interacting
-      .click(); // Click the button
+    cy.get('.dialog-actions button')
+      .contains(/Create\/Update|CSV Anlage\/Update/)
+      .click({ force: true });
     // cy.wait(10000);
     cy.wait(['@uploadCSV'], {
       timeout: 57000,
@@ -747,13 +756,13 @@ describe('Create and Update User`s data from CSV file', () => {
       });
     cy.wait(5000);
 
-    //>>> 4.Test scenario ->Update user`s data
+    //>>> 4.Test scenario ->(updateUser:true) Try to Update user`s data, by selecting inapropriate company prefix
 
     //Click on create User button
     cy.get('.button-wraper>button > .mdc-button__label')
       .filter((index, el) => {
         const text = Cypress.$(el).text().trim();
-        return text === 'Create user' || text === 'Neuen Benutzer Anlegen';
+        return text === 'Create/Update' || text === 'Anlegen/Updaten';
       })
       .click({ force: true });
     cy.wait(1500);
@@ -762,7 +771,82 @@ describe('Create and Update User`s data from CSV file', () => {
     cy.get('.create_user_dialog_content>.buttons-wrapper>button')
       .filter((index, el) => {
         const text = Cypress.$(el).text().trim();
-        return text === 'CSV uploading' || text === 'CSV Anlage';
+        return (
+          text === 'Create/Update user with CSV' ||
+          text === 'CSV Anlage/Update '
+        );
+      })
+      .click();
+
+    //Update new user via: CSV file
+    cy.updateUser_viaCSV();
+    cy.get('mat-select[formcontrolname="companyPrefix"]').click();
+    //cy.get('#mat-select-value-3 > .mat-mdc-select-placeholder').click();
+    cy.get('div.cdk-overlay-pane').should('exist'); // Ensure the overlay pane is present
+    cy.get('div.cdk-overlay-pane mat-option').should(
+      'have.length.greaterThan',
+      0
+    );
+    //Select innapropriate Company prefix
+    cy.wait(1500);
+    cy.get('mat-option').eq(1).click();
+    cy.wait(1500);
+
+    cy.intercept('POST', '**/supportView/v1/person/fromGroup/**').as(
+      'uploadCSV'
+    );
+
+    //Click on  Create Users button
+    cy.get('.dialog-actions button')
+      .contains(/Create\/Update|CSV Anlage\/Update/)
+      .click({ force: true });
+
+    // cy.wait(10000);
+    cy.wait(['@uploadCSV'], {
+      timeout: 57000,
+    }).then((interception) => {
+      // Log the intercepted response
+      cy.log('Intercepted response:', interception.response);
+
+      // Assert the response status code
+      expect(interception.response.statusCode).to.eq(200);
+    });
+
+    cy.wait(2000);
+
+    //Validate Error message
+    cy.get('sv-multiple-notifications>.messages>p')
+      .invoke('text')
+      .then((text) => {
+        const trimmedText = text.trim();
+
+        // Check if the text matches either English or German message
+        expect(trimmedText).to.be.oneOf([
+          '1 User was skipped, because he already exists', // English
+          '1 Benutzer wurde übersprungen, da er bereits existiert.', // German
+        ]);
+      });
+    cy.wait(5000);
+
+    //>>> 5.Test scenario ->Update user`s data (updateUser:true)
+
+    //Click on create User button
+    cy.get('.button-wraper>button > .mdc-button__label')
+      .filter((index, el) => {
+        const text = Cypress.$(el).text().trim();
+        return text === 'Create/Update' || text === 'Anlegen/Updaten';
+      })
+      .click({ force: true });
+    cy.wait(1500);
+
+    //Click on Upload CSV button
+    cy.get('.create_user_dialog_content>.buttons-wrapper>button')
+      .filter((index, el) => {
+        const text = Cypress.$(el).text().trim();
+        return (
+          text === 'Create/Update user with CSV' ||
+          text === 'CSV Anlage/Update '
+        );
       })
       .click();
 
@@ -785,10 +869,10 @@ describe('Create and Update User`s data from CSV file', () => {
     );
 
     //Click on  Create Users button
-    cy.get('.dialog-actions>button>.title')
-      .contains(/Create Users|Benutzer Anlegen/i)
-      .should('be.visible') // Optional: Ensure the button is visible before interacting
-      .click(); // Click the button
+    cy.get('.dialog-actions button')
+      .contains(/Create\/Update|CSV Anlage\/Update/)
+      .click({ force: true });
+
     // cy.wait(10000);
     cy.wait(['@uploadCSV'], {
       timeout: 57000,
