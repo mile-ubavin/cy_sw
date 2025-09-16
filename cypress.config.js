@@ -793,9 +793,9 @@ const environments = {
   },
   ebrief_test: {
     baseUrl: 'https://www.e-brief.at/fe_t/login',
-    username_kiam: 'kiam.t.andrej@yopmail.com',
+    username_kiam: 'kiam.t.mile@yopmail.com',
     password_kiam: 'Test1234!',
-    origin: 'https://kiamabn.b2clogin.com',
+    origin: 'https://abn-login.post.at/',
   },
   ebrief_prod: {
     baseUrl: 'https://www.e-brief.at/fe/login',

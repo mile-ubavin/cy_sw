@@ -562,6 +562,20 @@ Cypress.Commands.add('createNewUser_viaCSV', function () {
     });
 });
 
+//1_updateTwoUsers_viaCSV
+Cypress.Commands.add('updateTwoUsers_viaCSV', function () {
+  cy.fixture('2_update2User.csv', 'binary')
+    .then(Cypress.Blob.binaryStringToBlob)
+    .then((fileContent) => {
+      cy.get('.dialog-content>.upload-section>div>form>input').attachFile({
+        fileContent,
+        filePath: '2_update2User.csv.csv',
+        fileName: '2_update2User.csv.csv',
+        mimeType: 'text/csv',
+      });
+    });
+});
+
 //2_updateUser_viaCSV
 Cypress.Commands.add('updateUser_viaCSV', function () {
   cy.fixture('2_updateUser.csv', 'binary')

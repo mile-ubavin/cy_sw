@@ -1,4 +1,4 @@
-describe('Create and Update User`s data from CSV file', () => {
+describe('Create and Update User`s data via CSV file', () => {
   // Precondition: Search for the user and if user exists, proceed with deletion
   it('Search for the user and if user(s) exist, proceed with deletion', () => {
     const user = Cypress.env('createUser')[0];
@@ -27,7 +27,7 @@ describe('Create and Update User`s data from CSV file', () => {
     cy.get('.action-buttons > .mdc-button').eq(4).click();
 
     // Array of users to delete
-    const usersToDelete = ['ottoTestuser']; // Add more usernames as needed
+    const usersToDelete = ['ottoTestuser', 'emmaTestuser']; // Add more usernames as needed
 
     usersToDelete.forEach((userName) => {
       const searchAndDeleteUser = (userName) => {
@@ -80,7 +80,7 @@ describe('Create and Update User`s data from CSV file', () => {
     cy.log('The tests have been completed successfully.');
   });
 
-  // M A S T E R  U S E R - CREATE USER FROM CSV FILE and UPDATE HIS PERSONAL DATA
+  // Create new user via CSV file (base and alternative scenrios)
   it('Login As AdminUser - Create Users from CSV file', () => {
     // Login as Master User using a custom command
     cy.loginToSupportViewMaster();
@@ -112,7 +112,7 @@ describe('Create and Update User`s data from CSV file', () => {
     cy.get('.search-dialog>form>div>.mat-primary').click();
     cy.wait(1500);
 
-    //Create user
+    //Switch to User page by clicking on the User button
     cy.get('.action-buttons>.mdc-button>.mdc-button__label')
       .filter((index, el) => {
         const text = Cypress.$(el).text().trim();
@@ -120,6 +120,8 @@ describe('Create and Update User`s data from CSV file', () => {
       })
       .click({ force: true });
     cy.wait(2500);
+
+    //>>> 1.Alternative Test scenario ->(updateUser:true) Try to Update 1 non exiting user
 
     //Click on create User button
     cy.get('.button-wraper>button > .mdc-button__label')
@@ -135,32 +137,181 @@ describe('Create and Update User`s data from CSV file', () => {
       .filter((index, el) => {
         const text = Cypress.$(el).text().trim();
         return (
-          text === 'Create/Update user with CSV' ||
-          text === 'CSV Anlage/Update '
+          text === 'Create/Update user with CSV' || text === 'CSV Anlage/Update'
+        );
+      })
+      .click();
+
+    //Update new user via: CSV file
+    cy.updateUser_viaCSV();
+
+    //Select company pre fix
+    cy.get('mat-select[formcontrolname="companyPrefix"]').click();
+    cy.get('div.cdk-overlay-pane').should('exist');
+    // Count number of prefix items
+    cy.get('div.cdk-overlay-pane mat-option')
+      .should('have.length.greaterThan', 0)
+      .then(($options) => {
+        const countPrefix = $options.length;
+        const randomIndex = Math.floor(Math.random() * countPrefix); // random index
+        cy.wrap($options).eq(randomIndex).click(); // click random selected prefix
+      });
+
+    cy.intercept('POST', '**/supportView/v1/person/uploadCsv').as(
+      'faileduploadCSV'
+    );
+
+    // Click Create/Update button
+    cy.get('.dialog-actions button')
+      .contains(/Create\/Update|Anlegen\/Updaten/)
+      .click({ force: true });
+
+    // Wait for request + validate response + UI message
+    cy.wait('@faileduploadCSV').then((interception) => {
+      // Log the intercepted response
+      cy.log('Intercepted response:', interception.response);
+
+      // Assert the response status code
+      expect(interception.response.statusCode).to.eq(200);
+
+      const { numberOfFailedUpdates } = interception.response.body;
+
+      if (numberOfFailedUpdates === 0) {
+        cy.get('sv-multiple-notifications>.messages>p').should('not.exist');
+      } else {
+        cy.get('sv-multiple-notifications>.messages>p')
+          .should('be.visible')
+          .invoke('text')
+          .then((txt) => {
+            const trimmedText = txt.trim();
+
+            // Build regex dynamically for EN + DE
+            const regex = new RegExp(
+              `^(Tried to update ${numberOfFailedUpdates} non-existent users?|Versuch ${numberOfFailedUpdates} nicht vorhandenen? Benutzer zu aktualisieren)$`
+            );
+
+            expect(trimmedText).to.match(regex);
+          });
+      }
+    });
+
+    // cy.pause();
+    cy.wait(2500);
+
+    //>>> 2.Alternative Test scenario ->(updateUser:true) Try to Update 2 non exiting users
+
+    //Click on create User button
+    cy.get('.button-wraper>button > .mdc-button__label')
+      .filter((index, el) => {
+        const text = Cypress.$(el).text().trim();
+        return text === 'Create/Update' || text === 'Anlegen/Updaten';
+      })
+      .click({ force: true });
+    cy.wait(1500);
+
+    //Click on Upload CSV button
+    cy.get('.create_user_dialog_content>.buttons-wrapper>button')
+      .filter((index, el) => {
+        const text = Cypress.$(el).text().trim();
+        return (
+          text === 'Create/Update user with CSV' || text === 'CSV Anlage/Update'
+        );
+      })
+      .click();
+
+    //Update new user via: CSV file
+    cy.updateTwoUsers_viaCSV();
+
+    //Select company pre fix
+    cy.get('mat-select[formcontrolname="companyPrefix"]').click();
+    cy.get('div.cdk-overlay-pane').should('exist');
+    // Count number of prefix items
+    cy.get('div.cdk-overlay-pane mat-option')
+      .should('have.length.greaterThan', 0)
+      .then(($options) => {
+        const countPrefix = $options.length;
+        const randomIndex = Math.floor(Math.random() * countPrefix); // random index
+        cy.wrap($options).eq(randomIndex).click(); // click random selected prefix
+      });
+
+    cy.intercept('POST', '**/supportView/v1/person/uploadCsv').as(
+      'faileduploadCSV'
+    );
+
+    // Click Create/Update button
+    cy.get('.dialog-actions button')
+      .contains(/Create\/Update|Anlegen\/Updaten/)
+      .click({ force: true });
+
+    // Wait for request + validate response + UI message
+    cy.wait('@faileduploadCSV').then((interception) => {
+      // Log the intercepted response
+      cy.log('Intercepted response:', interception.response);
+
+      // Assert the response status code
+      expect(interception.response.statusCode).to.eq(200);
+
+      const { numberOfFailedUpdates } = interception.response.body;
+
+      if (numberOfFailedUpdates === 0) {
+        cy.get('sv-multiple-notifications>.messages>p').should('not.exist');
+      } else {
+        cy.get('sv-multiple-notifications>.messages>p')
+          .should('be.visible')
+          .invoke('text')
+          .then((txt) => {
+            const trimmedText = txt.trim();
+
+            // Build regex dynamically for EN + DE
+            const regex = new RegExp(
+              `^(Tried to update ${numberOfFailedUpdates} non-existent users?|Versuch ${numberOfFailedUpdates} nicht vorhandenen? Benutzer zu aktualisieren)$`
+            );
+
+            expect(trimmedText).to.match(regex);
+          });
+      }
+    });
+
+    // cy.pause();
+    cy.wait(2500);
+
+    /*    CREATE NEW USER via CSV     */
+
+    //Click on create User button
+    cy.get('.button-wraper>button > .mdc-button__label')
+      .filter((index, el) => {
+        const text = Cypress.$(el).text().trim();
+        return text === 'Create/Update' || text === 'Anlegen/Updaten';
+      })
+      .click({ force: true });
+    cy.wait(1500);
+
+    //Click on Upload CSV button
+    cy.get('.create_user_dialog_content>.buttons-wrapper>button')
+      .filter((index, el) => {
+        const text = Cypress.$(el).text().trim();
+        return (
+          text === 'Create/Update user with CSV' || text === 'CSV Anlage/Update'
         );
       })
       .click();
 
     //Register new user via: CSV file
     cy.createNewUser_viaCSV();
-    cy.get('#mat-select-value-3 > .mat-mdc-select-placeholder').click();
-    cy.get('div.cdk-overlay-pane').should('exist'); // Ensure the overlay pane is present
-    cy.get('div.cdk-overlay-pane mat-option').should(
-      'have.length.greaterThan',
-      0
-    );
 
-    //Select Company prefix
-    cy.wait(1500);
-    cy.get('mat-option').eq(0).click();
-    cy.wait(1500);
+    // Select company prefix
+    cy.get('mat-select[formcontrolname="companyPrefix"]').click();
+    cy.get('div.cdk-overlay-pane').should('exist');
+
+    // Select the first prefix option
+    cy.get('div.cdk-overlay-pane mat-option').first().click();
 
     cy.intercept('POST', '**/supportView/v1/person/fromGroup/**').as(
       'uploadCSV'
     );
 
     cy.get('.dialog-actions button')
-      .contains(/Create\/Update|CSV Anlage\/Update/)
+      .contains(/Create\/Update|Anlegen\/Updaten/)
       .click({ force: true });
 
     // cy.wait(10000);
@@ -175,23 +326,23 @@ describe('Create and Update User`s data from CSV file', () => {
     });
 
     cy.wait(2000);
-    // //Validate success message
-    // cy.get('sv-multiple-notifications>.messages>p')
-    //   .invoke('text')
-    //   .then((text) => {
-    //     const trimmedText = text.trim();
+    //Validate success message
+    cy.get('sv-multiple-notifications>.messages>p')
+      .invoke('text')
+      .then((text) => {
+        const trimmedText = text.trim();
 
-    //     // Check if the text matches either English or German message
-    //     expect(trimmedText).to.be.oneOf([
-    //       '1 User was created', // English
-    //       'Anzahl fehlgeschlagener Importe: 1', // German
-    //     ]);
-    //   });
-    // //cy.wait(7500);
-    // // Wait until the success message disappears completely
-    // cy.get('sv-multiple-notifications>.messages>p', { timeout: 20000 }).should(
-    //   'not.exist'
-    // );
+        // Check if the text matches either English or German message
+        expect(trimmedText).to.be.oneOf([
+          '1 User was created', // English
+          '1 Benutzer wurde angelegt', // German
+        ]);
+      });
+    //cy.wait(7500);
+    // Wait until the success message disappears completely
+    cy.get('sv-multiple-notifications>.messages>p', { timeout: 20000 }).should(
+      'not.exist'
+    );
 
     const usersToSearch = ['ottoTestuser']; // Add more usernames as needed
 
@@ -239,7 +390,7 @@ describe('Create and Update User`s data from CSV file', () => {
     cy.wait(1500);
   }); //end it
 
-  //Y O P M A I L
+  //Yopmail - Confirm email and Change password
   it('Yopmail - Confirm email and Change password', () => {
     // Visit yopmail application
     cy.visit('https://yopmail.com/en/');
@@ -399,10 +550,10 @@ describe('Create and Update User`s data from CSV file', () => {
       });
   });
 
-  //New user is Login to e-Box 1st time
+  //New user -  1st time Login to e-Box
   it('Login to e-Box 1st time', () => {
     cy.visit(Cypress.env('baseUrl_egEbox'));
-    cy.wait(5000);
+    cy.wait(2500);
 
     // Wait for the cookie bar to appear
     //Remove Cookie
@@ -452,7 +603,7 @@ describe('Create and Update User`s data from CSV file', () => {
         cy.wait(2500);
       }
     );
-    cy.wait(5000);
+    cy.wait(2500);
 
     // Logout
     cy.get('.user-title').click();
@@ -463,10 +614,10 @@ describe('Create and Update User`s data from CSV file', () => {
     cy.log('Test completed successfully.');
   });
 
-  // A D M I N   U S E R - UPDATE USER`S PERSONAL DATA
+  //Update personal data (base and alternative scenarios)
   it('Login As MasterUser - updateUser from CSV file', () => {
     // Login as Master User using a custom command
-    cy.loginToSupportViewMaster();
+    cy.loginToSupportViewAdmin();
     cy.wait(3500);
 
     //Remove pop up
@@ -539,6 +690,25 @@ describe('Create and Update User`s data from CSV file', () => {
       cy.wait(1000);
     });
 
+    // Extract and store data
+    let userData = {};
+
+    cy.get('.header-wrap > div')
+      .filter((index) => index % 2 === 0) // odd headers
+      .each(($header, i) => {
+        const key = $header.text().trim();
+
+        cy.get('.inline-div > div')
+          .eq(i)
+          .invoke('text')
+          .then((value) => {
+            userData[key] = value.trim();
+          });
+      })
+      .then(() => {
+        cy.log('Extracted Data:', JSON.stringify(userData));
+      });
+
     //UPDATE USER`S DATA VIA CSV FILE
 
     //>>> 1.Test scenario -> updateUser:false
@@ -557,8 +727,7 @@ describe('Create and Update User`s data from CSV file', () => {
       .filter((index, el) => {
         const text = Cypress.$(el).text().trim();
         return (
-          text === 'Create/Update user with CSV' ||
-          text === 'CSV Anlage/Update '
+          text === 'Create/Update user with CSV' || text === 'CSV Anlage/Update'
         );
       })
       .click();
@@ -584,7 +753,7 @@ describe('Create and Update User`s data from CSV file', () => {
 
     //Click on  Create Users button
     cy.get('.dialog-actions button')
-      .contains(/Create\/Update|CSV Anlage\/Update/)
+      .contains(/Create\/Update|Anlegen\/Updaten/)
       .click({ force: true });
     // cy.wait(10000);
     cy.wait(['@uploadCSV'], {
@@ -611,7 +780,7 @@ describe('Create and Update User`s data from CSV file', () => {
         ]);
       });
 
-    cy.wait(5000);
+    cy.wait(2500);
 
     //>>> 2.Test scenario ->invalidEmailFormat
 
@@ -629,8 +798,7 @@ describe('Create and Update User`s data from CSV file', () => {
       .filter((index, el) => {
         const text = Cypress.$(el).text().trim();
         return (
-          text === 'Create/Update user with CSV' ||
-          text === 'CSV Anlage/Update '
+          text === 'Create/Update user with CSV' || text === 'CSV Anlage/Update'
         );
       })
       .click();
@@ -656,7 +824,7 @@ describe('Create and Update User`s data from CSV file', () => {
 
     //Click on  Create Users button
     cy.get('.dialog-actions>button>.title')
-      .contains(/Create\/Update|CSV Anlage\/Update/)
+      .contains(/Create\/Update|Anlegen\/Updaten/)
       .click({ force: true });
 
     // cy.wait(10000);
@@ -683,7 +851,7 @@ describe('Create and Update User`s data from CSV file', () => {
           'Anzahl fehlgeschlagener Importe: 1', // German
         ]);
       });
-    cy.wait(5000);
+    cy.wait(2500);
 
     //>>> 3.Test scenario ->invalid (Non AT) ZIP code
 
@@ -701,8 +869,7 @@ describe('Create and Update User`s data from CSV file', () => {
       .filter((index, el) => {
         const text = Cypress.$(el).text().trim();
         return (
-          text === 'Create/Update user with CSV' ||
-          text === 'CSV Anlage/Update '
+          text === 'Create/Update user with CSV' || text === 'CSV Anlage/Update'
         );
       })
       .click();
@@ -728,7 +895,7 @@ describe('Create and Update User`s data from CSV file', () => {
 
     //Click on  Create Users button
     cy.get('.dialog-actions button')
-      .contains(/Create\/Update|CSV Anlage\/Update/)
+      .contains(/Create\/Update|Anlegen\/Updaten/)
       .click({ force: true });
     // cy.wait(10000);
     cy.wait(['@uploadCSV'], {
@@ -754,7 +921,7 @@ describe('Create and Update User`s data from CSV file', () => {
           'Anzahl fehlgeschlagener Importe: 1', // German
         ]);
       });
-    cy.wait(5000);
+    cy.wait(2500);
 
     //>>> 4.Test scenario ->(updateUser:true) Try to Update user`s data, by selecting inapropriate company prefix
 
@@ -772,8 +939,7 @@ describe('Create and Update User`s data from CSV file', () => {
       .filter((index, el) => {
         const text = Cypress.$(el).text().trim();
         return (
-          text === 'Create/Update user with CSV' ||
-          text === 'CSV Anlage/Update '
+          text === 'Create/Update user with CSV' || text === 'CSV Anlage/Update'
         );
       })
       .click();
@@ -792,42 +958,45 @@ describe('Create and Update User`s data from CSV file', () => {
     cy.get('mat-option').eq(1).click();
     cy.wait(1500);
 
-    cy.intercept('POST', '**/supportView/v1/person/fromGroup/**').as(
-      'uploadCSV'
+    cy.intercept('POST', '**/supportView/v1/person/uploadCsv').as(
+      'faileduploadCSV'
     );
 
-    //Click on  Create Users button
+    // Click Create/Update button
     cy.get('.dialog-actions button')
-      .contains(/Create\/Update|CSV Anlage\/Update/)
+      .contains(/Create\/Update|Anlegen\/Updaten/)
       .click({ force: true });
 
-    // cy.wait(10000);
-    cy.wait(['@uploadCSV'], {
-      timeout: 57000,
-    }).then((interception) => {
+    // Wait for request + validate response + UI message
+    cy.wait('@faileduploadCSV').then((interception) => {
       // Log the intercepted response
       cy.log('Intercepted response:', interception.response);
 
       // Assert the response status code
       expect(interception.response.statusCode).to.eq(200);
+
+      const { numberOfFailedUpdates } = interception.response.body;
+
+      if (numberOfFailedUpdates === 0) {
+        cy.get('sv-multiple-notifications>.messages>p').should('not.exist');
+      } else {
+        cy.get('sv-multiple-notifications>.messages>p')
+          .should('be.visible')
+          .invoke('text')
+          .then((txt) => {
+            const trimmedText = txt.trim();
+
+            // Build regex dynamically for EN + DE
+            const regex = new RegExp(
+              `^(Tried to update ${numberOfFailedUpdates} non-existent users?|Versuch ${numberOfFailedUpdates} nicht vorhandenen? Benutzer zu aktualisieren)$`
+            );
+
+            expect(trimmedText).to.match(regex);
+          });
+      }
     });
 
-    cy.wait(2000);
-
-    //Validate Error message
-    cy.get('sv-multiple-notifications>.messages>p')
-      .invoke('text')
-      .then((text) => {
-        const trimmedText = text.trim();
-
-        // Check if the text matches either English or German message
-        expect(trimmedText).to.be.oneOf([
-          '1 User was skipped, because he already exists', // English
-          '1 Benutzer wurde übersprungen, da er bereits existiert.', // German
-        ]);
-      });
-    cy.wait(5000);
-
+    cy.wait(2500);
     //>>> 5.Test scenario ->Update user`s data (updateUser:true)
 
     //Click on create User button
@@ -844,8 +1013,7 @@ describe('Create and Update User`s data from CSV file', () => {
       .filter((index, el) => {
         const text = Cypress.$(el).text().trim();
         return (
-          text === 'Create/Update user with CSV' ||
-          text === 'CSV Anlage/Update '
+          text === 'Create/Update user with CSV' || text === 'CSV Anlage/Update'
         );
       })
       .click();
@@ -870,7 +1038,7 @@ describe('Create and Update User`s data from CSV file', () => {
 
     //Click on  Create Users button
     cy.get('.dialog-actions button')
-      .contains(/Create\/Update|CSV Anlage\/Update/)
+      .contains(/Create\/Update|Anlegen\/Updaten/)
       .click({ force: true });
 
     // cy.wait(10000);
@@ -904,7 +1072,7 @@ describe('Create and Update User`s data from CSV file', () => {
       'not.exist'
     );
 
-    cy.wait(4000);
+    cy.wait(2500);
 
     //Search for user and check updated data
 
@@ -940,9 +1108,71 @@ describe('Create and Update User`s data from CSV file', () => {
 
       cy.wait(1500);
       searchUser(userName);
-      cy.wait(1000);
+      cy.wait(1500);
     });
-    cy.wait(4500);
+
+    // Extract and store data
+    let getUserDataAfterUpdate = {};
+
+    cy.get('.header-wrap > div')
+      .filter((index) => index % 2 === 0) // odd headers
+      .each(($header, i) => {
+        const key = $header.text().trim();
+
+        cy.get('.inline-div > div')
+          .eq(i)
+          .invoke('text')
+          .then((value) => {
+            getUserDataAfterUpdate[key] = value.trim();
+          });
+      })
+      .then(() => {
+        cy.log('Extracted Data:', JSON.stringify(getUserDataAfterUpdate));
+
+        cy.wait(2500);
+
+        // Expected values in EN
+        const updateUserEN = {
+          'Display Name': 'Updated OTTO User Testuser',
+          'Account Numbers': 'ottoTestuser',
+          'E-mail': 'update-csv.testuser@yopmail.com',
+          Username: ['AquaottoTestuser', 'aquaottoTestuser'], // allow both
+          Active: ['Yes', 'Ja'], // bilingual
+          'Send to Print Channel': ['No', 'Nein'], // bilingual
+        };
+
+        // Expected values in DE
+        const updateUserDE = {
+          Anzeigename: 'Updated OTTO User Testuser',
+          Personalnummern: 'ottoTestuser',
+          'E-Mail': 'update-csv.testuser@yopmail.com',
+          Benutzername: ['AquaottoTestuser', 'aquaottoTestuser'], // allow both
+          Aktiv: ['Yes', 'Ja'], // bilingual
+          'An Druckkanal senden': ['No', 'Nein'], // bilingual
+        };
+
+        // Detect which language is active by checking one known key
+        const expectedData = Object.keys(getUserDataAfterUpdate).includes(
+          'Display Name'
+        )
+          ? updateUserEN
+          : updateUserDE;
+
+        // Compare extracted data with correct expected object
+        Object.entries(expectedData).forEach(([key, expectedValue]) => {
+          const actualValue = getUserDataAfterUpdate[key]?.trim();
+
+          if (Array.isArray(expectedValue)) {
+            // actualValue must match one of the allowed options
+            expect(expectedValue, `${key} mismatch`).to.include(actualValue);
+          } else {
+            // strict comparison
+            expect(actualValue, `${key} mismatch`).to.eq(expectedValue);
+          }
+        });
+      });
+
+    cy.wait(2500);
 
     //Logout
     cy.get('.logout-icon ').click({ force: true });
@@ -956,7 +1186,7 @@ describe('Create and Update User`s data from CSV file', () => {
   //Login to e-Box and check does email is not confirm anymore
   it('Login to e-Box and check does email is not confirm anymore', () => {
     cy.visit(Cypress.env('baseUrl_egEbox'));
-    cy.wait(5000);
+    cy.wait(2500);
 
     // Wait for the cookie bar to appear
     //Remove Cookie
@@ -1030,7 +1260,7 @@ describe('Create and Update User`s data from CSV file', () => {
     cy.log('Test completed successfully.');
   });
 
-  // M A S T E R    U S E R - DELETE ALREADY CREATED USERS
+  //Delete already created user
   it('Delete already created user', () => {
     const user = Cypress.env('createUser')[0];
     cy.loginToSupportViewMaster();
@@ -1111,7 +1341,7 @@ describe('Create and Update User`s data from CSV file', () => {
     cy.log('The tests have been completed successfully.');
   });
 
-  //Y O P M A I L
+  //Clear user`s email inbox
   it('Yopmail - Clear inbox', () => {
     const legacyTestuser = Cypress.env('legacyTestuser')[0];
 

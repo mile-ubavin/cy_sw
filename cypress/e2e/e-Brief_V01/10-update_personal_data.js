@@ -1,13 +1,13 @@
 /// <reference types="cypress-xpath" />
 
 describe('Login, Update personal data, Logout', () => {
-  beforeEach(() => {
-    cy.session('login_data', () => {
-      cy.loginToEBrief();
-    });
-  });
+  // beforeEach(() => {
+  //   cy.session('login_data', () => {
+  //     cy.loginToEBrief();
+  //   });
+  // });
   //update personal data
-  it.only('Update personal data - all fields', function () {
+  it('Update personal data - all fields', function () {
     cy.visit('/deliveries');
     cy.get('.user-title').click(); //switch to Persons tab
     cy.get('[color="primary"] > .button').click();
@@ -155,6 +155,69 @@ describe('Login, Update personal data, Logout', () => {
     cy.wait(2000);
     cy.log('Test completed successfully.');
   }); //end it
+
+  it.only('Update 2025', () => {
+    cy.loginToEBrief();
+    cy.visit('/deliveries');
+    cy.get('.user-title').click(); //switch to Persons tab
+    cy.get('[color="primary"] > .button').click();
+    //cy.get('[href="/settings/personal"]').click();
+    cy.get(
+      'app-personal-data-settings > app-settings-outlet-wrapper > .outlet-wrap > .settings-section-wrapper > .settings-section-buttons > sc-button > .button'
+    ).click();
+    cy.wait(10000);
+    //Get total number of inputfields labels, and his validate txt
+    cy.get('.chameleon-form')
+      .find('.two-col-grid-label')
+      .then((inputFieldLabel) => {
+        //Get total number of inputfields labels
+        const listingCount = Cypress.$(inputFieldLabel).length;
+        expect(inputFieldLabel).to.have.length(listingCount);
+        cy.log('number of inputfields labels: ', listingCount); //Optional
+        //Get txt of inputfields labels, and validate it
+        let labeName = [];
+        cy.get('form.chameleon-form>div>.two-col-grid-label')
+          .each(($el, index, $list) => {
+            labeName[index] = $el.text(); //Get labele text for each element
+            cy.log('inputFields Label title', labeName[index]); //Optional
+          })
+          //Validating name of input field labels
+          .then(() => {
+            for (let index = 0; index < listingCount; index++) {
+              cy.get('form.chameleon-form>div>.two-col-grid-label')
+                .eq(index)
+                .invoke('text')
+                .as('labels');
+              cy.get('@labels').should('include', labeName[index]); //Validate name of input field label
+              cy.log('inputfields label', labeName[index]);
+            }
+          });
+      });
+
+    //VORNAME
+    cy.get('#app-input-1').clear().type('Vorname have number 012345');
+    // Assert validation message for first name
+    cy.get('.form__error-text > span')
+      .should('be.visible')
+      .and('have.text', 'Bitte geben Sie einen gültigen Vornamen ein.');
+    cy.wait();
+    cy.get('#app-input-1').clear().type('Vorname');
+    cy.pause();
+
+    cy.get('#app-input-2').clear().type('Test2');
+    cy.get('#preTitleInput').click();
+    cy.pause();
+    cy.get('#postTitleInput');
+    cy.get('#birthdayDayInput');
+    cy.get('#birthdayMonthInput');
+    cy.get('#birthdayYearInput');
+    cy.get('#phoneCountryCodeInput');
+    cy.get('#app-input-3');
+    cy.get('#app-input-4');
+    cy.get('#phone2CountryCodeInput');
+    cy.get('#app-input-5');
+    cy.get('#app-input-6');
+  });
 
   //Logout  & Clear saved session
   it('Logout & Clear saved session', function () {
