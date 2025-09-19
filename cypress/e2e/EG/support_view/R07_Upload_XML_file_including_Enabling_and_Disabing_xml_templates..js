@@ -1,4 +1,43 @@
 describe('Enable and Disable XML templates provided from JSON', () => {
+  //Precondition: Clear user`s email inbox if its not an empty
+  it('Yopmail - Clear inbox', () => {
+    // Visit yopmail application or login page
+    cy.visit('https://yopmail.com/en/');
+
+    // Access the first Admin User object from cypress.config.js
+    const testuser = Cypress.env('email_supportViewAdmin');
+
+    // Enter email and refresh
+    cy.get('#login').type(testuser).should('have.value', testuser);
+    cy.get('#refreshbut').click();
+
+    // Wait for inbox to load
+    cy.wait(2000);
+
+    // Access the inbox iframe
+    cy.get('iframe#ifinbox').then(($iframe) => {
+      const $body = $iframe.contents().find('body');
+
+      // Wrap iframe body for Cypress commands
+      cy.wrap($body).then(($inbox) => {
+        if ($inbox.find('.mctn .lm').length === 0) {
+          // No emails → skip delete
+          cy.log(`Inbox for ${testuser} is empty. Skipping delete.`);
+        } else {
+          // Emails exist → check delete button in main page
+          cy.get('#delall').then(($btn) => {
+            if (!$btn.is(':disabled')) {
+              cy.wrap($btn).click({ force: true });
+              cy.log(`All emails deleted for ${testuser}`);
+            } else {
+              cy.log(`Delete button disabled for ${testuser}`);
+            }
+          });
+        }
+      });
+    });
+  });
+
   //Disable xml teplates by Masteruser
   it('Disable XML templates by Masteruser', () => {
     cy.loginToSupportViewMaster(); // Login as a master user

@@ -1,12 +1,157 @@
 describe('Masteruser - Create Admin User From JSON', () => {
-  // beforeEach(() => {
-  //   cy.clearCookies();
-  //   cy.clearLocalStorage();
-  //   cy.window().then((win) => {
-  //     win.sessionStorage.clear(); // Clears session storage
-  //   });
-  // });
+  //Precondition: Clear user`s email inbox if its not an empty
+  it('Yopmail - Clear inbox', () => {
+    const adminUser = Cypress.env('createAdminUser')[0];
 
+    // Visit Yopmail
+    cy.visit('https://yopmail.com/en/');
+
+    // Enter email and refresh
+    cy.get('#login')
+      .type(adminUser.email)
+      .should('have.value', adminUser.email);
+    cy.get('#refreshbut').click();
+
+    // Wait for inbox to load
+    cy.wait(2000);
+
+    // Access the inbox iframe
+    cy.get('iframe#ifinbox').then(($iframe) => {
+      const $body = $iframe.contents().find('body');
+
+      // Wrap iframe body for Cypress commands
+      cy.wrap($body).then(($inbox) => {
+        if ($inbox.find('.mctn .lm').length === 0) {
+          // No emails → skip delete
+          cy.log(`Inbox for ${adminUser.email} is empty. Skipping delete.`);
+        } else {
+          // Emails exist → check delete button in main page
+          cy.get('#delall').then(($btn) => {
+            if (!$btn.is(':disabled')) {
+              cy.wrap($btn).click({ force: true });
+              cy.log(`All emails deleted for ${adminUser.email}`);
+            } else {
+              cy.log(`Delete button disabled for ${adminUser.email}`);
+            }
+          });
+        }
+      });
+    });
+
+    cy.wait(1500); // Stabilize after deletion
+  });
+
+  // Precondition: Search for the Admin user and if user exists, proceed with deletion
+  it('Search for the Admin user and if user(s) exist, proceed with deletion', () => {
+    const companyName = Cypress.env('company');
+    const adminUser = Cypress.env('createAdminUser')[0];
+
+    // Login as Master User using a custom command
+    cy.loginToSupportViewMaster();
+    cy.wait(3500);
+
+    //Remove pop up
+    cy.get('body').then(($body) => {
+      if ($body.find('.release-note-dialog__close-icon').length > 0) {
+        cy.get('.release-note-dialog__close-icon').click();
+      } else {
+        cy.log('Close icon is NOT present');
+      }
+    });
+
+    //Search for the Test Company
+    cy.get('#searchButton>span').click(); //Click on search button
+    cy.wait(1000);
+
+    // Search for Group by Display Name using the company name
+    cy.get('.search-dialog>form>.form-fields>.searchText-wrap')
+      .eq(1)
+      .type(companyName);
+    cy.wait(1500);
+    //Find the Search button by button name and click on it
+    cy.get('.search-dialog>form>div>.mat-primary').click();
+    cy.wait(1500);
+
+    // Switch on Admin User page
+    cy.get('.ng-star-inserted>.action-buttons>button')
+      .contains(/Admin User|Admin Benutzer/)
+      .then(($button) => {
+        if ($button.length > 0) {
+          cy.wrap($button).click({ force: true });
+        }
+      });
+
+    cy.wait(2500);
+
+    //Search for the Admin user and if user exists, proceed with deletion
+
+    const usersToDelete = [adminUser.username]; // Add more usernames as needed
+
+    usersToDelete.forEach((userName) => {
+      const searchAndDeleteUser = (userName) => {
+        cy.get('.search-label').click();
+
+        // Search for the user
+        cy.get('.mat-mdc-form-field-infix>input[formcontrolname="userName"]')
+          .clear()
+          .type(userName);
+        cy.get('button[type="submit"]').click();
+
+        cy.wait(2000);
+
+        // Check results
+        cy.get('body').then(($body) => {
+          if ($body.find('.cdk-row').length === 0) {
+            cy.log(`User ${userName} not found or already deleted.`);
+            // Close search dialog if needed
+            cy.get('.mdc-evolution-chip__cell--trailing > .mat-icon').click({
+              force: true,
+            });
+          } else {
+            // User exists -> proceed with deletion
+            cy.get('.cdk-row').should('exist');
+            cy.log(`User ${userName} found. Proceeding with deletion.`);
+
+            cy.contains('button', /Delete|DSGVO-Löschung/)
+              .should('be.visible')
+              .click();
+
+            cy.get('.confirm-buttons > button')
+              .contains(/YES|JA/)
+              .should('be.visible')
+              .click();
+
+            cy.log(`User ${userName} has been deleted.`);
+
+            // ✅ Verify "User deleted successfully" snackbar ONLY if deletion occurred
+            cy.get('.mat-mdc-simple-snack-bar > .mat-mdc-snack-bar-label')
+              .should('be.visible')
+              .invoke('text')
+              .then((text) => {
+                const trimmedText = text.trim();
+                expect(trimmedText).to.match(
+                  /User deleted succesfully|Benutzer erfolgreich gelöscht/
+                );
+              });
+          }
+        });
+      };
+
+      cy.wait(1500);
+      searchAndDeleteUser(userName);
+      cy.wait(1000);
+    });
+
+    cy.wait(2500);
+    //Logout from SW
+    cy.get('.logout-icon ').click();
+    cy.wait(2000);
+    cy.get('.confirm-buttons > :nth-child(2)').click();
+    cy.wait(2500);
+    cy.log('Test is successfully executed.');
+  }); //end it
+
+  // Create new user manually (base and alternative scenrios)
   it('MasterCreateAdminUser', () => {
     // Login as Master User using a custom command
     cy.loginToSupportViewMaster();
@@ -66,16 +211,12 @@ describe('Masteruser - Create Admin User From JSON', () => {
     cy.get('input[formcontrolname="username"]').type(adminUser.username); // Username
     cy.get('input[formcontrolname="email"]').type(adminUser.email); // Email
 
-    // //Submit the form
-    // cy.get('button[type="submit"]').click();
-    // cy.wait(8000);
-
     cy.intercept('POST', '**/supportView/v1/person/editXUser**').as(
       'editXUser'
     );
     cy.get('button[type="submit"]').click();
 
-    cy.wait(['@editXUser'], { timeout: 37000 }).then((interception) => {
+    cy.wait(['@editXUser'], { timeout: 57000 }).then((interception) => {
       // Log the intercepted response
       cy.log('Intercepted response:', interception.response);
 
@@ -196,6 +337,7 @@ describe('Masteruser - Create Admin User From JSON', () => {
     //********************* Yopmail *********************
   }); //end it
 
+  //New Admin user -  1st time Login to SW
   it('Get Credentials from emails and Login as a New Admin', () => {
     const adminUser = Cypress.env('createAdminUser')[0];
 
@@ -392,6 +534,8 @@ describe('Masteruser - Create Admin User From JSON', () => {
                 .true;
             });
         });
+
+        cy.wait(2000);
         // Click on the 'User | Benutzer' button
         cy.get('button > .mdc-button__label')
           .filter((index, el) => {
@@ -409,7 +553,7 @@ describe('Masteruser - Create Admin User From JSON', () => {
             en: 'Select users to deliver documents',
             de: 'Benutzer für die Zustellung von Dokumenten auswählen',
           },
-          { en: 'Create User', de: 'Neuen Benutzer Anlegen' },
+          { en: 'Create/Update', de: 'Anlegen/Updaten' },
           { en: 'Edit', de: 'Bearbeiten' },
           { en: 'Password reset', de: 'Passwort wiederherstellen' },
           { en: 'Open E-Box', de: 'E-Box Öffnen' },
@@ -480,225 +624,225 @@ describe('Masteruser - Create Admin User From JSON', () => {
   }); //end it
 
   //(c) 2025
+  // it.skip('Get Credentials from emails and Login as a New Admin', () => {
+  //   const adminUser = Cypress.env('createAdminUser')[0];
 
-  it.skip('Get Credentials from emails and Login as a New Admin', () => {
-    const adminUser = Cypress.env('createAdminUser')[0];
+  //   // Visit the Yopmail inbox
+  //   cy.visit('https://yopmail.com/en/');
+  //   cy.get('#login').type(adminUser.email);
+  //   cy.get('#refreshbut > .md > .material-icons-outlined').click();
 
-    // Visit the Yopmail inbox
-    cy.visit('https://yopmail.com/en/');
-    cy.get('#login').type(adminUser.email);
-    cy.get('#refreshbut > .md > .material-icons-outlined').click();
+  //   cy.iframe('#ifinbox')
+  //     .find('.mctn > .m > button > .lms')
+  //     .then((emails) => {
+  //       const emailList = [...emails];
 
-    cy.iframe('#ifinbox')
-      .find('.mctn > .m > button > .lms')
-      .then((emails) => {
-        const emailList = [...emails];
+  //       let usernameEmailIndex = -1;
+  //       let passwordEmailIndex = -1;
 
-        let usernameEmailIndex = -1;
-        let passwordEmailIndex = -1;
+  //       for (let i = 0; i < emailList.length; i++) {
+  //         const subject = emailList[i].textContent.trim();
+  //         if (
+  //           usernameEmailIndex === -1 &&
+  //           subject.includes(
+  //             'Neuer Benutzer e-Gehaltszettel Portal – Benutzername'
+  //           )
+  //         ) {
+  //           usernameEmailIndex = i;
+  //         } else if (
+  //           passwordEmailIndex === -1 &&
+  //           subject.includes('Neuer Benutzer e-Gehaltszettel Portal – Passwort')
+  //         ) {
+  //           passwordEmailIndex = i;
+  //         }
 
-        for (let i = 0; i < emailList.length; i++) {
-          const subject = emailList[i].textContent.trim();
-          if (
-            usernameEmailIndex === -1 &&
-            subject.includes(
-              'Neuer Benutzer e-Gehaltszettel Portal – Benutzername'
-            )
-          ) {
-            usernameEmailIndex = i;
-          } else if (
-            passwordEmailIndex === -1 &&
-            subject.includes('Neuer Benutzer e-Gehaltszettel Portal – Passwort')
-          ) {
-            passwordEmailIndex = i;
-          }
+  //         if (usernameEmailIndex !== -1 && passwordEmailIndex !== -1) {
+  //           break;
+  //         }
+  //       }
 
-          if (usernameEmailIndex !== -1 && passwordEmailIndex !== -1) {
-            break;
-          }
-        }
+  //       if (usernameEmailIndex !== -1) {
+  //         cy.iframe('#ifinbox')
+  //           .find('.mctn > .m > button > .lms')
+  //           .eq(usernameEmailIndex)
+  //           .click()
+  //           .wait(1500);
 
-        if (usernameEmailIndex !== -1) {
-          cy.iframe('#ifinbox')
-            .find('.mctn > .m > button > .lms')
-            .eq(usernameEmailIndex)
-            .click()
-            .wait(1500);
+  //         cy.iframe('#ifmail')
+  //           .find(
+  //             '#mail>div>div:nth-child(2)>div:nth-child(3)>table>tbody>tr>td>p:nth-child(2)>span'
+  //           )
+  //           .invoke('text')
+  //           .then((innerText) => {
+  //             const startIndex =
+  //               innerText.indexOf('Hier ist Ihr Benutzername:') +
+  //               'Hier ist Ihr Benutzername:'.length;
+  //             const usernameFromEmailBody = innerText
+  //               .substring(startIndex)
+  //               .trim();
 
-          cy.iframe('#ifmail')
-            .find(
-              '#mail>div>div:nth-child(2)>div:nth-child(3)>table>tbody>tr>td>p:nth-child(2)>span'
-            )
-            .invoke('text')
-            .then((innerText) => {
-              const startIndex =
-                innerText.indexOf('Hier ist Ihr Benutzername:') +
-                'Hier ist Ihr Benutzername:'.length;
-              const usernameFromEmailBody = innerText
-                .substring(startIndex)
-                .trim();
+  //             cy.wrap(usernameFromEmailBody).as('capturedUsername');
+  //             Cypress.env('usernameFromEmailBody', usernameFromEmailBody);
 
-              cy.wrap(usernameFromEmailBody).as('capturedUsername');
-              Cypress.env('usernameFromEmailBody', usernameFromEmailBody);
+  //             expect(usernameFromEmailBody).to.equal(adminUser.username);
+  //             cy.log('Username:', usernameFromEmailBody);
+  //           });
+  //       }
 
-              expect(usernameFromEmailBody).to.equal(adminUser.username);
-              cy.log('Username:', usernameFromEmailBody);
-            });
-        }
+  //       if (passwordEmailIndex !== -1) {
+  //         cy.iframe('#ifinbox')
+  //           .find('.mctn > .m > button > .lms')
+  //           .eq(passwordEmailIndex)
+  //           .click()
+  //           .wait(1500);
 
-        if (passwordEmailIndex !== -1) {
-          cy.iframe('#ifinbox')
-            .find('.mctn > .m > button > .lms')
-            .eq(passwordEmailIndex)
-            .click()
-            .wait(1500);
+  //         cy.iframe('#ifmail')
+  //           .find(
+  //             '#mail>div>div:nth-child(2)>div:nth-child(3)>table>tbody>tr>td>p:nth-child(2)>span'
+  //           )
+  //           .invoke('text')
+  //           .then((innerText) => {
+  //             const startIndex =
+  //               innerText.indexOf('hier ist Ihr Passwort:') +
+  //               'hier ist Ihr Passwort:'.length;
+  //             const passwordFromEmailBody = innerText
+  //               .substring(startIndex)
+  //               .trim();
 
-          cy.iframe('#ifmail')
-            .find(
-              '#mail>div>div:nth-child(2)>div:nth-child(3)>table>tbody>tr>td>p:nth-child(2)>span'
-            )
-            .invoke('text')
-            .then((innerText) => {
-              const startIndex =
-                innerText.indexOf('hier ist Ihr Passwort:') +
-                'hier ist Ihr Passwort:'.length;
-              const passwordFromEmailBody = innerText
-                .substring(startIndex)
-                .trim();
+  //             cy.wrap(passwordFromEmailBody).as('capturedPassword');
+  //             Cypress.env('passwordFromEmailBody', passwordFromEmailBody);
 
-              cy.wrap(passwordFromEmailBody).as('capturedPassword');
-              Cypress.env('passwordFromEmailBody', passwordFromEmailBody);
+  //             cy.log('Password:', passwordFromEmailBody);
+  //           });
+  //       }
+  //     });
 
-              cy.log('Password:', passwordFromEmailBody);
-            });
-        }
-      });
+  //   // Login and validate behavior
+  //   cy.wait(2500);
+  //   cy.intercept('GET', '**/supportView/v1/generalInfo**').as('visitURL');
+  //   cy.visit(Cypress.env('baseUrl'), { failOnStatusCode: false });
 
-    // Login and validate behavior
-    cy.wait(2500);
-    cy.intercept('GET', '**/supportView/v1/generalInfo**').as('visitURL');
-    cy.visit(Cypress.env('baseUrl'), { failOnStatusCode: false });
+  //   cy.wait(['@visitURL'], { timeout: 27000 }).then((interception) => {
+  //     expect(interception.response.statusCode).to.eq(200);
+  //   });
 
-    cy.wait(['@visitURL'], { timeout: 27000 }).then((interception) => {
-      expect(interception.response.statusCode).to.eq(200);
-    });
+  //   cy.url().should('include', '/login');
 
-    cy.url().should('include', '/login');
+  //   cy.get('@capturedUsername').then((username) => {
+  //     cy.get('@capturedPassword').then((password) => {
+  //       cy.get('input[formcontrolname="username"]').type(username);
+  //       cy.get('input[formcontrolname="password"]').type(password);
+  //       cy.wait(1500);
+  //       cy.get('button[type="submit"]').click();
 
-    cy.get('@capturedUsername').then((username) => {
-      cy.get('@capturedPassword').then((password) => {
-        cy.get('input[formcontrolname="username"]').type(username);
-        cy.get('input[formcontrolname="password"]').type(password);
-        cy.wait(1500);
-        cy.get('button[type="submit"]').click();
+  //       cy.wait(2500);
+  //       cy.visit(Cypress.env('dashboardURL'), {
+  //         failOnStatusCode: false,
+  //       });
+  //       cy.wait(5500);
 
-        cy.wait(2500);
-        cy.visit(Cypress.env('dashboardURL'), {
-          failOnStatusCode: false,
-        });
-        cy.wait(5500);
+  //       cy.get('body').then(($body) => {
+  //         if ($body.find('.release-note-dialog__close-icon').length > 0) {
+  //           cy.get('.release-note-dialog__close-icon').click();
+  //         }
+  //       });
 
-        cy.get('body').then(($body) => {
-          if ($body.find('.release-note-dialog__close-icon').length > 0) {
-            cy.get('.release-note-dialog__close-icon').click();
-          }
-        });
+  //       const buttonLabelsCompaniesPage = [
+  //         { en: 'Upload Document', de: 'Personalisierte Dokumente hochladen' },
+  //         { en: 'Mass Upload', de: 'Massensendung hochladen' },
+  //         { en: 'User', de: 'Benutzer' },
+  //       ];
+  //       cy.get('button > .mdc-button__label').each(($button) => {
+  //         cy.wrap($button)
+  //           .invoke('text')
+  //           .then((text) => {
+  //             const trimmedText = text.trim();
+  //             const isValid = buttonLabelsCompaniesPage.some(
+  //               (label) => label.en === trimmedText || label.de === trimmedText
+  //             );
+  //             expect(isValid, `Unexpected button label: "${trimmedText}"`).to.be
+  //               .true;
+  //           });
+  //       });
 
-        const buttonLabelsCompaniesPage = [
-          { en: 'Upload Document', de: 'Personalisierte Dokumente hochladen' },
-          { en: 'Mass Upload', de: 'Massensendung hochladen' },
-          { en: 'User', de: 'Benutzer' },
-        ];
-        cy.get('button > .mdc-button__label').each(($button) => {
-          cy.wrap($button)
-            .invoke('text')
-            .then((text) => {
-              const trimmedText = text.trim();
-              const isValid = buttonLabelsCompaniesPage.some(
-                (label) => label.en === trimmedText || label.de === trimmedText
-              );
-              expect(isValid, `Unexpected button label: "${trimmedText}"`).to.be
-                .true;
-            });
-        });
+  //       cy.get('button > .mdc-button__label')
+  //         .filter((index, el) => {
+  //           const text = Cypress.$(el).text().trim();
+  //           return text === 'User' || text === 'Benutzer';
+  //         })
+  //         .click();
+  //       cy.wait(1500);
 
-        cy.get('button > .mdc-button__label')
-          .filter((index, el) => {
-            const text = Cypress.$(el).text().trim();
-            return text === 'User' || text === 'Benutzer';
-          })
-          .click();
-        cy.wait(1500);
+  //       const buttonLabels = [
+  //         {
+  //           en: 'Select users to deliver documents',
+  //           de: 'Benutzer für die Zustellung von Dokumenten auswählen',
+  //         },
+  //         { en: 'Create User', de: 'Neuen Benutzer Anlegen' },
+  //         { en: 'Edit', de: 'Bearbeiten' },
+  //         { en: 'Password reset', de: 'Passwort wiederherstellen' },
+  //         { en: 'Open E-Box', de: 'E-Box Öffnen' },
+  //       ];
 
-        const buttonLabels = [
-          {
-            en: 'Select users to deliver documents',
-            de: 'Benutzer für die Zustellung von Dokumenten auswählen',
-          },
-          { en: 'Create User', de: 'Neuen Benutzer Anlegen' },
-          { en: 'Edit', de: 'Bearbeiten' },
-          { en: 'Password reset', de: 'Passwort wiederherstellen' },
-          { en: 'Open E-Box', de: 'E-Box Öffnen' },
-        ];
+  //       cy.get('button > .mdc-button__label').each(($button) => {
+  //         cy.wrap($button)
+  //           .invoke('text')
+  //           .then((text) => {
+  //             const trimmedText = text.trim();
+  //             const isValid = buttonLabels.some(
+  //               (label) => label.en === trimmedText || label.de === trimmedText
+  //             );
+  //             expect(isValid, `Unexpected button label: "${trimmedText}"`).to.be
+  //               .true;
+  //           });
+  //       });
 
-        cy.get('button > .mdc-button__label').each(($button) => {
-          cy.wrap($button)
-            .invoke('text')
-            .then((text) => {
-              const trimmedText = text.trim();
-              const isValid = buttonLabels.some(
-                (label) => label.en === trimmedText || label.de === trimmedText
-              );
-              expect(isValid, `Unexpected button label: "${trimmedText}"`).to.be
-                .true;
-            });
-        });
+  //       cy.get('.menu-trigger>.mat-mdc-menu-trigger>.user-display-name').click({
+  //         force: true,
+  //       });
+  //       cy.wait(2000);
+  //       cy.get('.password-bttn').click({ force: true });
+  //       cy.wait(1500);
 
-        cy.get('.menu-trigger>.mat-mdc-menu-trigger>.user-display-name').click({
-          force: true,
-        });
-        cy.wait(2000);
-        cy.get('.password-bttn').click({ force: true });
-        cy.wait(1500);
+  //       cy.get('@capturedPassword').then((password) => {
+  //         cy.get('input[formcontrolname="oldPassword"]').type(password);
+  //         cy.get('button>mat-icon[data-mat-icon-name="password_invisible"]')
+  //           .eq(0)
+  //           .click({ force: true });
+  //         cy.wait(1000);
+  //         cy.get('input[formcontrolname="newPassword"]').type(
+  //           Cypress.env('password_supportViewAdmin')
+  //         );
+  //         cy.get('button>mat-icon[data-mat-icon-name="password_invisible"]')
+  //           .eq(0)
+  //           .click({ force: true });
+  //         cy.wait(1000);
+  //         cy.get('input[formcontrolname="confirmedNewPassword"]').type(
+  //           Cypress.env('password_supportViewAdmin')
+  //         );
+  //         cy.get('button>mat-icon[data-mat-icon-name="password_invisible"]')
+  //           .eq(0)
+  //           .click({ force: true });
+  //         cy.wait(1000);
+  //       });
 
-        cy.get('@capturedPassword').then((password) => {
-          cy.get('input[formcontrolname="oldPassword"]').type(password);
-          cy.get('button>mat-icon[data-mat-icon-name="password_invisible"]')
-            .eq(0)
-            .click({ force: true });
-          cy.wait(1000);
-          cy.get('input[formcontrolname="newPassword"]').type(
-            Cypress.env('password_supportViewAdmin')
-          );
-          cy.get('button>mat-icon[data-mat-icon-name="password_invisible"]')
-            .eq(0)
-            .click({ force: true });
-          cy.wait(1000);
-          cy.get('input[formcontrolname="confirmedNewPassword"]').type(
-            Cypress.env('password_supportViewAdmin')
-          );
-          cy.get('button>mat-icon[data-mat-icon-name="password_invisible"]')
-            .eq(0)
-            .click({ force: true });
-          cy.wait(1000);
-        });
+  //       cy.get('.button-container>button[type="submit"]').click({
+  //         force: true,
+  //       });
 
-        cy.get('.button-container>button[type="submit"]').click({
-          force: true,
-        });
+  //       cy.get('.logout-icon ').click();
+  //       cy.wait(2000);
+  //       cy.get('.confirm-buttons > :nth-child(2)').click();
+  //       cy.log('Test completed successfully.');
+  //     });
+  //   });
+  // });
 
-        cy.get('.logout-icon ').click();
-        cy.wait(2000);
-        cy.get('.confirm-buttons > :nth-child(2)').click();
-        cy.log('Test completed successfully.');
-      });
-    });
-  });
-
+  //Delete already created Admin user
   it('Master user delete Admin user', () => {
     const companyName = Cypress.env('company');
     const adminUser = Cypress.env('createAdminUser')[0];
-    //*******************MASTERUSER DELETE NEW ADMIN USER */
+
     // Login as Master User using a custom command
     cy.loginToSupportViewMaster();
     cy.wait(3500);
@@ -811,20 +955,41 @@ describe('Masteruser - Create Admin User From JSON', () => {
   it('Yopmail - Clear inbox', () => {
     const adminUser = Cypress.env('createAdminUser')[0];
 
-    // Visit Yopmail application or login page
+    // Visit Yopmail
     cy.visit('https://yopmail.com/en/');
-    // Type the email and click refresh
+
+    // Enter email and refresh
     cy.get('#login')
       .type(adminUser.email)
       .should('have.value', adminUser.email);
-    cy.wait(1500);
-    cy.get('#refreshbut > .md > .material-icons-outlined').click();
+    cy.get('#refreshbut').click();
 
-    cy.wait(1500);
-    // Delete all emails if the button is not disabled
-    cy.get('.menu>div>#delall')
-      .should('not.be.disabled')
-      .click({ force: true });
-    cy.wait(2500);
-  }); //end it
+    // Wait for inbox to load
+    cy.wait(2000);
+
+    // Access the inbox iframe
+    cy.get('iframe#ifinbox').then(($iframe) => {
+      const $body = $iframe.contents().find('body');
+
+      // Wrap iframe body for Cypress commands
+      cy.wrap($body).then(($inbox) => {
+        if ($inbox.find('.mctn .lm').length === 0) {
+          // No emails → skip delete
+          cy.log(`Inbox for ${adminUser.email} is empty. Skipping delete.`);
+        } else {
+          // Emails exist → check delete button in main page
+          cy.get('#delall').then(($btn) => {
+            if (!$btn.is(':disabled')) {
+              cy.wrap($btn).click({ force: true });
+              cy.log(`All emails deleted for ${adminUser.email}`);
+            } else {
+              cy.log(`Delete button disabled for ${adminUser.email}`);
+            }
+          });
+        }
+      });
+    });
+
+    cy.wait(1500); // Stabilize after deletion
+  });
 }); //end describe

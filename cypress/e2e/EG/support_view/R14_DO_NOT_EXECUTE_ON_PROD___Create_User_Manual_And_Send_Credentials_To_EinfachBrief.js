@@ -365,7 +365,7 @@ describe('Send welcome mail via post/EinfachBrief', () => {
       cy.get('button > .mdc-button__label')
         .filter((index, el) => {
           const text = Cypress.$(el).text().trim();
-          return text === 'Create user' || text === 'Neuen Benutzer Anlegen';
+          return text === 'Create/Update' || text === 'Anlegen/Updaten';
         })
         .first()
         .click({ force: true });
@@ -375,7 +375,7 @@ describe('Send welcome mail via post/EinfachBrief', () => {
       cy.get('.create_user_dialog_content>.buttons-wrapper>button')
         .filter((index, el) => {
           const text = Cypress.$(el).text().trim();
-          return text === 'Manuel Creation' || text === 'Manuelle Anlage';
+          return text === 'Create user manually' || text === 'Manuelle Anlage';
         })
         .first()
         .click();
@@ -497,14 +497,23 @@ describe('Send welcome mail via post/EinfachBrief', () => {
     cy.wait(['@editPerson'], { timeout: 57000 }).then((interception) => {
       // Assert the response status code
       expect(interception.response.statusCode).to.eq(201);
-      cy.wait(2500);
-    });
+      cy.wait(500);
 
-    cy.get('sv-multiple-notifications>.messages>p')
-      .invoke('text')
-      .then((text) => {
-        expect(text.trim()).to.be.oneOf(['User created', 'Benutzer angelegt']);
-      });
+      cy.get('sv-multiple-notifications>.messages>p')
+        .invoke('text')
+        .then((text) => {
+          expect(text.trim()).to.be.oneOf([
+            'User created',
+            'Benutzer angelegt',
+          ]);
+        });
+    });
+    // cy.pause();
+    // cy.get('sv-multiple-notifications>.messages>p')
+    //   .invoke('text')
+    //   .then((text) => {
+    //     expect(text.trim()).to.be.oneOf(['User created', 'Benutzer angelegt']);
+    //   });
 
     cy.wait(2500);
 
@@ -769,7 +778,7 @@ describe('Send welcome mail via post/EinfachBrief', () => {
         //Open/Preview selected document
         cy.intercept('POST', '**/getDocumentPreview*').as('previewDoc');
 
-        cy.get('.css-17ktzop>svg')
+        cy.get('.css-17ktzop>span>svg')
           .should('be.visible') // Wait for the element to be visible
           .click({ force: true });
 

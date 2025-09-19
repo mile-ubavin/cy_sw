@@ -2,6 +2,48 @@ describe('Broadcast delivery to Specific User', () => {
   // Define a variable to store the formatted date and time after document upload
   var uploadDateTime;
 
+  //Precondition: Clear user`s email inbox if its not an empty
+  it('Yopmail - Clear inbox', () => {
+    const adminUser = Cypress.env('createAdminUser')[0];
+
+    // Visit Yopmail
+    cy.visit('https://yopmail.com/en/');
+
+    // Enter email and refresh
+    cy.get('#login')
+      .type(adminUser.email)
+      .should('have.value', adminUser.email);
+    cy.get('#refreshbut').click();
+
+    // Wait for inbox to load
+    cy.wait(2000);
+
+    // Access the inbox iframe
+    cy.get('iframe#ifinbox').then(($iframe) => {
+      const $body = $iframe.contents().find('body');
+
+      // Wrap iframe body for Cypress commands
+      cy.wrap($body).then(($inbox) => {
+        if ($inbox.find('.mctn .lm').length === 0) {
+          // No emails → skip delete
+          cy.log(`Inbox for ${adminUser.email} is empty. Skipping delete.`);
+        } else {
+          // Emails exist → check delete button in main page
+          cy.get('#delall').then(($btn) => {
+            if (!$btn.is(':disabled')) {
+              cy.wrap($btn).click({ force: true });
+              cy.log(`All emails deleted for ${adminUser.email}`);
+            } else {
+              cy.log(`Delete button disabled for ${adminUser.email}`);
+            }
+          });
+        }
+      });
+    });
+
+    cy.wait(1500); // Stabilize after deletion
+  });
+
   //Disable hrManagement flag on Company
   it('Disable hrManagement flag on Company', () => {
     //Import credentials (un/pw) from 'supportView.json' file

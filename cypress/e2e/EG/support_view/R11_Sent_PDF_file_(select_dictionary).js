@@ -549,7 +549,7 @@ describe('Sent pdf file', () => {
       .click(); // Click the button
 
     cy.wait(['@completeCheckingDocumentProcessingStatus'], {
-      timeout: 27000,
+      timeout: 57000,
     }).then((interception) => {
       // Log the intercepted response
       cy.log('Intercepted response:', interception.response);

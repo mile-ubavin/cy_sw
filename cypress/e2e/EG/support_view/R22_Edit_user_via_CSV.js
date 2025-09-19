@@ -1,4 +1,45 @@
 describe('Create and Update User`s data via CSV file', () => {
+  //Precondition: Clear user`s email inbox if its not an empty
+  it('Yopmail - Clear inbox', () => {
+    // Visit yopmail application or login page
+    cy.visit('https://yopmail.com/en/');
+
+    // Access the first Admin User object from cypress.config.js
+    const csvTestuser = Cypress.env('csvTestuser')[0];
+
+    // Enter email and refresh
+    cy.get('#login')
+      .type(csvTestuser.email)
+      .should('have.value', csvTestuser.email);
+    cy.get('#refreshbut').click();
+
+    // Wait for inbox to load
+    cy.wait(2000);
+
+    // Access the inbox iframe
+    cy.get('iframe#ifinbox').then(($iframe) => {
+      const $body = $iframe.contents().find('body');
+
+      // Wrap iframe body for Cypress commands
+      cy.wrap($body).then(($inbox) => {
+        if ($inbox.find('.mctn .lm').length === 0) {
+          // No emails → skip delete
+          cy.log(`Inbox for ${csvTestuser.email} is empty. Skipping delete.`);
+        } else {
+          // Emails exist → check delete button in main page
+          cy.get('#delall').then(($btn) => {
+            if (!$btn.is(':disabled')) {
+              cy.wrap($btn).click({ force: true });
+              cy.log(`All emails deleted for ${csvTestuser.email}`);
+            } else {
+              cy.log(`Delete button disabled for ${csvTestuser.email}`);
+            }
+          });
+        }
+      });
+    });
+  });
+
   // Precondition: Search for the user and if user exists, proceed with deletion
   it('Search for the user and if user(s) exist, proceed with deletion', () => {
     const user = Cypress.env('createUser')[0];
@@ -617,7 +658,7 @@ describe('Create and Update User`s data via CSV file', () => {
   //Update personal data (base and alternative scenarios)
   it('Login As MasterUser - updateUser from CSV file', () => {
     // Login as Master User using a custom command
-    cy.loginToSupportViewAdmin();
+    cy.loginToSupportViewMaster();
     cy.wait(3500);
 
     //Remove pop up
@@ -1343,12 +1384,12 @@ describe('Create and Update User`s data via CSV file', () => {
 
   //Clear user`s email inbox
   it('Yopmail - Clear inbox', () => {
-    const legacyTestuser = Cypress.env('legacyTestuser')[0];
-
     // Visit yopmail application or login page
     cy.visit('https://yopmail.com/en/');
+
     // Access the first Admin User object from cypress.config.js
     const csvTestuser = Cypress.env('csvTestuser')[0];
+
     cy.get('#login').type(csvTestuser.email);
     cy.wait(1500);
     cy.get('#refreshbut > .md > .material-icons-outlined').click();

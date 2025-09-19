@@ -341,6 +341,63 @@ describe('Register User from xml file', () => {
       });
     cy.wait(2500);
 
+    //Search for user
+
+    // Search for Group by Display Name
+    cy.get('#searchButton>span').click();
+    const companyName = Cypress.env('company');
+    cy.get('.search-dialog>form>.form-fields>.searchText-wrap')
+      .eq(1)
+      .type(companyName);
+    cy.get('.search-dialog>form>div>.mat-primary').click();
+    cy.wait(2500);
+
+    // Switch to user section
+    // cy.get('.action-buttons > .mdc-button').eq(4).click();
+
+    //Switch to User page
+    cy.get('.action-buttons>.mdc-button>.mdc-button__label')
+      .filter((index, el) => {
+        const text = Cypress.$(el).text().trim();
+        return text === 'User' || text === 'Benutzer';
+      })
+      .click({ force: true });
+    cy.wait(2500);
+
+    const usersToSearch = ['jat']; // Add more usernames as needed
+
+    usersToSearch.forEach((userName) => {
+      const searchUser = (userName) => {
+        cy.get('.search-label').click();
+
+        // Search for the user
+        cy.get('.mat-mdc-form-field-infix>input[formcontrolname="userName"]')
+          .clear()
+          .type(userName);
+
+        cy.get('button[type="submit"]').click();
+
+        cy.wait(2000);
+
+        // Check search results
+        cy.get('body').then(($body) => {
+          if ($body.find('.cdk-row').length === 0) {
+            // No results found → fail test and stop execution
+            throw new Error(`ERRROR -> User "${userName}" not found.`);
+          } else {
+            // User exists
+            cy.get('.cdk-row').should('exist');
+            cy.log(`User "${userName}" found.`);
+          }
+        });
+      };
+
+      cy.wait(1500);
+      searchUser(userName);
+    });
+
+    cy.wait(2500);
+
     // Logout
     cy.get('.logout-icon ').click();
     cy.wait(2000);

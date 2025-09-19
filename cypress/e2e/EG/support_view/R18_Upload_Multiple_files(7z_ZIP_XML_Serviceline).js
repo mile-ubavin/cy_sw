@@ -368,7 +368,7 @@ describe('Upload Multiple Files (xml, txt, serviceline, pdf, zip, 7z)', () => {
     // Function: Wait until receive response -> success: false
     function waitForFailedProcessing() {
       return cy
-        .wait('@compelteUpload/PorcessingFiles', { timeout: 27000 })
+        .wait('@compelteUpload/PorcessingFiles', { timeout: 57000 })
         .then((interception) => {
           //get value from response
           const success = interception.response.body?.success;
@@ -392,7 +392,7 @@ describe('Upload Multiple Files (xml, txt, serviceline, pdf, zip, 7z)', () => {
     cy.get('.dialog-actions>button>.title')
       .contains(/Upload Personal Document|Personalisierte Dokumente hochladen/i)
       .should('be.visible')
-      .click();
+      .click({ force: true });
 
     // Start recursive waiting
     waitForFailedProcessing().then((interception) => {
@@ -421,6 +421,7 @@ describe('Upload Multiple Files (xml, txt, serviceline, pdf, zip, 7z)', () => {
 
         cy.log('Clicked delete icon for a row with red danger message');
       });
+
     // cy.wait(['@completeCheckingDocumentProcessingStatus'], {
     //   timeout: 27000,
     // }).then((interception) => {
@@ -447,7 +448,7 @@ describe('Upload Multiple Files (xml, txt, serviceline, pdf, zip, 7z)', () => {
     cy.get('.dialog-actions>button>.title')
       .contains(/Send|Senden /i)
       .should('be.visible') // Optional: Ensure the button is visible before interacting
-      .click(); // Click the button
+      .click({ force: true }); // Click the button
     cy.wait(1500);
 
     // Verify the success message

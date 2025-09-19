@@ -248,7 +248,7 @@ describe('R03_Admn user - Create E-Box User - Manually', () => {
       cy.get('button > .mdc-button__label')
         .filter((index, el) => {
           const text = Cypress.$(el).text().trim();
-          return text === 'Create user' || text === 'Neuen Benutzer Anlegen';
+          return text === 'Create/Update' || text === 'Anlegen/Updaten';
         })
         .click({ force: true });
 

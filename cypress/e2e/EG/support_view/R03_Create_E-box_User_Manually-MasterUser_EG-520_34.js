@@ -51,7 +51,7 @@ describe('R03_Create User -Manual.js', () => {
       cy.get('button > .mdc-button__label')
         .filter((index, el) => {
           const text = Cypress.$(el).text().trim();
-          return text === 'Create user' || text === 'Neuen Benutzer Anlegen';
+          return text === 'Create/Update' || text === 'Anlegen/Updaten';
         })
         .click({ force: true });
 
@@ -61,7 +61,7 @@ describe('R03_Create User -Manual.js', () => {
       cy.get('.create_user_dialog_content>.buttons-wrapper>button')
         .filter((index, el) => {
           const text = Cypress.$(el).text().trim();
-          return text === 'Manuel Creation' || text === 'Manuelle Anlage';
+          return text === 'Create user manually' || text === 'Manuelle Anlage';
         })
         .click();
 
