@@ -347,6 +347,34 @@ Cypress.Commands.add('uploadXMLfile', function () {
     });
 });
 
+// Upload Unstructured XML file
+Cypress.Commands.add('uploadUnstructuredXMLfile', function () {
+  cy.fixture('XML_Unstructured(ABBA000100279311_T101-BBCare).xml', 'binary')
+    .then(Cypress.Blob.binaryStringToBlob)
+    .then((fileContent) => {
+      cy.get('#input-file').attachFile({
+        mimeType: 'text/xml',
+        fileContent,
+        filePath: 'XML_Unstructured(ABBA000100279311_T101-BBCare).xml',
+        fileName: 'XML_Unstructured(ABBA000100279311_T101-BBCare).xml',
+      });
+    });
+});
+
+// Upload Structured XML file
+Cypress.Commands.add('uploadStructuredXMLfile', function () {
+  cy.fixture('XML_Structured(ABBA000100279311_L103-ISS).xml', 'binary')
+    .then(Cypress.Blob.binaryStringToBlob)
+    .then((fileContent) => {
+      cy.get('#input-file').attachFile({
+        mimeType: 'text/xml',
+        fileContent,
+        filePath: 'XML_Structured(ABBA000100279311_L103-ISS).xml',
+        fileName: 'XML_Structured(ABBA000100279311_L103-ISS).xml',
+      });
+    });
+});
+
 // Create new user from XML file
 Cypress.Commands.add('createNewUserFromXMLfile', function () {
   cy.fixture('JAT-XML_1receiver__(ISS BBcare).xml', 'binary')

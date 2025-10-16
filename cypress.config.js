@@ -306,6 +306,7 @@ const environments = {
     disableXML: [
       { id: 'T101', name: 'BB Care' },
       { id: 'T102', name: 'Beiersdorfer' },
+      { id: 'L103', name: 'ISS' },
     ],
     enablePDFDictionary: [
       { name: 'PDFTABDictionary-200' },
@@ -427,6 +428,7 @@ const environments = {
     disableXML: [
       { id: 'T101', name: 'BB Care' },
       { id: 'T102', name: 'Beiersdorfer' },
+      { id: 'L103', name: 'ISS' },
     ],
     enablePDFDictionary: [
       { name: 'PDFTABDictionary-200' },
@@ -547,6 +549,7 @@ const environments = {
     disableXML: [
       { id: 'T101', name: 'BB Care' },
       { id: 'T102', name: 'Beiersdorfer' },
+      { id: 'L103', name: 'ISS' },
     ],
     enablePDFDictionary: [
       { name: 'PDFTABDictionary-200' },

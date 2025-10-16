@@ -1,47 +1,16 @@
-describe('Upload_TXT_file_including_Enabling_and_Disabing_xml_templates', () => {
-  //Precondition: Clear user`s email inbox if its not an empty
-  it('Yopmail - Clear inbox', () => {
-    // Visit yopmail application or login page
-    cy.visit('https://yopmail.com/en/');
-
-    // Access the first Admin User object from cypress.config.js
-    const testuser = Cypress.env('email_supportViewAdmin');
-
-    // Enter email and refresh
-    cy.get('#login').type(testuser).should('have.value', testuser);
-    cy.get('#refreshbut').click();
-
-    // Wait for inbox to load
-    cy.wait(2000);
-
-    // Access the inbox iframe
-    cy.get('iframe#ifinbox').then(($iframe) => {
-      const $body = $iframe.contents().find('body');
-
-      // Wrap iframe body for Cypress commands
-      cy.wrap($body).then(($inbox) => {
-        if ($inbox.find('.mctn .lm').length === 0) {
-          // No emails → skip delete
-          cy.log(`Inbox for ${testuser} is empty. Skipping delete.`);
-        } else {
-          // Emails exist → check delete button in main page
-          cy.get('#delall').then(($btn) => {
-            if (!$btn.is(':disabled')) {
-              cy.wrap($btn).click({ force: true });
-              cy.log(`All emails deleted for ${testuser}`);
-            } else {
-              cy.log(`Delete button disabled for ${testuser}`);
-            }
-          });
-        }
-      });
-    });
-  });
+describe('Admin user uploads/send to e-Box Unstructured XML template', () => {
+  // --- Helper: Parse datetime from "dd.mm.yyyy hh:mm" (German format)
+  function parseGermanDateTime(dateTimeStr) {
+    const [datePart, timePart] = dateTimeStr.split(' ');
+    const [day, month, year] = datePart.split('.').map(Number);
+    const [hour, minute] = timePart.split(':').map(Number);
+    return new Date(year, month - 1, day, hour, minute);
+  }
 
   //Disable xml teplates by Masteruser
   it('Disable XML templates by Masteruser', () => {
     cy.loginToSupportViewMaster(); // Login as a master user
-    cy.wait(1500);
+    cy.wait(2000);
 
     //Remove pop up
     cy.get('body').then(($body) => {
@@ -142,8 +111,8 @@ describe('Upload_TXT_file_including_Enabling_and_Disabing_xml_templates', () => 
     cy.wait(2500);
   });
 
-  //Admin user Upload TXT File, before enabling xml template
-  it('Failed upload TXT File - before enabling template', () => {
+  //Admin user Try Upload Unstructured XML file before enabling templated
+  it('Failed upload Unstructured XML file - before enabling template', () => {
     cy.loginToSupportViewAdmin();
     // Wait for login to complete
     cy.wait(1500);
@@ -158,6 +127,8 @@ describe('Upload_TXT_file_including_Enabling_and_Disabing_xml_templates', () => 
     });
     cy.wait(1500);
 
+    //Case 1 : Try upload Untructured XML file (T101 BBCare), when T101 xml template is disabled
+
     //Click On Upload Personal Document Button
     cy.get('.upload__document>.mdc-button__label>.upload__document__text')
       .contains(/Upload Personal Document|Personalisierte Dokumente hochladen/i)
@@ -169,7 +140,7 @@ describe('Upload_TXT_file_including_Enabling_and_Disabing_xml_templates', () => 
     cy.get('body').then(($body) => {
       if ($body.find('.buttons-wrapper>button').length > 0) {
         cy.get('.buttons-wrapper>button>.title')
-          .filter((index, el) => {
+          .filter((_index, el) => {
             const text = Cypress.$(el).text().trim();
             return text === 'Upload Document' || text === 'Dokument hochladen';
           })
@@ -181,8 +152,8 @@ describe('Upload_TXT_file_including_Enabling_and_Disabing_xml_templates', () => 
     });
     cy.wait(1500);
 
-    // Upload XML file
-    cy.uploadXMLfile();
+    // Upload Structured XML file
+    cy.uploadUnstructuredXMLfile();
     cy.wait(1500);
 
     cy.intercept(
@@ -194,12 +165,6 @@ describe('Upload_TXT_file_including_Enabling_and_Disabing_xml_templates', () => 
       .contains(/Upload Personal Document|Personalisierte Dokumente hochladen/i)
       .should('be.visible') // Ensure the button is visible before interacting
       .click(); // Click the button
-
-    // Wait for the response and check the `processingOver` flag
-    // cy.wait('@completeCheckingDocumentProcessingStatus', { timeout: 27000 })
-    //   .its('response.body')
-    //   .should('have.property', 'processingOver', true);
-    // cy.wait(1500);
 
     const checkProcessingStatus = () => {
       cy.wait('@completeCheckingDocumentProcessingStatus', { timeout: 27000 })
@@ -347,18 +312,18 @@ describe('Upload_TXT_file_including_Enabling_and_Disabing_xml_templates', () => 
     cy.wait(2500);
   });
 
-  //Admin user Upload TXT File, after enabling xml template
-  it('Upload TXT File', () => {
+  // Admin user uploads Structured XML template
+  it('Upload UnstructedXML template', () => {
+    // Login to SupportView as Admin
     cy.loginToSupportViewAdmin();
-    // Wait for login to complete
     cy.wait(1500);
 
-    //Remove pop up
+    // Close popup if visible
     cy.get('body').then(($body) => {
       if ($body.find('.release-note-dialog__close-icon').length > 0) {
         cy.get('.release-note-dialog__close-icon').click();
       } else {
-        cy.log('Close icon is NOT present');
+        cy.log('No popup to close');
       }
     });
     cy.wait(1500);
@@ -374,7 +339,7 @@ describe('Upload_TXT_file_including_Enabling_and_Disabing_xml_templates', () => 
     cy.get('body').then(($body) => {
       if ($body.find('.buttons-wrapper>button').length > 0) {
         cy.get('.buttons-wrapper>button>.title')
-          .filter((index, el) => {
+          .filter((_index, el) => {
             const text = Cypress.$(el).text().trim();
             return text === 'Upload Document' || text === 'Dokument hochladen';
           })
@@ -386,21 +351,22 @@ describe('Upload_TXT_file_including_Enabling_and_Disabing_xml_templates', () => 
     });
     cy.wait(1500);
 
-    //Upload XML file
-    cy.uploadTXTfile();
+    //Upload Unstructured XML file
+    cy.uploadUnstructuredXMLfile();
     cy.wait(2500);
+
     cy.intercept(
       'POST',
       '**/deliveryHandler/checkDocumentProcessingStatus**'
     ).as('completeCheckingDocumentProcessingStatus');
-
+    cy.wait(2500);
     cy.get('.dialog-actions>button>.title')
       .contains(/Upload Personal Document|Personalisierte Dokumente hochladen/i)
       .should('be.visible') // Optional: Ensure the button is visible before interacting
       .click(); // Click the button
 
     cy.wait(['@completeCheckingDocumentProcessingStatus'], {
-      timeout: 27000,
+      timeout: 37000,
     }).then((interception) => {
       // Log the intercepted response
       cy.log('Intercepted response:', interception.response);
@@ -424,18 +390,12 @@ describe('Upload_TXT_file_including_Enabling_and_Disabing_xml_templates', () => 
       });
     cy.wait(2500);
 
+    //Click on Send button, to process delivery
     cy.get('.dialog-actions>button>.title')
       .contains(/Send|Senden /i)
       .should('be.visible') // Optional: Ensure the button is visible before interacting
       .click(); // Click the button
     cy.wait(1500);
-
-    // //Confirm dialog for sending delivery to all users from selected company
-    // cy.get('.title')
-    //   .contains(/Confirm|Bestätigen/i)
-    //   .should('be.visible') // Optional: Ensure the button is visible before interacting
-    //   .click(); // Click the button
-    // cy.wait(1500);
 
     // Verify the success message
     cy.get('.mat-mdc-simple-snack-bar > .mat-mdc-snack-bar-label')
@@ -450,56 +410,116 @@ describe('Upload_TXT_file_including_Enabling_and_Disabing_xml_templates', () => 
       });
     cy.wait(2500);
 
-    // Logout
-    cy.get('.logout-icon ').click();
+    // Capture current time (upload time) and fomat dateTime in German format
+    const now = new Date();
+    const formattedDate = now.toLocaleDateString('de-DE'); // Format: dd.mm.yyyy
+    const formattedTime = now.toLocaleTimeString('de-DE', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    });
+    const uploadDateTime = `${formattedDate} ${formattedTime}`;
+    cy.log(`Upload DateTime: ${uploadDateTime}`);
+
+    // Save globally for later validation
+    Cypress.env('uploadDateTime', uploadDateTime);
+    cy.wait(2500);
+
+    // Logout after upload
+    cy.get('.logout-icon').click();
     cy.wait(2000);
     cy.get('.confirm-buttons > :nth-child(2)').click();
-    cy.url().should('include', Cypress.env('baseUrl')); // Validate url'
-    cy.log('Test completed successfully.');
+    cy.url().should('include', Cypress.env('baseUrl'));
+    cy.log('Upload finished successfully.');
     cy.wait(2500);
   });
 
-  //Login to e-Box and Open Delivery
-  it('Ebox user Open delivery', () => {
+  // Login to e-Box and open delivery if timestamps match logic
+  it('Login to e-Box and Open Delivery', () => {
+    // Log into e-Box
     cy.loginToEgEbox();
-    cy.wait(2500);
-    //Open latest created deivery
-    cy.intercept(
-      'GET',
-      '**/hybridsign/backend_t/document/v1/getDocument/**'
-    ).as('getDocument');
-    cy.intercept('GET', '**/getIdentifications?**').as('getIdentifications');
-    cy.get('.mdc-data-table__content>tr>.subject-sender-cell')
-      .eq(0)
-      .click({ force: true });
+    cy.wait(2000);
 
-    cy.wait(['@getIdentifications'], { timeout: 37000 }).then(
-      (interception) => {
-        // Log the intercepted response
-        cy.log('Intercepted response:', interception.response);
+    // Retrieve upload time stored in previous test
+    const uploadDateTime = Cypress.env('uploadDateTime');
+    expect(uploadDateTime, 'Upload datetime must exist').to.exist;
+    cy.log(`Stored Upload DateTime: ${uploadDateTime}`);
 
-        // Assert the response status code
-        expect(interception.response.statusCode).to.eq(200);
-      }
-    );
+    // Find latest delivery and extract its date/time
+    cy.get('.date-of-delivery-cell > .half-cell-text-content')
+      .first() // latest delivery
+      .should('be.visible')
+      .invoke('text')
+      .then((readTextRaw) => {
+        // Clean text (remove commas/spaces)
+        const readClean = readTextRaw
+          .replace(',', ' ')
+          .replace(/\s+/g, ' ')
+          .trim();
 
-    // Scroll to the bottom of the PDF viewer or page
-    cy.get('.content-container>.scroll-container').eq(1).scrollTo('bottom', {
-      duration: 500,
-      ensureScrollable: false,
-    });
-    cy.wait(3500);
+        // --- Convert both datetimes to comparable JS Date objects ---
+        const uploadParsed = parseGermanDateTime(uploadDateTime);
+        const readParsed = parseGermanDateTime(readClean);
 
-    // Logout
-    cy.get('.user-title').click();
-    cy.wait(1500);
-    cy.get('.logout-title > a').click();
-    cy.url().should('include', Cypress.env('baseUrl_egEbox')); // Validate url
-    cy.log('Test completed successfully.');
+        // --- Calculate difference in milliseconds ---
+        const diffMs = Math.abs(readParsed - uploadParsed);
+        const diffMin = diffMs / (1000 * 60);
+
+        cy.log(`Upload: ${uploadParsed}`);
+        cy.log(`Read:   ${readParsed}`);
+        cy.log(`Difference: ${diffMin.toFixed(2)} minutes`);
+
+        // --- Apply the condition ---
+        if (
+          readParsed.getTime() === uploadParsed.getTime() || // exact same minute
+          readParsed.getTime() === uploadParsed.getTime() + 60000 // within +1 minute
+        ) {
+          cy.log(
+            'Difference between upload and read dateTime should be max 1 minute'
+          );
+
+          // Intercept backend calls for document load
+          cy.intercept('GET', '**/getDocument/**').as('getDocument');
+          cy.intercept('GET', '**/getIdentifications?**').as(
+            'getIdentifications'
+          );
+
+          // Open the latest delivery
+          cy.get('.mdc-data-table__content>tr>.subject-sender-cell')
+            .eq(0)
+            .click({ force: true });
+
+          // Wait for identifications response
+          cy.wait(['@getIdentifications'], { timeout: 57000 }).then(
+            (interception) => {
+              expect(interception.response.statusCode).to.eq(200);
+            }
+          );
+
+          // Scroll to bottom of the delivery
+          cy.get('.content-container>.scroll-container')
+            .eq(1)
+            .scrollTo('bottom', { duration: 500, ensureScrollable: false });
+          cy.wait(3500);
+        } else {
+          // FAIL: difference > 1 minute
+          const errorMsg = `ERROR: readDateTime (${readClean}) not within 1 minute of uploadDateTime (${uploadDateTime})`;
+          cy.log(errorMsg);
+
+          // Log out the user immediately
+          cy.get('.user-title').click({ force: true });
+          cy.wait(1000);
+          cy.get('.logout-title > a').click();
+          cy.url().should('include', Cypress.env('baseUrl_egEbox'));
+
+          // Throw error to fail test
+          throw new Error(errorMsg);
+        }
+      });
   });
 
-  //Admin user check Reporting email
-  it('Yopmail - Get Reporting email', () => {
+  //Admin user check Reporting email and delte all emails
+  it('Yopmail - Get Reporting email and delte all emails', () => {
     // Visit Yopmail
     cy.visit('https://yopmail.com/en/');
 
@@ -542,13 +562,10 @@ describe('Upload_TXT_file_including_Enabling_and_Disabing_xml_templates', () => 
 
     cy.wait(4500);
 
-    // Switch to the second email
-    //cy.iframe('#ifinbox').find('.mctn > .m > button > .lms').eq(1).click();
-
-    // emailSubject(1); // Validate subject of second email
-    // cy.wait(1500);
-    // emailBody(); // Validate second email body
-
-    //cy.wait(4500);
+    // Delete all emails
+    cy.get('.menu>div>#delall')
+      .should('not.be.disabled')
+      .click({ force: true });
+    cy.wait(2500);
   });
 }); //end describe

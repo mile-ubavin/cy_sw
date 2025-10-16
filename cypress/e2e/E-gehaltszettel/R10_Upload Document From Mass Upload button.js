@@ -1,4 +1,4 @@
-describe('R05_Upload Document From Mass Upload button', () => {
+describe('Upload_XML_file_including_Enabling_and_Disabing_xml_templates.', () => {
   let uploadDateTime = ''; // Global variable to store upload date & time
 
   //Disable hrManagement flag on Company

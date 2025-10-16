@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE PBInvoice_2_5_at PUBLIC "" "https://business.ebpp.at/xml/DTD/PBInvoice_2_5_at.dtd">
+<PBInvoice_2_5_at>
+  <InvoiceNumber>071000842016041</InvoiceNumber>
+  <InvoiceDate>20160428</InvoiceDate>
+  <DueDate>20160428</DueDate>
+  <URL>http://www.test.cc</URL>
+<LogoURL>https://e-gehaltszettel.post-business-solutions.at/be.e-gehaltszettel/resources/branding/AQUA/AQUA_1.JPG</LogoURL>
+<LayoutID>T101</LayoutID>
+<Language>GER</Language>
+<Biller>
+   <SystemsBillerID>AQUA</SystemsBillerID>
+   <Address>
+      <Salutation>Firma</Salutation>
+      <Name>AQUA GmbH</Name>
+      <Street>Straße 777</Street>
+      <Town>City</Town>
+      <ZIP>1020</ZIP>
+      <Country>Österreich</Country>
+   </Address>
+</Biller>
+<InvoiceRecipient>
+   <BillersInvoiceRecipientID>ABBA000100279311</BillersInvoiceRecipientID>
+   <Address>
+      <Salutation>Herr</Salutation>
+      <Name>QA Mustermann</Name>
+      <Street>Straße 777/8</Street>
+      <Town>City</Town>
+      <ZIP>8020</ZIP>
+      <Country>&#160;</Country>
+   </Address>
+  </InvoiceRecipient>
+  <ShortComment>Unstructured XML</ShortComment>
+  <Details>
+    <ItemList>
+      <LineItem><Element>
+
+
+                                                           Test company GmbH
+       Personalnummer ABBA000100279311                     Dv-Nr.: 0000001
+                                                           Moth Year        Seite  1
+          Herr                                             Alleinverd./Erz.:
+          QA Testuser                                      Freibetrag:          0,00
+          Straße 777/7                                     Pendlerpauschale     0,00
+          1030 City                                        Gruppe:         Aqua GmbH
+                                                           Stufe:                777
+                                                           VorrÃ¼ckung:   01.10.2027
+                                                           Besch.grad:        000,00
+     Chapter 1
+     =========
+     Monat Lart Bezeichnung                    Anzahl      Wert/Einh.       Betrag
+     ................................................................................
+     04/16 1000 Grundbezug                                                0.000,00
+     03/16 2525 Gefahrenzulage pflichtig                                      0,00
+     04/16 2525 Gefahrenzulage pflichtig                                     00,00
+     03/16 2550 Erschwerniszulage Stufe                                       0,00
+     04/16 2550 Erschwerniszulage Stufe                                     000,00
+     03/16 3010 Stationsleiterzulage                                          0,00
+     04/16 3010 Stationsleiterzulage                                        000,00
+     03/16 4160 Sonntagszuschlag                 0,00           0,00         00,00
+     04/16 6020 Zus. Urlaubsentgelt DS          00,00           0,00         00,00
+                                   Summe Chapter 1                        0.000,00
+     ................................................................................
+     
+	 Chapter 2
+     =========
+     Monat Lart Bezeichnung                      Tage      Bemessung        Betrag
+     ................................................................................
+     03/16 /594 Betriebsratsumlage                                             0,00-
+     04/16 /594 Betriebsratsumlage                                            00,00-
+     04/16 /595 Gewerkschaftsbeitrag                                          0,000-
+     03/16 8555 Telefonspesen Betrag                                           0,00-
+     03/16 /27A DN-Anteil-SV lfd. aktiv                        00,00           0,00-
+     04/16 /27A DN-Anteil-SV lfd. aktiv         00,00       0.000,00          00,00-
+     03/16 /440 Steuer gemÃ¤ss Tarif                             0,00          0,00-
+     04/16 /440 Steuer gemÃ¤ss Tarif             00,00       0.000,00        000,00-
+                                   Summe Chapter 2                         0.000,00-
+     ................................................................................
+     04/16 /559 Test                IBAN: AT0000000TEST000000              0.000,00
+
+
+
+     Grundlagen/Bemessungen
+     ======================
+           Lart Bezeichnung                                   Betrag
+     ................................................................................
+           /102 SV-Br. lfd. Bezage ges.                      0.000,00
+           /111 ST-Brutto (lfd. Bezage)                      0.000,00
+           /123 Zul./Zuschl.   68/1/6                           00,00
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</Element></LineItem>
+   </ItemList>
+ </Details>
+ <Tax>
+   <TaxID>no Tax</TaxID>
+ <Amount Currency="EUR">0</Amount>
+ </Tax>
+ <TotalAmount Currency="EUR">
+   <Full SuppressZero="yes">0</Full>
+   <Minimum>0.00</Minimum>
+ </TotalAmount>
+ <PaymentMethod>
+  <NoPayment>
+    <Comment>Zu dieser Abrechnung kann keine Zahlung erfasst werden.</Comment>
+  </NoPayment>
+  </PaymentMethod>
+</PBInvoice_2_5_at>

@@ -1,4 +1,4 @@
-describe('Enable and Disable XML templates provided from JSON', () => {
+describe('Upload_XML_file_including_Enabling_and_Disabing_xml_templates', () => {
   //Precondition: Clear user`s email inbox if its not an empty
   it('Yopmail - Clear inbox', () => {
     // Visit yopmail application or login page

@@ -1,0 +1,360 @@
+<?xml version="1.0" encoding="iso-8859-1" ?>
+<!DOCTYPE PBInvoice_2_5_at PUBLIC "" "https://business.ebpp.at/xml/DTD/PBInvoice_2_5_at.dtd">
+<PBInvoice_2_5_at>
+<InvoiceNumber>000000010027190920230401</InvoiceNumber>
+<InvoiceDate>20250707</InvoiceDate>
+<DueDate>20250707</DueDate>
+<URL>http://www.test.cc</URL>
+<LogoURL>https://e-gehaltszettel.post-business-solutions.at/be.e-gehaltszettel/resources/branding/AQUA/AQUA_1.JPG</LogoURL>
+<LayoutID>L103</LayoutID>
+<Language>GER</Language>
+<Biller>
+   <SystemsBillerID>AQUA</SystemsBillerID>
+   <Address>
+      <Salutation>Firma</Salutation>
+      <Name>AQUA GmbH</Name>
+      <Street>Straße 777</Street>
+      <Town>City</Town>
+      <ZIP>1020</ZIP>
+      <Country>Österreich</Country>
+   </Address>
+</Biller>
+<InvoiceRecipient>
+   <BillersInvoiceRecipientID>ABBA000100279311</BillersInvoiceRecipientID>
+   <Address>
+      <Salutation>Herr</Salutation>
+      <Name>QA Mustermann</Name>
+      <Street>Straße 777/8</Street>
+      <Town>City</Town>
+      <ZIP>8020</ZIP>
+      <Country>&#160;</Country>
+   </Address>
+</InvoiceRecipient>
+<DocumentTitle>A&amp;#160;Q&amp;#160;U&amp;#160;A&amp;#160;-&amp;#160;G&amp;#160;m&amp;#160;b&amp;#160;H</DocumentTitle>
+<ShortComment>Structured XML</ShortComment>
+<Details>
+   <FooterComment>&#160;</FooterComment>
+   <FooterComment>&#160;</FooterComment>
+   <ItemList Type="info1">
+      <LineItem>
+         <Element Type="periode1">für den Zeitraum 2025</Element>
+         <Element Type="periode2">&#160;</Element>
+         <Element Type="empfaenger1">Herr</Element>
+         <Element Type="empfaenger2">QA Mustermann </Element>
+         <Element Type="empfaenger3">Straße 777/8</Element>
+         <Element Type="empfaenger4">8020 City</Element>
+         <Element Type="empfaenger5">&#160;</Element>
+         <Element Type="empfaenger6">&#160;</Element>
+         <Element Type="info011">Fnr / Pnr:</Element>
+         <Element Type="info012">1 / 271909</Element>
+         <Element Type="info021">Kreis:</Element>
+         <Element Type="info022">TEST_ARB</Element>
+         <Element Type="info031">Kostenstelle:</Element>
+         <Element Type="info032">010101010</Element>
+         <Element Type="info041">Abteilung:</Element>
+         <Element Type="info042">KAGES</Element>
+         <Element Type="info051">Ersteintritt am:</Element>
+         <Element Type="info052">&#160;</Element>
+         <Element Type="info061">Eintritt am:</Element>
+         <Element Type="info062">01-12-2027</Element>
+         <Element Type="info071">&#160;</Element>
+         <Element Type="info072">&#160;</Element>
+         <Element Type="info081">SV Gruppe:</Element>
+         <Element Type="info082">&#160;</Element>
+         <Element Type="info091">Sachbearbeiter:</Element>
+         <Element Type="info092">3032</Element>
+         <Element Type="info101">NAZ-Woche:</Element>
+         <Element Type="info102">00,00</Element>
+         <Element Type="info111">Lohn-/Gehaltstafel:</Element>
+         <Element Type="info112">GEBRL</Element>
+         <Element Type="info121">Urlaubsrest:</Element>
+         <Element Type="info122">00,00</Element>
+         <Element Type="info131">&#160;</Element>
+         <Element Type="info132">&#160;</Element>
+         <Element Type="info141">&#160;</Element>
+         <Element Type="info142">&#160;</Element>
+      </LineItem>
+   </ItemList>
+   <ItemList Type="brutto1">
+      <Title>
+         <Element Type="thcxtbl">Lohnart</Element>
+         <Element Type="thlxtbl">Bezeichnung</Element>
+         <Element Type="thrxtbl">Einheiten</Element>
+         <Element Type="thrxtbl">Satz / BMG</Element>
+         <Element Type="thrxtbl">Abzüge</Element>
+         <Element Type="thrxtrbl">Bezüge</Element>
+      </Title>
+      <LineItem Type="artline">
+         <Element Type="tdcgxl">1200</Element>
+         <Element Type="tdlgxl">Normalstunden</Element>
+         <Element Type="tdrgxl">000,00</Element>
+         <Element Type="tdrgxl">00,00</Element>
+         <Element Type="tdrgxl">&#160;</Element>
+         <Element Type="tdrgxrl">0.000,00</Element>
+      </LineItem>
+      <LineItem Type="artline">
+         <Element Type="tdcwxl">2100</Element>
+         <Element Type="tdlwxl">Sonntagszuschlag 100 %</Element>
+         <Element Type="tdrwxl">00,00</Element>
+         <Element Type="tdrwxl">00,00</Element>
+         <Element Type="tdrwxl">&#160;</Element>
+         <Element Type="tdrwxrl">000,00</Element>
+      </LineItem>
+      <LineItem Type="artline">
+         <Element Type="tdcgxl">3100</Element>
+         <Element Type="tdlgxl">Überstundengrundlohn</Element>
+         <Element Type="tdrgxl">00,00</Element>
+         <Element Type="tdrgxl">00,00</Element>
+         <Element Type="tdrgxl">&#160;</Element>
+         <Element Type="tdrgxrl">000,00</Element>
+      </LineItem>
+      <LineItem Type="artline">
+         <Element Type="tdcwxl">3120</Element>
+         <Element Type="tdlwxl">Überstundenzuschl 50% 68/2</Element>
+         <Element Type="tdrwxl">0,00</Element>
+         <Element Type="tdrwxl">0,00</Element>
+         <Element Type="tdrwxl">&#160;</Element>
+         <Element Type="tdrwxrl">00,00</Element>
+      </LineItem>
+      <LineItem Type="artline">
+         <Element Type="tdcgxl">3220</Element>
+         <Element Type="tdlgxl">Überstundenzuschl 150% 68/1</Element>
+         <Element Type="tdrgxl">0,00</Element>
+         <Element Type="tdrgxl">00,00</Element>
+         <Element Type="tdrgxl">&#160;</Element>
+         <Element Type="tdrgxrl">00,00</Element>
+      </LineItem>
+      <LineItem Type="artline">
+         <Element Type="tdcwxl">3226</Element>
+         <Element Type="tdlwxl">Überstundenzuschl 175% 68/1</Element>
+         <Element Type="tdrwxl">0,00</Element>
+         <Element Type="tdrwxl">00,00</Element>
+         <Element Type="tdrwxl">&#160;</Element>
+         <Element Type="tdrwxrl">00,00</Element>
+      </LineItem>
+      <LineItem Type="artline">
+         <Element Type="tdcgxl">4002</Element>
+         <Element Type="tdlgxl">Feiertagsentgelt Arb</Element>
+         <Element Type="tdrgxl">0,00</Element>
+         <Element Type="tdrgxl">00,00</Element>
+         <Element Type="tdrgxl">&#160;</Element>
+         <Element Type="tdrgxrl">00,00</Element>
+      </LineItem>
+      <LineItem Type="artline">
+         <Element Type="tdcwxl">4101</Element>
+         <Element Type="tdlwxl">Urlaubsentgelt Arb</Element>
+         <Element Type="tdrwxl">00,00</Element>
+         <Element Type="tdrwxl">00,00</Element>
+         <Element Type="tdrwxl">&#160;</Element>
+         <Element Type="tdrwxrl">000,00</Element>
+      </LineItem>
+      <LineItem Type="artline">
+         <Element Type="tdcgxl">4581</Element>
+         <Element Type="tdlgxl">Feiertagsentgelt Schnitt</Element>
+         <Element Type="tdrgxl">0,00</Element>
+         <Element Type="tdrgxl">0,00</Element>
+         <Element Type="tdrgxl">&#160;</Element>
+         <Element Type="tdrgxrl">00,00</Element>
+      </LineItem>
+      <LineItem Type="artline">
+         <Element Type="tdcwxl">4583</Element>
+         <Element Type="tdlwxl">Urlaubsentgelt Schnitt</Element>
+         <Element Type="tdrwxl">00,00</Element>
+         <Element Type="tdrwxl">0,00</Element>
+         <Element Type="tdrwxl">&#160;</Element>
+         <Element Type="tdrwxrl">00,00</Element>
+      </LineItem>
+      <LineItem Type="artline">
+         <Element Type="tdcgxl">8305</Element>
+         <Element Type="tdlgxl">Betriebsratsumlage Süd</Element>
+         <Element Type="tdrgxl">&#160;</Element>
+         <Element Type="tdrgxl">&#160;</Element>
+         <Element Type="tdrgxl">00,00</Element>
+         <Element Type="tdrgxrl">&#160;</Element>
+      </LineItem>
+      <LineItem Type="artline">
+         <Element Type="tdcwxl">&#160;</Element>
+         <Element Type="tdlwxl">&#160;</Element>
+         <Element Type="tdrwxl">&#160;</Element>
+         <Element Type="tdrwxl">&#160;</Element>
+         <Element Type="tdrwxl">&#160;</Element>
+         <Element Type="tdrwxrl">&#160;</Element>
+      </LineItem>
+      <LineItem Type="artline">
+         <Element Type="tdcgxl">&#160;</Element>
+         <Element Type="tdlgxl">&#160;</Element>
+         <Element Type="tdrgxl">&#160;</Element>
+         <Element Type="tdrgxl">&#160;</Element>
+         <Element Type="tdrgxl">&#160;</Element>
+         <Element Type="tdrgxrl">&#160;</Element>
+      </LineItem>
+	  <LineItem Type="artline">
+         <Element Type="tdcgxl">&#160;</Element>
+         <Element Type="tdlgxl">01.01.2025 - 01.01.2027 Urlaub Arbeitsjahr L</Element>
+         <Element Type="tdrgxl">Tage 3,00</Element>
+         <Element Type="tdrgxl">&#160;</Element>
+         <Element Type="tdrgxl">&#160;</Element>
+         <Element Type="tdrgxrl">&#160;</Element>
+      </LineItem>
+      <LineItem Type="infoline">
+         <Element Type="tdcwxl">&#160;</Element>
+         <Element Type="tdlinfewxl">Für Rückfragen zum Abrechnungsbeleg steht Ihnen</Element>
+         <Element Type="skip">&#160;</Element>
+         <Element Type="skip">&#160;</Element>
+         <Element Type="tdrwxl">&#160;</Element>
+         <Element Type="tdrwxrl">&#160;</Element>
+      </LineItem>
+      <LineItem Type="infoline">
+         <Element Type="tdcwxl">&#160;</Element>
+         <Element Type="tdlinflwxl">die E-Mail test@test.com zur Verfügung</Element>
+         <Element Type="skip">&#160;</Element>
+         <Element Type="skip">&#160;</Element>
+         <Element Type="tdrwxl">&#160;</Element>
+         <Element Type="tdrwxrl">&#160;</Element>
+      </LineItem>
+      <LineItem Type="artline">
+         <Element Type="tdcwxl">&#160;</Element>
+         <Element Type="tdlwxl">&#160;</Element>
+         <Element Type="tdrwxl">&#160;</Element>
+         <Element Type="tdrwxl">&#160;</Element>
+         <Element Type="tdrwxl">&#160;</Element>
+         <Element Type="tdrwxrl">&#160;</Element>
+      </LineItem>
+      <LineItem Type="artline">
+         <Element Type="tdcwxbl">&#160;</Element>
+         <Element Type="tdlwxbl">&#160;</Element>
+         <Element Type="tdrwxbl">&#160;</Element>
+         <Element Type="tdrwxbl">&#160;</Element>
+         <Element Type="tdrwxbl">&#160;</Element>
+         <Element Type="tdrwxrbl">&#160;</Element>
+      </LineItem><LineItem Type="artline">
+         <Element Type="tdcwxbl">&#160;</Element>
+         <Element Type="tdlwxbl">&#160;</Element>
+         <Element Type="tdrwxbl">&#160;</Element>
+         <Element Type="tdrwxbl">&#160;</Element>
+         <Element Type="tdrwxbl">&#160;</Element>
+         <Element Type="tdrwxrbl">&#160;</Element>
+      </LineItem>
+      <LineItem Type="artline">
+         <Element Type="tdcw">&#160;</Element>
+         <Element Type="tdlw">&#160;</Element>
+         <Element Type="tdrw">&#160;</Element>
+         <Element Type="tdrw">&#160;</Element>
+         <Element Type="tdrsumwbxbl">Summe Bezüge</Element>
+         <Element Type="tdrsumwxrbl">0.000,00</Element>tdrsumwxrbl
+      </LineItem>
+      <LineItem Type="artline">
+         <Element Type="tdcw">&#160;</Element>
+         <Element Type="tdlw">&#160;</Element>
+         <Element Type="tdrw">&#160;</Element>
+         <Element Type="tdrw">&#160;</Element>
+         <Element Type="tdrsumwbxbl">Summe Abzüge</Element>
+         <Element Type="tdrsumwxrbl">00,00</Element>
+      </LineItem>
+   </ItemList>
+   <ItemList Type="posten1">
+      <LineItem Type="artline">
+         <Element Type="tdlwztl">SV- / LST- / P- /Ausl-Tage</Element>
+         <Element Type="tdlwztl">SV Bem. SZ</Element>
+         <Element Type="tdlwztl">SV Bem. lfd</Element>
+         <Element Type="tdlwztl">SV SZ</Element>
+         <Element Type="tdlwztl">SV lfd</Element>
+         <Element Type="tdlwztrl">SV Gesamt</Element>
+      </LineItem>
+      <LineItem Type="artline">
+         <Element Type="tdrwzl">30/30/0</Element>
+         <Element Type="tdrwzl">&#160;</Element>
+         <Element Type="tdrwzl">0.000,00</Element>
+         <Element Type="tdrwzl">&#160;</Element>
+         <Element Type="tdrwzl">000,00</Element>
+         <Element Type="tdrwzrl">000,00</Element>
+      </LineItem>
+      <LineItem Type="artline">
+         <Element Type="tdlwztl">AV / AE / PAB</Element>
+         <Element Type="tdlwztl">Kinder  106</Element>
+         <Element Type="tdlwztl"> 3 / 15 frei</Element>
+         <Element Type="tdlwztl"> 67 frei</Element>
+         <Element Type="tdlwztl"> 67 Bem. SB</Element>
+         <Element Type="tdlwztrl">LSt SB</Element>
+      </LineItem>
+      <LineItem Type="artline">
+         <Element Type="tdrwzl">nein</Element>
+         <Element Type="tdrwzl">&#160;</Element>
+         <Element Type="tdrwzl">&#160;</Element>
+         <Element Type="tdrwzl">&#160;</Element>
+         <Element Type="tdrwzl">&#160;</Element>
+         <Element Type="tdrwzrl">&#160;</Element>
+      </LineItem>
+      <LineItem Type="artline">
+         <Element Type="tdlwztl"> 68 frei</Element>
+         <Element Type="tdlwztl">Freibetrag</Element>
+         <Element Type="tdlwztl">Pendlerpauschale</Element>
+         <Element Type="tdlwztl">J/6 Überhang</Element>
+         <Element Type="tdlwztl">LSt-Bem. lfd</Element>
+         <Element Type="tdlwztrl">LSt lfd</Element>
+      </LineItem>
+      <LineItem Type="artline">
+         <Element Type="tdrwzl">000,00</Element>
+         <Element Type="tdrwzl">&#160;</Element>
+         <Element Type="tdrwzl">&#160;</Element>
+         <Element Type="tdrwzl">&#160;</Element>
+         <Element Type="tdrwzl">0.000,00</Element>
+         <Element Type="tdrwzrl">-000,00</Element>
+      </LineItem>
+      <LineItem Type="artline">
+         <Element Type="tdlwztl">Familienbonus</Element>
+         <Element Type="tdlwztl"> 26 Z 4</Element>
+         <Element Type="tdlwztl">Pendlereuro</Element>
+         <Element Type="tdlwztl">&#160;</Element>
+         <Element Type="tdlwztl">Differenz aus Vormonaten</Element>
+         <Element Type="tdlwztrl">gesetzl. Abzüge</Element>
+      </LineItem>
+      <LineItem Type="artline">
+         <Element Type="tdrwzl">&#160;</Element>
+         <Element Type="tdrwzl">&#160;</Element>
+         <Element Type="tdrwzl">&#160;</Element>
+         <Element Type="tdrwzl">&#160;</Element>
+         <Element Type="tdrwzl">&#160;</Element>
+         <Element Type="tdrwzrl">000,00</Element>
+      </LineItem>
+      <LineItem Type="sumline">
+         <Element Type="tdlsumwztl">Überweisung auf IBAN: AT00111000111 BIC: TEST01</Element>
+         <Element Type="skip">&#160;</Element>
+         <Element Type="skip">&#160;</Element>
+         <Element Type="skip">&#160;</Element>
+         <Element Type="tdrsumwbztl">Auszahlung</Element>
+         <Element Type="tdrsumwbztrl">0.000,00</Element>
+      </LineItem>
+      <LineItem Type="artline">
+         <Element Type="tdlwztl">&#160;</Element>
+         <Element Type="tdlwztl">BV Bem.</Element>
+         <Element Type="tdlwztl">BV Beitrag</Element>
+         <Element Type="tdlwztl">KommSt. / Wr. DGA</Element>
+         <Element Type="tdlwztl">DB / DZ</Element>
+         <Element Type="tdlwztrl">SV DG</Element>
+      </LineItem>
+      <LineItem Type="artline">
+         <Element Type="tdlwzbl">Dienstgeberanteile</Element>
+         <Element Type="tdrwzbl">0.000,00</Element>
+         <Element Type="tdrwzbl">00,00</Element>
+         <Element Type="tdrwzbl">00,00</Element>
+         <Element Type="tdrwzbl">000,00</Element>
+         <Element Type="tdrwzrbl">000,00</Element>
+      </LineItem>
+   </ItemList>
+</Details>
+<Tax>
+   <TaxID>&#160;</TaxID>
+   <Type>&#160;</Type>
+   <Amount Currency="EUR">0</Amount>
+</Tax>
+<TotalAmount Currency="EUR">
+   <Full SuppressZero="yes">0</Full>
+   <Minimum>0,00</Minimum>
+</TotalAmount>
+<PaymentMethod>
+   <NoPayment>
+      <Comment>Zu diesem Abrechnungsbeleg kann keine Zahlung erfasst werden.</Comment>
+   </NoPayment>
+</PaymentMethod>
+</PBInvoice_2_5_at>

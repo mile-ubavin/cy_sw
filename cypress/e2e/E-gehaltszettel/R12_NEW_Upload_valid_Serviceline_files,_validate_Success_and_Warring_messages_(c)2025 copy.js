@@ -1,4 +1,4 @@
-describe('Sent pdf file', () => {
+describe('Upload valid Serviceline files, validate Success and Warring messages', () => {
   let uploadDateTime; // shared across tests
 
   // Helper: Compare two datetime rounded to minute
@@ -230,288 +230,8 @@ describe('Sent pdf file', () => {
     cy.log('Test completed successfully — HR disabled and roles updated.');
   });
 
-  // Disable pdfDictionary by Masteruser by uncheck all items provided from the file
-  it('Disable pdfDictionary by Masteruser', () => {
-    cy.loginToSupportViewMaster(); // Login as a master user
-
-    // Remove pop-up if present
-    cy.get('body').then(($body) => {
-      if ($body.find('.release-note-dialog__close-icon').length > 0) {
-        cy.get('.release-note-dialog__close-icon').click();
-      }
-    });
-
-    cy.intercept('GET', '**/group/template/tenant/**').as('apiRequest');
-
-    // Search for Group section
-    cy.get('#searchButton>span').click();
-
-    // Search for Group by Display Name using the company name
-    cy.get('.search-dialog>form>.form-fields>.searchText-wrap')
-      .eq(0)
-      .type(Cypress.env('company'));
-
-    // Find and click the search button
-    cy.get('.search-dialog>form>div>.mat-primary').click();
-    cy.wait(1500);
-
-    // Search for PDF Dictionary button and click on it
-    cy.get('.mdc-button__label')
-      .contains(/Assign PDF Dictionary|PDF Dictionary zuweisen/i)
-      .should('be.visible')
-      .click();
-
-    // Get dictionary names from JSON
-    const disablePDFDictionary = Cypress.env('disablePDFDictionary');
-    cy.log('disablePDFDictionary:', disablePDFDictionary);
-
-    if (!disablePDFDictionary || disablePDFDictionary.length === 0) {
-      throw new Error('No dictionary names found in Cypress.env');
-    }
-
-    const searchCriteria = disablePDFDictionary.map((item) => item.name);
-    cy.log('Search Criteria:', searchCriteria);
-
-    // Ensure the table is visible before processing
-    cy.get('table > tbody', { timeout: 10000 }).should('be.visible');
-
-    // Disable (Uncheck) PDF Dictionary according to Search Criteria
-    cy.get('table > tbody > tr').each(($row) => {
-      const rowText = $row.text().trim();
-      cy.log(`Checking row: ${rowText}`);
-
-      // If row matches any criteria, uncheck the checkbox
-      searchCriteria.forEach((criteria) => {
-        if (rowText.includes(criteria)) {
-          cy.wrap($row)
-            .find('td>input[type="checkbox"]')
-            .should('exist')
-            .uncheck({ force: true }); // Uncheck instead of check
-          cy.log(`Unchecked: ${criteria}`);
-        }
-      });
-    });
-
-    cy.wait(1500);
-
-    // Check if next page exists and navigate
-    cy.get('.mat-mdc-paginator-navigation-next').then(($nextButton) => {
-      if (!$nextButton.prop('disabled')) {
-        cy.wrap($nextButton).click();
-        cy.wait(500);
-        findAndCheckElement(searchCriteria); // Recursively check next page
-      } else {
-        cy.log('No more pages to check');
-      }
-    });
-
-    cy.wait(2000);
-
-    // Save the changes
-    cy.get('button>.title')
-      .contains(/Save|Übernehmen/i)
-      .should('be.visible')
-      .click();
-
-    // Verify the success message
-    cy.get('.mat-mdc-simple-snack-bar > .mat-mdc-snack-bar-label')
-      .should('be.visible')
-      .invoke('text')
-      .then((text) => {
-        expect(text.trim()).to.match(
-          /PDF Dictionary has been assigned successfully|PDF Dictionary wurde erfolgreich zugewiesen/
-        );
-      });
-    cy.wait(3000);
-    // Logout
-    cy.get('.logout-icon').click();
-    cy.get('.confirm-buttons > :nth-child(2)').click();
-    cy.url().should('include', Cypress.env('baseUrl'));
-    cy.log('Test completed successfully.');
-  });
-
-  it('Verify disabled PDF Dictionary is not visible in the dropdown, after disabling', () => {
-    cy.loginToSupportViewAdmin();
-    cy.wait(1500);
-
-    // Remove pop-up if present
-    cy.get('body').then(($body) => {
-      if ($body.find('.release-note-dialog__close-icon').length > 0) {
-        cy.get('.release-note-dialog__close-icon').click();
-      } else {
-        cy.log('Close icon is NOT present');
-      }
-    });
-    cy.wait(1500);
-
-    // Click on Upload Personal Document Button
-    cy.get('.upload__document>.mdc-button__label>.upload__document__text')
-      .contains(/Upload Personal Document|Personalisierte Dokumente hochladen/i)
-      .should('be.visible')
-      .click();
-    cy.wait(1500);
-
-    // Click on Upload Document button
-    cy.get('body').then(($body) => {
-      if ($body.find('.buttons-wrapper>button').length > 0) {
-        cy.get('.buttons-wrapper>button>.title')
-          .filter((index, el) => {
-            const text = Cypress.$(el).text().trim();
-            return text === 'Upload Document' || text === 'Dokument hochladen';
-          })
-          .click();
-        cy.wait(1500);
-      } else {
-        cy.log('Upload Document button is NOT present');
-      }
-    });
-    cy.wait(1500);
-
-    // Upload serviceLine file
-    cy.uploadPDFdictionary305();
-    cy.wait(2500);
-    // Open dictionary dropdown
-    cy.get('.mdc-floating-label').click({ force: true });
-    cy.wait(1500);
-
-    // Get disabled dictionary names from JSON
-    const disablePDFDictionary = Cypress.env('disablePDFDictionary');
-    cy.log('Disabled Dictionaries:', disablePDFDictionary);
-
-    if (!disablePDFDictionary || disablePDFDictionary.length === 0) {
-      throw new Error('No disabled dictionary names found in Cypress.env');
-    }
-
-    // Ensure the dropdown options exist
-    cy.get('mat-option[role="option"]>.mdc-list-item__primary-text')
-      .should('exist')
-      .each(($option) => {
-        const optionText = $option.text().trim();
-        cy.log(`Checking dropdown option: ${optionText}`);
-
-        // Ensure disabled dictionaries are NOT present in the dropdown
-        expect(disablePDFDictionary).to.not.include(optionText);
-      });
-
-    cy.log('Test completed successfully.');
-
-    // Wait for the deselection process to complete
-    cy.wait(3000);
-    // Focus out
-    cy.get('body').type('{esc}');
-    cy.wait(1500);
-
-    //Close Upload documets dialog
-    cy.get('mat-icon[data-mat-icon-name="close"]').first().click();
-
-    // Logout
-    cy.get('.logout-icon ').click();
-    cy.wait(2000);
-    cy.get('.confirm-buttons > :nth-child(2)').click();
-    cy.url().should('include', Cypress.env('baseUrl')); // Validate url'
-    cy.log('Test completed successfully.');
-    cy.wait(2500);
-  });
-
-  //Enable pdfDictionary by Masteruser
-  it('Enable pdfDictionary by Masteruser', () => {
-    cy.loginToSupportViewMaster(); // Login as a master user
-
-    // Remove pop-up if present
-    cy.get('body').then(($body) => {
-      if ($body.find('.release-note-dialog__close-icon').length > 0) {
-        cy.get('.release-note-dialog__close-icon').click();
-      }
-    });
-
-    cy.intercept('GET', '**/group/template/tenant/**').as('apiRequest');
-
-    // Search for Group section
-    cy.get('#searchButton>span').click();
-
-    // Search for Group by Display Name using the company name
-    cy.get('.search-dialog>form>.form-fields>.searchText-wrap')
-      .eq(0)
-      .type(Cypress.env('company'));
-
-    // Find and click the search button
-    cy.get('.search-dialog>form>div>.mat-primary').click();
-    cy.wait(1500);
-
-    // Search for  PDF Dictionary button and click on it
-    cy.get('.mdc-button__label')
-      .contains(/Assign PDF Dictionary|PDF Dictionary zuweisen/i)
-      .should('be.visible')
-      .click();
-
-    // Get dictionary names from JSON
-    const enablePDFDictionary = Cypress.env('enablePDFDictionary');
-    cy.log('enablePDFDictionary:', enablePDFDictionary);
-
-    if (!enablePDFDictionary || enablePDFDictionary.length === 0) {
-      throw new Error('No dictionary names found in Cypress.env');
-    }
-
-    const searchCriteria = enablePDFDictionary.map((item) => item.name);
-    cy.log('Search Criteria:', searchCriteria);
-
-    // Ensure the table is visible before processing
-    cy.get('table > tbody', { timeout: 10000 }).should('be.visible');
-
-    //Enable PDF Dictionary according Search Criteria
-    cy.get('table > tbody > tr').each(($row) => {
-      const rowText = $row.text().trim();
-      cy.log(`Checking row: ${rowText}`);
-
-      // If row matches any criteria, check the checkbox
-      searchCriteria.forEach((criteria) => {
-        if (rowText.includes(criteria)) {
-          cy.wrap($row)
-            .find('td>input[type="checkbox"]')
-            .should('exist')
-            .check({ force: true });
-          cy.log(`Checked: ${criteria}`);
-        }
-      });
-    });
-    cy.wait(1500);
-    // Check if next page exists and navigate
-    cy.get('.mat-mdc-paginator-navigation-next').then(($nextButton) => {
-      if (!$nextButton.prop('disabled')) {
-        cy.wrap($nextButton).click();
-        cy.wait(500);
-        findAndCheckElement(searchCriteria); // Recursively check next page
-      } else {
-        cy.log('No more pages to check');
-      }
-    });
-    //}
-    cy.wait(2000);
-    // Save the changes
-    cy.get('button>.title')
-      .contains(/Save|Übernehmen/i)
-      .should('be.visible')
-      .click();
-
-    // Verify the success message
-    cy.get('.mat-mdc-simple-snack-bar > .mat-mdc-snack-bar-label')
-      .should('be.visible')
-      .invoke('text')
-      .then((text) => {
-        expect(text.trim()).to.match(
-          /PDF Dictionary has been assigned successfully|PDF Dictionary wurde erfolgreich zugewiesen/
-        );
-      });
-
-    // Logout
-    cy.get('.logout-icon').click();
-    cy.get('.confirm-buttons > :nth-child(2)').click();
-    cy.url().should('include', Cypress.env('baseUrl'));
-    cy.log('Test completed successfully.');
-  });
-
-  //Admin user Upload can upload valid pdf(dictionary)
-  it('Upload pdfDictionary 305_Dictionary (verify Error and Success messages)', () => {
+  //Admin user Upload can upload valid serviceLine File
+  it('Upload valid serviceLine file and validate Success message', () => {
     cy.loginToSupportViewAdmin();
     // Wait for login to complete
     cy.wait(1500);
@@ -565,21 +285,22 @@ describe('Sent pdf file', () => {
     cy.wait(1500);
 
     // Upload serviceLine file
-    cy.uploadPDFdictionary305();
+    cy.uploadServiceLine();
+
     cy.wait(2500);
 
-    // Select invalid Dictionary
+    // Select Company
     cy.get('.mdc-floating-label').click({
       force: true,
     });
     cy.wait(1500);
 
-    const selectDictionary = ['PDFTABDictionary-301'];
+    const toCompanies = ['ServiceLine'];
     cy.get('mat-option[role="option"]>.mdc-list-item__primary-text')
       .should('exist') // Ensure checkbox labels exist
       .each(($label) => {
         const text = $label.text().trim();
-        if (selectDictionary.includes(text)) {
+        if (toCompanies.includes(text)) {
           // Target the specific checkbox
           cy.wrap($label)
             .parent()
@@ -626,84 +347,6 @@ describe('Sent pdf file', () => {
     cy.wait(4000);
 
     // Verify success message, after uplading document
-    cy.get('.list-item-status>.danger')
-      .should('be.visible') // Ensure it's visible first
-      .invoke('text') // Get the text of the element
-      .then((text) => {
-        // Trim the text and validate it
-        const trimmedText = text.trim();
-        expect(trimmedText).to.match(
-          /Meta data could not be extracted|Metadaten konnten nicht extrahiert werden/
-        );
-      });
-    cy.wait(2500);
-
-    //Remove already uploaded document
-    cy.get('.list-item-control').click();
-
-    //******************************************************************* */
-    // Upload appropriatePDFdictionary305 file
-    cy.uploadPDFdictionary305();
-    cy.wait(2500);
-
-    // Select Valid Dictionary
-    cy.get('.mdc-floating-label').click({
-      force: true,
-    });
-    cy.wait(1500);
-
-    const selectValidDictionary = ['PDFTABDictionary-305'];
-    cy.get('mat-option[role="option"]>.mdc-list-item__primary-text')
-      .should('exist') // Ensure checkbox labels exist
-      .each(($label) => {
-        const text = $label.text().trim();
-        if (selectValidDictionary.includes(text)) {
-          // Target the specific checkbox
-          cy.wrap($label)
-            .parent()
-            .find('.mdc-list-item__primary-text') // Locate the checkbox input
-            .then(($checkboxInput) => {
-              if (!$checkboxInput.is(':checked')) {
-                // Enable the role if not already checked
-                cy.wrap($checkboxInput).click({ force: true });
-                cy.log(`Checkbox for "${text}" was not enabled; now enabled.`);
-              } else {
-                // Role is already enabled
-                cy.log(`Checkbox for "${text}" is already enabled.`);
-              }
-            });
-        }
-      });
-
-    // Wait for the deselection process to complete
-    cy.wait(1000);
-    // Focus out
-    cy.get('body').type('{esc}');
-    cy.wait(1500);
-
-    cy.intercept(
-      'POST',
-      '**/deliveryHandler/checkDocumentProcessingStatus**'
-    ).as('completeCheckingDocumentProcessingStatus');
-
-    cy.get('.dialog-actions>button>.title')
-      .contains(/Upload Personal Document|Personalisierte Dokumente hochladen/i)
-      .should('be.visible') // Optional: Ensure the button is visible before interacting
-      .click(); // Click the button
-
-    cy.wait(['@completeCheckingDocumentProcessingStatus'], {
-      timeout: 27000,
-    }).then((interception) => {
-      // Log the intercepted response
-      cy.log('Intercepted response:', interception.response);
-
-      // Assert the response status code
-      expect(interception.response.statusCode).to.eq(200);
-    });
-
-    cy.wait(4000);
-
-    // Verify success message, after uplading document
     cy.get('.list-item-status>.success')
       .should('be.visible') // Ensure it's visible first
       .invoke('text') // Get the text of the element
@@ -718,8 +361,34 @@ describe('Sent pdf file', () => {
 
     cy.get('.dialog-actions>button>.title')
       .contains(/Send|Senden /i)
-      .should('be.visible') // Optional: Ensure the button is visible before interacting
-      .click(); // Click the button
+      .then(($button) => {
+        if (!$button.is(':disabled')) {
+          cy.wait(1500);
+          cy.wrap($button).click({ force: true });
+          cy.wait(500);
+
+          // Update uploadDateTime here to reflect SIGNED time
+          const now = new Date();
+          const day = String(now.getDate()).padStart(2, '0');
+          const month = String(now.getMonth() + 1).padStart(2, '0');
+          const year = now.getFullYear();
+          const formattedDate = `${day}.${month}.${year}`;
+          const formattedTime = now
+            .toLocaleTimeString('de-DE', {
+              hour: '2-digit',
+              minute: '2-digit',
+              hour12: false,
+            })
+            .trim();
+
+          const newUploadDateTime = `${formattedDate} ${formattedTime}`;
+          Cypress.env('uploadDateTime', newUploadDateTime);
+          cy.log(`Updated Upload DateTime after sending: ${newUploadDateTime}`);
+        } else {
+          cy.log('Save button is disabled');
+        }
+      });
+
     cy.wait(1500);
 
     // //Confirm dialog for sending delivery to all users from selected company
@@ -1020,11 +689,26 @@ describe('Sent pdf file', () => {
     cy.log('Test completed successfully — HR disabled and roles updated.');
   });
 
-  //Upload pdfDictionary 305_Dictionary (verify Error amd Success messages)
-  it('Upload pdfDictionary 305_Dictionary (verify Error amd Success messages)', () => {
+  //Admin user Upload can upload serviceLine file with valid and invalid tid
+  it('Upload serviceLine file with valid and invalid tid and validate Warning message', () => {
     cy.loginToSupportViewAdmin();
     // Wait for login to complete
     cy.wait(1500);
+
+    // Capture and save uploadDateTime
+    const now = new Date();
+    const formattedDate = now.toLocaleDateString('de-DE'); // dd.mm.yyyy
+    const formattedTime = now.toLocaleTimeString('de-DE', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    });
+
+    const uploadDateTime = `${formattedDate} ${formattedTime}`;
+    cy.log(`Upload DateTime: ${uploadDateTime}`);
+
+    // Save globally for later validation
+    Cypress.env('uploadDateTime', uploadDateTime);
 
     //Remove pop up
     cy.get('body').then(($body) => {
@@ -1054,27 +738,28 @@ describe('Sent pdf file', () => {
           .click();
         cy.wait(1500);
       } else {
-        cy.log('icon is NOT present');
+        cy.log('Close icon is NOT present');
       }
     });
     cy.wait(1500);
 
     // Upload serviceLine file
-    cy.uploadPDFdictionary305();
+    cy.uploadServiceLineFile_WithValidAndInvalidTid();
+
     cy.wait(2500);
 
-    // Select invalid Dictionary
+    // Select Company
     cy.get('.mdc-floating-label').click({
       force: true,
     });
     cy.wait(1500);
 
-    const selectDictionary = ['PDFTABDictionary-301'];
+    const toCompanies = ['ServiceLine'];
     cy.get('mat-option[role="option"]>.mdc-list-item__primary-text')
       .should('exist') // Ensure checkbox labels exist
       .each(($label) => {
         const text = $label.text().trim();
-        if (selectDictionary.includes(text)) {
+        if (toCompanies.includes(text)) {
           // Target the specific checkbox
           cy.wrap($label)
             .parent()
@@ -1094,7 +779,6 @@ describe('Sent pdf file', () => {
 
     // Wait for the deselection process to complete
     cy.wait(1000);
-
     // Focus out
     cy.get('body').type('{esc}');
     cy.wait(1500);
@@ -1121,93 +805,15 @@ describe('Sent pdf file', () => {
 
     cy.wait(4000);
 
-    // Verify success message, after uplading document
-    cy.get('.list-item-status>.danger')
+    // Verify warning message, after uplading document
+    cy.get('.list-item-status>.warning')
       .should('be.visible') // Ensure it's visible first
       .invoke('text') // Get the text of the element
       .then((text) => {
         // Trim the text and validate it
         const trimmedText = text.trim();
         expect(trimmedText).to.match(
-          /Meta data could not be extracted|Metadaten konnten nicht extrahiert werden/
-        );
-      });
-    cy.wait(2500);
-
-    //Remove already uploaded document
-    cy.get('.list-item-control').click();
-
-    //******************************************************************* */
-    // Upload appropriatePDFdictionary305 file
-    cy.uploadPDFdictionary305();
-    cy.wait(2500);
-
-    // Select Valid Dictionary
-    cy.get('.mdc-floating-label').click({
-      force: true,
-    });
-    cy.wait(1500);
-
-    const selectValidDictionary = ['PDFTABDictionary-305'];
-    cy.get('mat-option[role="option"]>.mdc-list-item__primary-text')
-      .should('exist') // Ensure checkbox labels exist
-      .each(($label) => {
-        const text = $label.text().trim();
-        if (selectValidDictionary.includes(text)) {
-          // Target the specific checkbox
-          cy.wrap($label)
-            .parent()
-            .find('.mdc-list-item__primary-text') // Locate the checkbox input
-            .then(($checkboxInput) => {
-              if (!$checkboxInput.is(':checked')) {
-                // Enable the dictionary if not already checked
-                cy.wrap($checkboxInput).click({ force: true });
-                cy.log(`Checkbox for "${text}" was not enabled; now enabled.`);
-              } else {
-                // Role is already enabled
-                cy.log(`Checkbox for "${text}" is already enabled.`);
-              }
-            });
-        }
-      });
-
-    // Wait for the deselection process to complete
-    cy.wait(1000);
-    // Focus out
-    cy.get('body').type('{esc}');
-    cy.wait(1500);
-
-    cy.intercept(
-      'POST',
-      '**/deliveryHandler/checkDocumentProcessingStatus**'
-    ).as('completeCheckingDocumentProcessingStatus');
-
-    cy.get('.dialog-actions>button>.title')
-      .contains(/Upload Personal Document|Personalisierte Dokumente hochladen/i)
-      .should('be.visible') // Optional: Ensure the button is visible before interacting
-      .click(); // Click the button
-
-    cy.wait(['@completeCheckingDocumentProcessingStatus'], {
-      timeout: 27000,
-    }).then((interception) => {
-      // Log the intercepted response
-      cy.log('Intercepted response:', interception.response);
-
-      // Assert the response status code
-      expect(interception.response.statusCode).to.eq(200);
-    });
-
-    cy.wait(4000);
-
-    // Verify success message, after uplading document
-    cy.get('.list-item-status>.success')
-      .should('be.visible') // Ensure it's visible first
-      .invoke('text') // Get the text of the element
-      .then((text) => {
-        // Trim the text and validate it
-        const trimmedText = text.trim();
-        expect(trimmedText).to.match(
-          /Document successfully uploaded|Dokument erfolgreich hochgeladen/
+          /File contain non valid invoices|Die Datei enthält ungültige Rechnungen/
         );
       });
     cy.wait(2500);
