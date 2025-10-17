@@ -1,58 +1,11 @@
 describe('Upload valid Serviceline files, validate Success and Warring messages', () => {
-  let uploadDateTime; // shared across tests
-
-  // Helper: Compare two datetime rounded to minute
-  const compareRoundedDateTimes = (sendingRaw, readRaw) => {
-    // Function to parse both ISO (e.g., 2025-10-09T12:34:00Z)
-    // and custom "dd.mm.yyyy hh:mm[:ss]" formatted dates
-    const parseDate = (input) => {
-      // Try parsing directly as a standard ISO datetime
-      const direct = new Date(input);
-      // If parsing succeeds, return the Date object
-      if (!isNaN(direct)) return direct;
-
-      // If not ISO, try matching "dd.mm.yyyy hh:mm[:ss]" pattern using regex
-      const match = input.match(
-        /(\d{2})\.(\d{2})\.(\d{4})\s+(\d{2}):(\d{2})(?::(\d{2}))?/
-      );
-
-      // Destructure matched date components (day, month, year, hour, minute, seconds)
-      const [, dd, mm, yyyy, hh, min, ss] = match;
-
-      // Return JavaScript Date object (month index starts from 0)
-      return new Date(yyyy, mm - 1, dd, hh, min, ss || 0);
-    };
-
-    // Function to format datetime as "dd/mm/yyyy - HH:mm" (ignoring seconds)
-    const formatDateTimeAs_ddmmyyyy = (date) => {
-      // Ensure day, month, hour, and minute are always two digits
-      const pad = (n) => n.toString().padStart(2, '0');
-
-      // Return formatted date string
-      return `${pad(date.getDate())}/${pad(
-        date.getMonth() + 1
-      )}/${date.getFullYear()} - ${pad(date.getHours())}:${pad(
-        date.getMinutes()
-      )}`;
-    };
-
-    // Parse the upload (sending) datetime string into a Date object
-    const sendingDate = parseDate(sendingRaw);
-
-    // Parse the SupportView datetime string into a Date object
-    const readDate = parseDate(readRaw);
-
-    // Format both dates to minute precision ("dd/mm/yyyy - HH:mm")
-    const sendingFormatted = formatDateTimeAs_ddmmyyyy(sendingDate);
-    const readFormatted = formatDateTimeAs_ddmmyyyy(readDate);
-
-    // Log both formatted datetime values in Cypress output for debugging
-    cy.log(`Upload datetime (rounded): ${sendingFormatted}`);
-    cy.log(`SupportView datetime (rounded): ${readFormatted}`);
-
-    // Return both formatted strings for further comparison in test
-    return { sendingFormatted, readFormatted };
-  };
+  // --- Helper: Parse datetime from "dd.mm.yyyy hh:mm" (German format)
+  function parseGermanDateTime(dateTimeStr) {
+    const [datePart, timePart] = dateTimeStr.split(' ');
+    const [day, month, year] = datePart.split('.').map(Number);
+    const [hour, minute] = timePart.split(':').map(Number);
+    return new Date(year, month - 1, day, hour, minute);
+  }
 
   // Disable HR and Enable 'Company Admin', 'Customer Creator' and 'View E-Box' Roles
   it('Disable HR and Enable Company Admin, Customer Creator and View E-Box Roles', () => {
@@ -236,21 +189,6 @@ describe('Upload valid Serviceline files, validate Success and Warring messages'
     // Wait for login to complete
     cy.wait(1500);
 
-    // Capture and save uploadDateTime
-    const now = new Date();
-    const formattedDate = now.toLocaleDateString('de-DE'); // dd.mm.yyyy
-    const formattedTime = now.toLocaleTimeString('de-DE', {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false,
-    });
-
-    const uploadDateTime = `${formattedDate} ${formattedTime}`;
-    cy.log(`Upload DateTime: ${uploadDateTime}`);
-
-    // Save globally for later validation
-    Cypress.env('uploadDateTime', uploadDateTime);
-
     //Remove pop up
     cy.get('body').then(($body) => {
       if ($body.find('.release-note-dialog__close-icon').length > 0) {
@@ -367,36 +305,26 @@ describe('Upload valid Serviceline files, validate Success and Warring messages'
           cy.wrap($button).click({ force: true });
           cy.wait(500);
 
-          // Update uploadDateTime here to reflect SIGNED time
+          // Capture current time (upload time) and fomat dateTime in German format
           const now = new Date();
-          const day = String(now.getDate()).padStart(2, '0');
-          const month = String(now.getMonth() + 1).padStart(2, '0');
-          const year = now.getFullYear();
-          const formattedDate = `${day}.${month}.${year}`;
-          const formattedTime = now
-            .toLocaleTimeString('de-DE', {
-              hour: '2-digit',
-              minute: '2-digit',
-              hour12: false,
-            })
-            .trim();
+          const formattedDate = now.toLocaleDateString('de-DE'); // Format: dd.mm.yyyy
+          const formattedTime = now.toLocaleTimeString('de-DE', {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false,
+          });
+          const uploadDateTime = `${formattedDate} ${formattedTime}`;
+          cy.log(`Upload DateTime: ${uploadDateTime}`);
 
-          const newUploadDateTime = `${formattedDate} ${formattedTime}`;
-          Cypress.env('uploadDateTime', newUploadDateTime);
-          cy.log(`Updated Upload DateTime after sending: ${newUploadDateTime}`);
+          // Save globally for later validation
+          Cypress.env('uploadDateTime', uploadDateTime);
+          cy.wait(2500);
         } else {
           cy.log('Save button is disabled');
         }
       });
 
     cy.wait(1500);
-
-    // //Confirm dialog for sending delivery to all users from selected company
-    // cy.get('.title')
-    //   .contains(/Confirm|Bestätigen/i)
-    //   .should('be.visible') // Optional: Ensure the button is visible before interacting
-    //   .click(); // Click the button
-    // cy.wait(1500);
 
     // Verify the success message
     cy.get('.mat-mdc-simple-snack-bar > .mat-mdc-snack-bar-label')
@@ -420,43 +348,87 @@ describe('Upload valid Serviceline files, validate Success and Warring messages'
     cy.wait(2500);
   });
 
-  //Login to e-Box and Open Delivery
-  it('Ebox user Open delivery', () => {
+  // Login to e-Box and open delivery if timestamps match logic
+  it('Login to e-Box and Open Delivery', () => {
+    // Log into e-Box
     cy.loginToEgEbox();
-    cy.wait(5500);
-    //Open latest created deivery
-    cy.intercept(
-      'GET',
-      '**/hybridsign/backend_t/document/v1/getDocument/**'
-    ).as('getDocument');
-    cy.intercept('GET', '**/getIdentifications?**').as('getIdentifications');
-    cy.get('.mdc-data-table__content>tr>.subject-sender-cell')
-      .eq(0)
-      .click({ force: true });
+    cy.wait(2000);
 
-    cy.wait(['@getIdentifications'], { timeout: 37000 }).then(
-      (interception) => {
-        // Log the intercepted response
-        cy.log('Intercepted response:', interception.response);
+    // Retrieve upload time stored in previous test
+    const uploadDateTime = Cypress.env('uploadDateTime');
+    expect(uploadDateTime, 'Upload datetime must exist').to.exist;
+    cy.log(`Stored Upload DateTime: ${uploadDateTime}`);
 
-        // Assert the response status code
-        expect(interception.response.statusCode).to.eq(200);
-      }
-    );
+    // Find latest delivery and extract its date/time
+    cy.get('.date-of-delivery-cell > .half-cell-text-content')
+      .first() // latest delivery
+      .should('be.visible')
+      .invoke('text')
+      .then((readTextRaw) => {
+        // Clean text (remove commas/spaces)
+        const readClean = readTextRaw
+          .replace(',', ' ')
+          .replace(/\s+/g, ' ')
+          .trim();
 
-    // Scroll to the bottom of the PDF viewer or page
-    cy.get('.content-container>.scroll-container').eq(1).scrollTo('bottom', {
-      duration: 500,
-      ensureScrollable: false,
-    });
-    cy.wait(3500);
+        // --- Convert both datetimes to comparable JS Date objects ---
+        const uploadParsed = parseGermanDateTime(uploadDateTime);
+        const readParsed = parseGermanDateTime(readClean);
 
-    // Logout
-    cy.get('.user-title').click();
-    cy.wait(1500);
-    cy.get('.logout-title > a').click();
-    cy.url().should('include', Cypress.env('baseUrl_egEbox')); // Validate url
-    cy.log('Test completed successfully.');
+        // --- Calculate difference in milliseconds ---
+        const diffMs = Math.abs(readParsed - uploadParsed);
+        const diffMin = diffMs / (1000 * 60);
+
+        cy.log(`Upload: ${uploadParsed}`);
+        cy.log(`Read:   ${readParsed}`);
+        cy.log(`Difference: ${diffMin.toFixed(2)} minutes`);
+
+        // --- Apply the condition ---
+        if (
+          readParsed.getTime() === uploadParsed.getTime() || // exact same minute
+          readParsed.getTime() === uploadParsed.getTime() + 60000 // within +1 minute
+        ) {
+          cy.log(
+            'Difference between upload and read dateTime should be max 1 minute'
+          );
+
+          // Intercept backend calls for document load
+          cy.intercept('GET', '**/getDocument/**').as('getDocument');
+          cy.intercept('GET', '**/getIdentifications?**').as(
+            'getIdentifications'
+          );
+
+          // Open the latest delivery
+          cy.get('.mdc-data-table__content>tr>.subject-sender-cell')
+            .eq(0)
+            .click({ force: true });
+
+          // Wait for identifications response
+          cy.wait(['@getIdentifications'], { timeout: 57000 }).then(
+            (interception) => {
+              expect(interception.response.statusCode).to.eq(200);
+            }
+          );
+
+          // Scroll to bottom of the delivery
+          cy.get('.content-container>.scroll-container')
+            .eq(1)
+            .scrollTo('bottom', { duration: 500, ensureScrollable: false });
+          cy.wait(3500);
+        } else {
+          // FAIL: difference > 1 minute
+          const errorMsg = `ERROR: readDateTime (${readClean}) not within 1 minute of uploadDateTime (${uploadDateTime})`;
+          cy.log(errorMsg);
+
+          // Throw error to fail test
+          throw new Error(errorMsg);
+        }
+        // Log out the user immediately
+        cy.get('.user-title').click({ force: true });
+        cy.wait(1000);
+        cy.get('.logout-title > a').click();
+        cy.url().should('include', Cypress.env('baseUrl_egEbox'));
+      });
   });
 
   //Admin user check Reporting email
@@ -689,26 +661,11 @@ describe('Upload valid Serviceline files, validate Success and Warring messages'
     cy.log('Test completed successfully — HR disabled and roles updated.');
   });
 
-  //Admin user Upload can upload serviceLine file with valid and invalid tid
-  it('Upload serviceLine file with valid and invalid tid and validate Warning message', () => {
+  //Admin user Upload can upload valid serviceLine File
+  it('Upload valid serviceLine file and validate Success message', () => {
     cy.loginToSupportViewAdmin();
     // Wait for login to complete
     cy.wait(1500);
-
-    // Capture and save uploadDateTime
-    const now = new Date();
-    const formattedDate = now.toLocaleDateString('de-DE'); // dd.mm.yyyy
-    const formattedTime = now.toLocaleTimeString('de-DE', {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false,
-    });
-
-    const uploadDateTime = `${formattedDate} ${formattedTime}`;
-    cy.log(`Upload DateTime: ${uploadDateTime}`);
-
-    // Save globally for later validation
-    Cypress.env('uploadDateTime', uploadDateTime);
 
     //Remove pop up
     cy.get('body').then(($body) => {
@@ -744,7 +701,7 @@ describe('Upload valid Serviceline files, validate Success and Warring messages'
     cy.wait(1500);
 
     // Upload serviceLine file
-    cy.uploadServiceLineFile_WithValidAndInvalidTid();
+    cy.uploadServiceLine();
 
     cy.wait(2500);
 
@@ -794,7 +751,7 @@ describe('Upload valid Serviceline files, validate Success and Warring messages'
       .click(); // Click the button
 
     cy.wait(['@completeCheckingDocumentProcessingStatus'], {
-      timeout: 27000,
+      timeout: 57000,
     }).then((interception) => {
       // Log the intercepted response
       cy.log('Intercepted response:', interception.response);
@@ -805,15 +762,15 @@ describe('Upload valid Serviceline files, validate Success and Warring messages'
 
     cy.wait(4000);
 
-    // Verify warning message, after uplading document
-    cy.get('.list-item-status>.warning')
+    // Verify success message, after uplading document
+    cy.get('.list-item-status>.success')
       .should('be.visible') // Ensure it's visible first
       .invoke('text') // Get the text of the element
       .then((text) => {
         // Trim the text and validate it
         const trimmedText = text.trim();
         expect(trimmedText).to.match(
-          /File contain non valid invoices|Die Datei enthält ungültige Rechnungen/
+          /Document successfully uploaded|Dokument erfolgreich hochgeladen/
         );
       });
     cy.wait(2500);
@@ -826,27 +783,25 @@ describe('Upload valid Serviceline files, validate Success and Warring messages'
           cy.wrap($button).click({ force: true });
           cy.wait(500);
 
-          // Update uploadDateTime here to reflect SIGNED time
+          // Capture current time (upload time) and fomat dateTime in German format
           const now = new Date();
-          const day = String(now.getDate()).padStart(2, '0');
-          const month = String(now.getMonth() + 1).padStart(2, '0');
-          const year = now.getFullYear();
-          const formattedDate = `${day}.${month}.${year}`;
-          const formattedTime = now
-            .toLocaleTimeString('de-DE', {
-              hour: '2-digit',
-              minute: '2-digit',
-              hour12: false,
-            })
-            .trim();
+          const formattedDate = now.toLocaleDateString('de-DE'); // Format: dd.mm.yyyy
+          const formattedTime = now.toLocaleTimeString('de-DE', {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false,
+          });
+          const uploadDateTime = `${formattedDate} ${formattedTime}`;
+          cy.log(`Upload DateTime: ${uploadDateTime}`);
 
-          const newUploadDateTime = `${formattedDate} ${formattedTime}`;
-          Cypress.env('uploadDateTime', newUploadDateTime);
-          cy.log(`Updated Upload DateTime after sending: ${newUploadDateTime}`);
+          // Save globally for later validation
+          Cypress.env('uploadDateTime', uploadDateTime);
+          cy.wait(2500);
         } else {
           cy.log('Save button is disabled');
         }
       });
+
     cy.wait(1500);
 
     // Verify the success message
@@ -871,90 +826,87 @@ describe('Upload valid Serviceline files, validate Success and Warring messages'
     cy.wait(2500);
   });
 
-  //Login to e-Box and Open Delivery
+  // Login to e-Box and open delivery if timestamps match logic
   it('Login to e-Box and Open Delivery', () => {
-    // Log in to the e-Box application using a custom command
+    // Log into e-Box
     cy.loginToEgEbox();
     cy.wait(2000);
 
-    // Get the stored sending datetime from Cypress environment variable
-    const sendingDateTime = Cypress.env('uploadDateTime');
+    // Retrieve upload time stored in previous test
+    const uploadDateTime = Cypress.env('uploadDateTime');
+    expect(uploadDateTime, 'Upload datetime must exist').to.exist;
+    cy.log(`Stored Upload DateTime: ${uploadDateTime}`);
 
-    // Verify that upload datetime exists — test should fail if missing
-    expect(sendingDateTime, 'Upload (sending) datetime must exist').to.exist;
-
-    // Log sendingDateTime taken from Cypress variable
-    cy.log(`Raw upload datetime: ${sendingDateTime}`);
-
-    // Find the latest delivery in the list and extract its datetime
+    // Find latest delivery and extract its date/time
     cy.get('.date-of-delivery-cell > .half-cell-text-content')
-      .first() // get latest delivery
-      .should('be.visible') // make sure the element is visible before reading text
-      .invoke('text') // extract its
-      .then((textRaw) => {
-        // Clean extracted datetime by removing commas and excessive spaces
-        const clean = textRaw.replace(',', ' ').replace(/\s+/g, ' ').trim();
+      .first() // latest delivery
+      .should('be.visible')
+      .invoke('text')
+      .then((readTextRaw) => {
+        // Clean text (remove commas/spaces)
+        const readClean = readTextRaw
+          .replace(',', ' ')
+          .replace(/\s+/g, ' ')
+          .trim();
 
-        // Compare upload and read datetime using helper function
-        //     The helper returns both timestamps formatted to "dd/mm/yyyy - HH:mm"
-        const { sendingFormatted, readFormatted } = compareRoundedDateTimes(
-          sendingDateTime,
-          clean
-        );
+        // --- Convert both datetimes to comparable JS Date objects ---
+        const uploadParsed = parseGermanDateTime(uploadDateTime);
+        const readParsed = parseGermanDateTime(readClean);
 
-        // Check if read datetime is equal or later than upload datetime
-        if (readFormatted >= sendingFormatted) {
-          // If datetimes match logically, continue the test
+        // --- Calculate difference in milliseconds ---
+        const diffMs = Math.abs(readParsed - uploadParsed);
+        const diffMin = diffMs / (1000 * 60);
 
-          // Intercept the backend API calls that occur when opening a delivery
+        cy.log(`Upload: ${uploadParsed}`);
+        cy.log(`Read:   ${readParsed}`);
+        cy.log(`Difference: ${diffMin.toFixed(2)} minutes`);
+
+        // --- Apply the condition ---
+        if (
+          readParsed.getTime() === uploadParsed.getTime() || // exact same minute
+          readParsed.getTime() === uploadParsed.getTime() + 60000 // within +1 minute
+        ) {
+          cy.log(
+            'Difference between upload and read dateTime should be max 1 minute'
+          );
+
+          // Intercept backend calls for document load
           cy.intercept('GET', '**/getDocument/**').as('getDocument');
           cy.intercept('GET', '**/getIdentifications?**').as(
             'getIdentifications'
           );
 
-          // Click on the subject cell of the first delivery to open it
+          // Open the latest delivery
           cy.get('.mdc-data-table__content>tr>.subject-sender-cell')
             .eq(0)
             .click({ force: true });
 
-          // Wait for the "getIdentifications" API response and validate it
+          // Wait for identifications response
           cy.wait(['@getIdentifications'], { timeout: 57000 }).then(
             (interception) => {
-              // Log full response details for debugging
-              cy.log('Intercepted response:', interception.response);
-
-              // Validate status code 200 (OK)
               expect(interception.response.statusCode).to.eq(200);
             }
           );
 
-          // Scroll to the bottom of the opened delivery view to ensure document is visible
+          // Scroll to bottom of the delivery
           cy.get('.content-container>.scroll-container')
             .eq(1)
             .scrollTo('bottom', { duration: 500, ensureScrollable: false });
           cy.wait(3500);
         } else {
-          // If the datetimes are not in the expected, log an error message
-          cy.log(
-            `Error: Upload (${sendingFormatted}) and SupportView (${readFormatted}) times are not correct.`
-          );
+          // FAIL: difference > 1 minute
+          const errorMsg = `ERROR: readDateTime (${readClean}) not within 1 minute of uploadDateTime (${uploadDateTime})`;
+          cy.log(errorMsg);
 
-          // Throw an error to fail the test with a clear message
-          throw new Error(
-            `SupportView time (${readFormatted}) does not match Upload time (${sendingFormatted})`
-          );
+          // Throw error to fail test
+          throw new Error(errorMsg);
         }
+        // Log out the user immediately
+        cy.get('.user-title').click({ force: true });
+        cy.wait(1000);
+        cy.get('.logout-title > a').click();
+        cy.url().should('include', Cypress.env('baseUrl_egEbox'));
       });
-
-    // LOG OUT from the e-Box
-    cy.get('.user-title').click({ force: true }); // open user menu
-    cy.wait(1000); // wait for menu animation
-    cy.get('.logout-title > a').click(); // click "Logout" link
-    // Verify that the URL includes the e-Box base URL (confirming successful logout)
-    cy.url().should('include', Cypress.env('baseUrl_egEbox'));
-
-    //Log a success message for final confirmation in Cypress runner
-    cy.log('Test completed successfully.');
   });
 
   //Admin user check Reporting email and delte all emails

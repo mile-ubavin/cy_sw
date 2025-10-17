@@ -506,15 +506,20 @@ describe('Admin user uploads/send to e-Box Unstructured XML template', () => {
           const errorMsg = `ERROR: readDateTime (${readClean}) not within 1 minute of uploadDateTime (${uploadDateTime})`;
           cy.log(errorMsg);
 
-          // Log out the user immediately
-          cy.get('.user-title').click({ force: true });
-          cy.wait(1000);
-          cy.get('.logout-title > a').click();
-          cy.url().should('include', Cypress.env('baseUrl_egEbox'));
+          // // Log out the user immediately
+          // cy.get('.user-title').click({ force: true });
+          // cy.wait(1000);
+          // cy.get('.logout-title > a').click();
+          // cy.url().should('include', Cypress.env('baseUrl_egEbox'));
 
           // Throw error to fail test
           throw new Error(errorMsg);
         }
+        // Log out the user immediately
+        cy.get('.user-title').click({ force: true });
+        cy.wait(1000);
+        cy.get('.logout-title > a').click();
+        cy.url().should('include', Cypress.env('baseUrl_egEbox'));
       });
   });
 
