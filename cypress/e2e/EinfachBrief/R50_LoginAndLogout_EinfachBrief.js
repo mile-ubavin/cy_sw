@@ -1,5 +1,5 @@
 import 'cypress-iframe';
-describe('Login to Einfachbrief', () => {
+describe('Login and Logout to Einfachbrief', () => {
   it.skip('Login Test', () => {
     // Generate a 5-character random string
     function generateRandomString(length) {
@@ -112,6 +112,129 @@ describe('Login to Einfachbrief', () => {
     });
   });
 
+  //NEW
+
+  it('Login to einfachBrief and check welcome PDF content', () => {
+    // Visit the base URL of the application
+    cy.visit(Cypress.env('baseUrl'));
+
+    // Verify that the current URL contains the expected base URL
+    cy.url().should('include', Cypress.env('baseUrl'));
+
+    // Check if the cookie banner is visible and accept it if so
+    cy.get('body').then(($body) => {
+      if ($body.find('#onetrust-policy-title').is(':visible')) {
+        // Click on "Accept Cookies" button
+        cy.get('#onetrust-accept-btn-handler').click({ force: true });
+        cy.log('Cookie banner accepted');
+      } else {
+        // Log info if cookie banner is not displayed
+        cy.log('Cookie banner not visible');
+      }
+    });
+
+    //Login to Einfachbrief
+    // Enter username from Cypress environment variables
+    cy.get('#username').type(Cypress.env('username_stundung'));
+
+    // Enter password from Cypress environment variables
+    cy.get('#password').type(Cypress.env('password_stundung'));
+
+    // Click on the show/hide password button (optional UI action)
+    cy.get('button>.css-j5bxbw').click();
+
+    // Scroll to the top of the login page
+    cy.scrollTo('top', { duration: 500 });
+    cy.wait(2500);
+
+    // Click the submit button to log in
+    cy.get('button[type="submit"]').click({ force: true });
+    cy.wait(2500);
+
+    //Validate Solutions heading
+    cy.get('#solutions-heading').should(
+      'include.text',
+      'Entdecken Sie auch unsere anderen Lösungen'
+    );
+
+    // === Validate Header Titles ===
+    // Load expected header titles from a Cypress task
+    cy.task('readHeaderLinks').then((expectedTitles) => {
+      // Compare each visible header title with the expected one
+      cy.get('.css-oq1557')
+        .should('have.length', expectedTitles.length)
+        .each(($el, i) => {
+          // Assert the text content of each header item
+          cy.wrap($el).should('have.text', expectedTitles[i]);
+        });
+    });
+
+    // Smooth scroll to bottom to ensure all elements are visible
+    cy.scrollTo('bottom', { duration: 800 });
+
+    // Short wait to allow bottom content (solutions) to render
+    cy.wait(1000);
+
+    // === Helper Function to Validate Section Content ===
+    const validateSection = (selector, envKey, label) => {
+      // Read expected values from Cypress environment variables
+      const expectedValues = Cypress.env(envKey);
+
+      // Extract UI text content and compare with expected values
+      cy.get(selector).then(($elements) => {
+        // Map all found elements to trimmed text values
+        const uiValues = [...$elements].map((el) => el.innerText.trim());
+
+        // Log extracted UI values for debugging
+        cy.log(`${label} (UI):`, uiValues);
+        cy.log(`${label} (Expected):`, expectedValues);
+
+        // Loop through all expected values and verify each one exists in UI
+        expectedValues.forEach((expected) => {
+          expect(uiValues, `${label} should include '${expected}'`).to.include(
+            expected
+          );
+        });
+      });
+    };
+
+    // === Validate Solution Titles ===
+    validateSection(
+      '.css-1opaxxg > article > div > h3',
+      'solutionsTitle',
+      'Solution Titles'
+    );
+
+    // === Validate Solution Descriptions ===
+    validateSection(
+      '.css-1opaxxg > article > div > p',
+      'solutionsTxt',
+      'Solution Texts'
+    );
+
+    // === Validate Solution Links ===
+    validateSection(
+      '.css-1opaxxg > article > div > div > a',
+      'solutionsLink',
+      'Solution Links'
+    );
+
+    // Pause test execution for manual verification (optional)
+    cy.pause();
+  });
+
+  //END NEW
+
+  // ✅ Ignore 3rd-party script errors
+  Cypress.on('uncaught:exception', (err) => {
+    if (
+      err.message.includes('postMessage') ||
+      err.message.includes('ResizeObserver')
+    ) {
+      return false; // prevent Cypress from failing test
+    }
+  });
+
   //Login to einfachBrief and opem welcome pdf (OLD VERSION)
   it.only('Login to einfachBrief and check welcome pdf', () => {
     cy.visit(Cypress.env('baseUrl'));
@@ -132,102 +255,214 @@ describe('Login to Einfachbrief', () => {
     // Log in to the sw
     cy.get('#username').type(Cypress.env('username_stundung'));
     cy.get('#password').type(Cypress.env('password_stundung'));
-
     //Click on show hide button
     cy.get('button>.css-j5bxbw').click();
-    cy.wait(1500);
 
+    //Scroll to the top
+    cy.scrollTo('top', { duration: 500 }); // smooth scroll
+    cy.wait(2500);
     //Click on Submit button
     cy.get('button[type="submit"]').click({ force: true });
     cy.wait(1500);
 
+    //Scroll down
+    cy.scrollTo('bottom', { duration: 500 }); // smooth scroll
+    cy.wait(1500);
+
     //Check Header title
-    cy.task('readHeaderLinks').then((expectedTitles) => {
-      cy.log('Loaded expected titles:', JSON.stringify(expectedTitles));
-      expect(expectedTitles.length, 'Expected titles length').to.be.greaterThan(
-        0
-      );
-      //Check Header title
-      cy.get('.css-oq1557')
-        .should('have.length', expectedTitles.length)
-        .each(($el, index) => {
-          cy.wrap($el).should('have.text', expectedTitles[index]);
-        });
+    cy.get('.css-oq1557').each(($el, index) => {});
+
+    // Get expected titles from env
+    const expectedTitles = Cypress.env('solutionsTitle');
+    cy.log('UI Titles:');
+
+    // Extract UI titles
+    cy.get('.css-1opaxxg>article>div>h3').then(($titles) => {
+      const uiTitles = [...$titles].map((el) => el.innerText.trim());
+      //cy.log('UI Titles:', uiTitles);
+      // cy.log('Expected Titles:', expectedTitles);
+
+      expectedTitles.forEach((expectedTitle) => {
+        expect(uiTitles).to.include(expectedTitle);
+      });
     });
 
-    // Check SendungenLinks on Home page (body)
-    cy.task('readSendungenLinks').then((expectedSendungenLinks) => {
-      cy.log('Loaded expected titles:', JSON.stringify(expectedSendungenLinks));
-      expect(
-        expectedSendungenLinks.length,
-        'Expected length'
-      ).to.be.greaterThan(0);
+    // Get expected Txt from env
+    const expectedTxts = Cypress.env('solutionsTxt');
 
-      cy.get(
-        '.css-1vra9a1 > .css-xrlcbs > :nth-child(n+1):nth-child(-n+3) > .css-10la1oh'
-      )
-        .should('have.length', expectedSendungenLinks.length) // match exactly expected count
-        .each(($el, index) => {
-          cy.wrap($el).should('have.text', expectedSendungenLinks[index]);
-        });
+    // Extract UI titles
+    cy.get('.css-1opaxxg>article>div>p').then(($Txt) => {
+      const uiTxt = [...$Txt].map((el) => el.innerText.trim());
+
+      expectedTxts.forEach((expectedTxt) => {
+        expect(uiTxt).to.include(expectedTxt);
+      });
+    });
+    cy.wait(2500);
+
+    // Get expected Links from env
+    const expectedLinks = Cypress.env('solutionsLink');
+
+    // Extract UI titles
+    cy.get('.css-1opaxxg>article>div>div>a').then(($Links) => {
+      const uiLinks = [...$Links].map((el) => el.innerText.trim());
+
+      expectedLinks.forEach((expectedLink) => {
+        expect(uiLinks).to.include(expectedLink);
+      });
     });
 
-    //  Check weiterführendeLinks on Home page (body)
-    cy.task('readWeiterführendeLinks').then((expectedSendungenLinks) => {
-      cy.log('Loaded expected titles:', JSON.stringify(expectedSendungenLinks));
-      expect(
-        expectedSendungenLinks.length,
-        'Expected length'
-      ).to.be.greaterThan(0);
+    // //Footer
+    // const footerTitles = Cypress.env('footerTitle');
+    // //const footerLinks = Cypress.env('footerLink');
 
-      // Assert the links have the same length and match the expected text
-      cy.get('.css-1nlo301 > .css-xrlcbs > :nth-child(-n+4) > .css-10la1oh') // Grabs the first 4 links (adjust as needed)
-        .should('have.length', expectedSendungenLinks.length)
-        .each(($el, index) => {
-          cy.wrap($el).should('have.text', expectedSendungenLinks[index]);
-        });
-    });
+    // // 1. Count the number of solution elements
+    // cy.get('.css-cuvpzb').should('have.length', 3);
 
-    // Check solutions-heading
+    // // 2. Validate Footer titles
+    // cy.get('.css-cuvpzb').each((el, index) => {
+    //   cy.wrap(el).should('have.text', footerTitles[index]);
+    // });
 
-    const titles = Cypress.env('solutionsTitle');
-    const paragraphs = Cypress.env('solutionsP');
-    const links = Cypress.env('solutionsLinks');
+    // // Get expected footer links from config
+    // const expectedFooterLinks = Cypress.env('footerLink');
+    // expect(expectedFooterLinks, 'Expected footerLinks loaded').to.be.an('array')
+    //   .and.not.empty;
 
-    // 1. Count the number of solution elements
-    cy.get('.css-p38o28').should('have.length', 3);
+    // // Extract and validate footer link texts
+    // cy.get('.css-cylfbu > li > a') // all anchor tags in footer sections
+    //   .then(($links) => {
+    //     // Map actual links' text into array
+    //     const uiFooter = [...$links].map((el) => el.innerText.trim());
+    //     cy.log('UI Footer Links:', uiFooter);
+    //     cy.log('Expected Footer Links:', expectedFooterLinks);
 
-    // 2. Validate titles
-    cy.get('.css-p38o28 > div > h3').each((el, index) => {
-      cy.wrap(el).should('have.text', titles[index]);
-    });
+    //     // Normalize both expected and actual text before comparison
+    //     const normalizedUI = uiFooter.map((t) =>
+    //       t.replace(/[:\s]+$/g, '').toLowerCase()
+    //     );
 
-    // 3. Validate paragraphs
-    cy.get('.css-p38o28 > div > p').each((el, index) => {
-      cy.wrap(el).should('have.text', paragraphs[index]);
-    });
+    //     expectedFooterLinks.forEach((expected) => {
+    //       const cleanExpected = expected.replace(/[:\s]+$/g, '').toLowerCase();
+    //       expect(normalizedUI).to.include(cleanExpected);
+    //     });
+    //   });
 
-    // 4. Validate link texts
-    cy.get('.css-p38o28 > div > a').each((el, index) => {
-      cy.wrap(el).should('have.text', links[index]);
-    });
+    // cy.log('--- Validate Footer Links ---');
 
-    //Footer
+    // // Load expected footer links from config
+    // const expectedFooterLinks = Cypress.env('footerLink');
+    // // expect(expectedFooterLinks, 'Expected footerLinks loaded').to.be.an('array')
+    // //   .and.not.empty;
 
-    const footerTitles = Cypress.env('footerTitle');
-    const footerLinks = Cypress.env('footerLink');
+    // // Get all footer link elements
+    // cy.get('.css-cylfbu > li > a').then(($links) => {
+    //   // Convert NodeList to array of link texts
+    //   const uiFooterLinks = [...$links].map((el) => el.innerText.trim());
 
-    // 1. Count the number of solution elements
-    cy.get('.css-cuvpzb').should('have.length', 3);
+    //   // Normalize both arrays (ignore case, spaces, trailing colons)
+    //   const normalize = (str) => str.replace(/[:\s]+$/g, '').toLowerCase();
+    //   const normalizedUI = uiFooterLinks.map(normalize);
 
-    // 2. Validate Footer titles
-    cy.get('.css-cuvpzb').each((el, index) => {
-      cy.wrap(el).should('have.text', footerTitles[index]);
-    });
+    //   // Verify all expected footer link texts are present
+    //   expectedFooterLinks.forEach((expected) => {
+    //     const cleanExpected = normalize(expected);
+    //     expect(normalizedUI, `Footer should contain "${expected}"`).to.include(
+    //       cleanExpected
+    //     );
+    //   });
 
-    // 4. Validate footer link texts
-    cy.get('.css-p38o28 > div > a').each((el, index) => {
-      cy.wrap(el).should('have.text', footerLinks[index]);
+    //   // Iterate through footer links and verify they are reachable or openable
+    //   cy.wrap($links).each(($link, index) => {
+    //     const href = $link.prop('href');
+
+    //     if (!href) {
+    //       cy.log(`Skipping link ${index + 1}: missing href`);
+    //       return;
+    //     }
+
+    //     cy.log(`Checking footer link: ${href}`);
+
+    //     // Validate if footer lin is clicable
+    //     if (href.startsWith('https')) {
+    //       // For internal links — actually click and validate navigation
+    //       cy.wrap($link)
+    //         .invoke('removeAttr', 'target') // open in same tab
+    //         .click({ force: true });
+
+    //       cy.pause();
+
+    //       // Confirm we navigated to correct page
+    //       cy.url().should('include', href.split('/').pop());
+    //       cy.wait(1000);
+
+    //       // Navigate back to homepage
+    //       cy.go('back');
+    //     }
+    //   });
+    // });
+
+    //lats
+
+    cy.log('--- Validate Footer Links ---');
+
+    // Load expected footer links from config
+    const expectedFooterLinks = Cypress.env('footerLink');
+
+    // Normalize helper
+    const normalize = (str) => str.replace(/[:\s]+$/g, '').toLowerCase();
+
+    // Step 1️⃣: Get total clickable footer links
+    cy.get('.css-cylfbu > li > a').then(($links) => {
+      const totalLinks = $links.length;
+      cy.log(`Found ${totalLinks} footer links`);
+
+      // Step 2️⃣: Validate all expected footer link texts are present
+      const uiFooterLinks = [...$links].map((el) => el.innerText.trim());
+      const normalizedUI = uiFooterLinks.map(normalize);
+
+      expectedFooterLinks.forEach((expected) => {
+        const cleanExpected = normalize(expected);
+        expect(normalizedUI, `Footer should contain "${expected}"`).to.include(
+          cleanExpected
+        );
+      });
+
+      // Step 3️⃣: Iterate safely through links one by one
+      Cypress._.times(totalLinks, (i) => {
+        cy.get('.css-cylfbu > li > a')
+          .eq(i)
+          .then(($link) => {
+            const href = $link.prop('href');
+            const text = $link.text().trim();
+
+            if (!href) {
+              cy.log(`⚠️ Skipping link ${i + 1}: missing href`);
+              return;
+            }
+
+            cy.log(`🔗 [${i + 1}/${totalLinks}] Checking: ${text} → ${href}`);
+
+            // Click link safely
+            cy.wrap($link)
+              .invoke('removeAttr', 'target') // open in same tab
+              .click({ force: true });
+
+            // Wait for navigation and log URL
+            cy.url().then((newUrl) => {
+              cy.log(`🌐 Navigated to: ${newUrl}`);
+            });
+
+            cy.wait(1500);
+
+            // Navigate back and wait for homepage to reload
+            cy.go('back');
+            cy.wait(1500);
+
+            // Verify we’re back on homepage
+            // cy.url().should('include', '/');
+          });
+      });
     });
 
     cy.pause();

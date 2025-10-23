@@ -816,7 +816,7 @@ const environments = {
   tages_dev: {
     usernameFromEmailBody: '',
     passwordFromEmailBody: '',
-    baseUrl: 'https://tages-post.edeja.com/login',
+    baseUrl: 'https://abn-www.einfach-brief.at/fe_t/',
 
     username_stundung: 'k40.tages-post.testuser@yopmail.com',
     password_stundung: 'Test1234!',
@@ -827,7 +827,7 @@ const environments = {
     username_ILV: 'k106.tages-post.testuser@yopmail.com',
     password_ILV: 'Test1234!',
 
-    headerLinks: [
+    menuLinks: [
       'Home',
       'Neue Sendung',
       'Offene Sendungen',
@@ -836,6 +836,12 @@ const environments = {
       'Tarifrechner',
       'Häufige Fragen',
       'Vorlagen',
+    ],
+
+    solutionsTitle: [
+      'e-Gehaltszettel',
+      'e-Signaturlösung',
+      'Posteingangslösungen',
     ],
 
     sendungen: ['Neue Sendung', 'Offene Sendungen', 'Auftragsliste'],
@@ -847,59 +853,60 @@ const environments = {
       'Vorlagen',
     ],
 
-    // solutionsData: {
-    //   solutionsTitle: [
-    //     'e-Gehaltszettel',
-    //     'e-Signaturlösung',
-    //     'Posteingangslösungen',
-    //   ],
-    //   solutionsP: [
-    //     'Mitarbeiter*innen erhalten Gehalts- und Lohnabrechnungen papierlos und Sie profitieren von verbesserten Workflows durch die direkte Anbindung an das Lohnverrechnungssystem.',
-    //     'Unterzeichnen Sie Dokumente, Verträge und mehr einfach digital, auch direkt am Point-of-Sale. So erhöht sich der Komfort für Ihre Kund*innen und vermeiden Medienbrüche.',
-    //     'Ob Rechnungen, Formulare, Bestellungen oder der komplette Posteingang – wir digitalisieren Ihre eingehenden Sendungen für eine automatisierte Weiterverarbeitung.',
-    //     ,
-    //   ],
-    //   solutionsLinks: [
-    //     'Weiter zu e-Gehaltszettel',
-    //     'Weiter zu e-Signaturlösung',
-    //     'Weiter zu Posteingangslösungen',
-    //   ],
-    // },
+    solutionsData: {
+      // solutionsTitle: [
+      //   'e-Gehaltszettel',
+      //   'e-Signaturlösung',
+      //   'Intelligent Document Processing',
+      // ],
+      // solutionsP: [
+      //   'Mitarbeiter*innen erhalten Gehalts- und Lohnabrechnungen papierlos und Sie profitieren von verbesserten Workflows durch die direkte Anbindung an das Lohnverrechnungssystem.',
+      //   'Unterzeichnen Sie Dokumente, Verträge und mehr einfach digital, auch direkt am Point-of-Sale. So erhöht sich der Komfort für Ihre Kund*innen und vermeiden Medienbrüche.',
+      //   'Ob Rechnungen, Formulare, Bestellungen oder der komplette Posteingang – wir digitalisieren Ihre eingehenden Sendungen für eine automatisierte Weiterverarbeitung.',
+      //   ,
+      // ],
+      // solutionsLinks: [
+      //   'Weiter zu e-Gehaltszettel',
+      //   'Weiter zu e-Signaturlösung',
+      //   'Weiter zu Posteingangslösungen',
+      // ],
+    },
 
     solutionsTitle: [
       'e-Gehaltszettel',
       'e-Signaturlösung',
-      'Posteingangslösungen',
+      'Intelligent Document Processing',
     ],
-    solutionsP: [
+    solutionsTxt: [
       'Mitarbeiter*innen erhalten Gehalts- und Lohnabrechnungen papierlos und Sie profitieren von verbesserten Workflows durch die direkte Anbindung an das Lohnverrechnungssystem.',
       'Unterzeichnen Sie Dokumente, Verträge und mehr einfach digital, auch direkt am Point-of-Sale. So erhöht sich der Komfort für Ihre Kund*innen und vermeiden Medienbrüche.',
-
-      'Ob Rechnungen, Formulare, Bestellungen oder der komplette Posteingang – wir digitalisieren Ihre eingehenden Sendungen für eine automatisierte Weiterverarbeitung.',
+      'Unsere Services digitalisieren und automatisieren Ihre Dokumentenprozesse. Mit der Plattform DAiTA verwandeln wir unstrukturierte Daten in nutzbare Informationen. Unsere Posteingangslösungen erfassen und verarbeiten Ihre Eingangspost effizient, während die Archivdigitalisierung Ihnen schnellen, ortsunabhängigen Zugriff auf Ihre Daten ermöglicht.',
     ],
-    solutionsLinks: [
+    solutionsLink: [
       'Weiter zu e-Gehaltszettel',
       'Weiter zu e-Signaturlösung',
-      'Weiter zu Posteingangslösungen',
+      'Weiter zu Intelligent Document Processing',
     ],
     footerTitle: [
       'HOTLINE: +43 800 2088 23',
       'SERVICES',
       'RECHTLICHE HINWEISE',
     ],
-    footerLinks: [
+    footerLink: [
       'Servicezeiten:',
       'Montag – Donnerstag (werktags): 08:00 – 17:00',
       'Freitag (werktags): 08:00 – 14:00',
-      'Servicezeiten:',
-      'Servicezeiten:',
-      'Servicezeiten:',
-      'Servicezeiten:',
-      'Servicezeiten:',
-      'Servicezeiten:',
-      'Servicezeiten:',
-      'Servicezeiten:',
-      'Servicezeiten:',
+      'Paket versenden:',
+      'Schnell versenden (Post Express)',
+      'Paket empfangen',
+      'Sendungsverfolgung',
+      'Tarifrechner',
+      'Immobilien',
+      'Kontaktformular',
+      'Impressum',
+      'Rechtliche Hinweise / Datenschutzhinweise',
+      'Alternative Streitbeilegung',
+      'Allgemeine Geschäftsbedingungen',
     ],
 
     // headerLinks: [
@@ -1139,7 +1146,7 @@ module.exports = defineConfig({
         /*********************************** */
       });
       //  Set executing tests on various environments, targeting appropriate json from const=environments
-      const envConfig = environments['eg_test'];
+      const envConfig = environments['tages_dev'];
       return { ...config, env: { ...config.env, ...envConfig } };
     }, //end
     specPattern: 'cypress/e2e/**/*.{js,jsx,ts,tsx}', // Ensure this matches your structure
