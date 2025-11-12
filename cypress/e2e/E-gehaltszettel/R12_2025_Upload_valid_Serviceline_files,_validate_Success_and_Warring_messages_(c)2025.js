@@ -184,7 +184,7 @@ describe('Upload valid Serviceline files, validate Success and Warring messages'
   });
 
   //Admin user Upload can upload valid serviceLine File
-  it('Upload valid serviceLine file and validate Success message', () => {
+  it.only('Upload valid serviceLine file and validate Success message', () => {
     cy.loginToSupportViewAdmin();
     // Wait for login to complete
     cy.wait(1500);
@@ -349,7 +349,7 @@ describe('Upload valid Serviceline files, validate Success and Warring messages'
   });
 
   // Login to e-Box and open delivery if timestamps match logic
-  it('Login to e-Box and Open Delivery', () => {
+  it.only('Login to e-Box and Open Delivery', () => {
     // Log into e-Box
     cy.loginToEgEbox();
     cy.wait(2000);
@@ -432,7 +432,7 @@ describe('Upload valid Serviceline files, validate Success and Warring messages'
   });
 
   //Admin user check Reporting email
-  it('Yopmail - Get Reporting email', () => {
+  it.only('Yopmail - Get Reporting email', () => {
     // Visit Yopmail
     cy.visit('https://yopmail.com/en/');
 

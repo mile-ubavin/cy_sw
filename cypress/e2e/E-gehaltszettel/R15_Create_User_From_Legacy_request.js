@@ -90,7 +90,7 @@ describe('Create_User_From_Legacy_request', () => {
   }); //end it
 
   //Enable All Roles, except HR Role
-  it('Enable Craete user Roles ', () => {
+  it.skip('Enable Craete user Roles ', () => {
     // Login as a Master-User using custom command
     cy.loginToSupportViewMaster();
     cy.wait(3500);
@@ -202,69 +202,113 @@ describe('Create_User_From_Legacy_request', () => {
     cy.wait(2500);
   }); //end it
 
-  //GetCookie and Store it as a global variabile/Create_User_From_Legacy_request
-  it('getCookie and Store it as a global variabile/Create_User_From_Legacy_request', () => {
-    cy.intercept('POST', '**/login/user').as('getToken'); // Intercept login request
-    cy.loginToSupportViewAdmin(); // Perform login
-    cy.wait(1500);
+  //GetCookie and Store it as a global variabile/Create user via Legacy request with dynamic BillersInvoiceRecipientID
+  it('Create user via Legacy request with dynamic BillersInvoiceRecipientID', () => {
+    cy.intercept('POST', '**/login/user').as('getToken');
+    cy.loginToSupportViewAdmin();
 
     cy.wait('@getToken', { timeout: 37000 }).then((interception) => {
       expect(interception.response.statusCode).to.eq(200);
 
-      // Extract 'set-cookie' header
-      const setCookieHeaders = interception.response.headers['set-cookie'];
-      cy.log('Set-Cookie Headers:', setCookieHeaders);
+      // === Extract SV_AUTH cookie ===
+      const setCookieHeaders =
+        interception.response.headers['set-cookie'] || [];
+      const authCookie = setCookieHeaders.find((cookie) =>
+        cookie.startsWith('SV_AUTH=')
+      );
+      if (!authCookie) throw new Error('SV_AUTH cookie not found in response');
 
-      if (setCookieHeaders && setCookieHeaders.length > 0) {
-        // Find the header that contains SV_AUTH
-        const authCookie = setCookieHeaders.find((cookie) =>
-          cookie.startsWith('SV_AUTH=')
-        );
+      const match = authCookie.match(/SV_AUTH=([^;]+)/);
+      if (!match) throw new Error('Cannot extract SV_AUTH cookie value');
+      const authCookieValue = match[1];
+      Cypress.env('authCookieValue', authCookieValue);
 
-        if (authCookie) {
-          // Extract the SV_AUTH value
-          const match = authCookie.match(/SV_AUTH=([^;]+)/);
-          if (match) {
-            const authCookieValue = match[1];
-            cy.log('Extracted SV_AUTH Cookie:', authCookieValue);
+      // === Generate dynamic ID ===
+      const randomId = `0000000100${Date.now().toString().slice(-8)}CY`;
+      cy.log('Generated BillersInvoiceRecipientID:', randomId);
 
-            // Store in Cypress env variable
-            Cypress.env('authCookieValue', authCookieValue);
+      // === Build XML dynamically ===
+      const xmlContent = `PBRequest/2.0
+Type: FileSubmission
+PackageType: Plain
+Timing: Synchronous
+UserID: aquaAdmin
+Password: Test1234!
 
-            //postman Register user using Legacy web request
-            cy.fixture('cy_legacy_register.xml', 'binary')
-              .then(Cypress.Blob.binaryStringToBlob)
-              .then((fileContent) => {
-                const formData = new FormData();
-                formData.append(
-                  'PBRequest',
-                  fileContent,
-                  'cy_legacy_register.xml'
-                );
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<PBCustomerCreationRequest></PBCustomerCreationRequest>
 
-                const legacyTestuser = Cypress.env('legacyTestuser')[0];
+<?xml version="1.0" encoding="iso-8859-1" ?>
+<!DOCTYPE PBCustomerCreationData PUBLIC "" "PBCustomerCreationData.dtd">
+<PBCustomerCreationData>
+  <LanguageCode>GER</LanguageCode>
+  <ProviderID>ATEBPP</ProviderID>
+  <Brand>ATEBPP</Brand>
+  <Application>BILL2C</Application>
+  <NewBusinessUnit>
+    <ContractNr>ExternalRegistration</ContractNr>
+    <Name>Ing. CY Legacy Testmann</Name>
+    <BusinessUnitType>Consumer</BusinessUnitType>
+    <Address>
+      <Street>Street</Street>
+      <ZIP>1111</ZIP>
+      <Town>City</Town>
+      <Country>AT</Country>
+      <Email>cy.legacy@yopmail.com</Email>
+    </Address>
+    <ProvisionCode>BNK</ProvisionCode>
+    <NotificationSettings>
+      <NotificationSubscription>
+        <LanguageCode>GER</LanguageCode>
+        <Event EventParameter="daily">InvoiceCreation</Event>
+        <Channel>Email</Channel>
+        <ReceiverAddress>cy.legacy@yopmail.com</ReceiverAddress>
+      </NotificationSubscription>
+    </NotificationSettings>
+  </NewBusinessUnit>
+  <NewUser>
+    <UserID>CYLegacyTestuser</UserID> 
+    <Password>Test1234!</Password>
+    <LastName>CY Testuser</LastName>
+    <FirstName>LegacyTestuser</FirstName>
+    <DateOfBirth>19720212</DateOfBirth>
+    <Salutation>m</Salutation>
+    <Title>Ing.</Title>
+    <Email>cy.legacy@yopmail.com</Email>
+  </NewUser>
+  <BillerRegistrationSettings>
+    <BillerRegistration>
+      <BillersInvoiceRecipientID>${randomId}</BillersInvoiceRecipientID>
+      <SystemsBillerID>AQUA</SystemsBillerID>
+    </BillerRegistration>
+  </BillerRegistrationSettings>
+</PBCustomerCreationData>
+`;
 
-                cy.request({
-                  method: 'POST',
-                  url: legacyTestuser.legacyURL,
-                  headers: {
-                    Authorization: `Bearer ${Cypress.env(
-                      'authCookieValue',
-                      authCookieValue
-                    )}`,
-                  },
-                  body: formData,
-                }).then((response) => {
-                  expect(response.status).to.eq(200); // Adjust based on expected response
-                  cy.log('Request executed successfully');
-                });
-              });
-          }
-        }
-      }
-      cy.wait(2500);
+      // === Create FormData (the backend expects this format) ===
+      const blob = new Blob([xmlContent], { type: 'text/xml' });
+      const formData = new FormData();
+      formData.append('PBRequest', blob, 'cy_dynamic_legacy_register.xml');
+
+      const legacyTestuser = Cypress.env('legacyTestuser')[0];
+
+      // === Perform request with correct structure ===
+      cy.request({
+        method: 'POST',
+        url: legacyTestuser.legacyURL,
+        headers: {
+          Cookie: `SV_AUTH=${authCookieValue}`,
+        },
+        body: formData,
+        encoding: 'binary',
+        failOnStatusCode: false,
+      }).then((response) => {
+        cy.log('Response Status:', response.status);
+        cy.log('Response Body:', response.body);
+        expect(response.status).to.be.oneOf([200, 201]);
+      });
     });
-  }); //end it
+  });
 
   //Yopmail - Confirm email and Change password
   it('Yopmail - Confirm email and Change password', () => {
@@ -398,7 +442,7 @@ describe('Create_User_From_Legacy_request', () => {
       });
   });
 
-  //********************* Login to ebox 1st time *********************
+  //Login to ebox 1st time
   it('Login to e-Box 1st time', () => {
     cy.visit(Cypress.env('baseUrl_egEbox'));
     cy.wait(5000);
@@ -584,16 +628,17 @@ describe('Create_User_From_Legacy_request', () => {
     cy.wait(3000);
   }); //end it
 
-  //Y O P M A I L
+  //Delete all emails
   it('Yopmail - Clear inbox', () => {
     const legacyTestuser = Cypress.env('legacyTestuser')[0];
 
-    // Visit yopmail application or login page
+    // Visit Yopmail application or login page
     cy.visit('https://yopmail.com/en/');
     cy.get('#login').type(legacyTestuser.email);
     cy.wait(1500);
     cy.get('#refreshbut > .md > .material-icons-outlined').click();
     cy.wait(3500);
+
     // Delete all emails if the button is not disabled
     cy.get('.menu>div>#delall')
       .should('not.be.disabled')

@@ -1113,6 +1113,46 @@ Cypress.Commands.add('downloadBinary', (url, filename) => {
   });
 });
 
+// Cypress.Commands.add('uploadRegisterNonAT', () => {
+//   const fileName = 'Normal_Register.pdf';
+//   cy.fixture(`Tages/${fileName}`, 'binary')
+//     .then(Cypress.Blob.binaryStringToBlob)
+//     .then((fileContent) => {
+//       cy.get('input[type="file"]').first().attachFile({
+//         fileContent,
+//         fileName,
+//         mimeType: 'application/pdf',
+//         encoding: 'binary',
+//       });
+//     });
+// });
+
+//Upload Register+nonAT
+Cypress.Commands.add('uploadRegisterNonAT', () => {
+  const fileName = 'Register-NonAT.pdf';
+  cy.fixture(`Tages/${fileName}`, 'base64').then((fileContent) => {
+    cy.get('input[type="file"]').first().attachFile({
+      fileContent,
+      fileName,
+      mimeType: 'application/pdf',
+      encoding: 'base64',
+    });
+  });
+});
+
+//Upload Register+AT
+Cypress.Commands.add('uploadRegisterAT', () => {
+  const fileName = 'Register-AT.pdf';
+  cy.fixture(`Tages/${fileName}`, 'base64').then((fileContent) => {
+    cy.get('input[type="file"]').first().attachFile({
+      fileContent,
+      fileName,
+      mimeType: 'application/pdf',
+      encoding: 'base64',
+    });
+  });
+});
+
 //********************************TEMPORALY ******************************* */
 
 Cypress.Commands.add('downloadZipFromYopmail', () => {

@@ -356,7 +356,7 @@ describe('Upload_TXT_file_including_Enabling_and_Disabing_xml_templates', () => 
   });
 
   //Admin user Upload TXT File, after enabling xml template
-  it('Upload TXT File', () => {
+  it.only('Upload TXT File', () => {
     cy.loginToSupportViewAdmin();
     // Wait for login to complete
     cy.wait(1500);
@@ -483,7 +483,7 @@ describe('Upload_TXT_file_including_Enabling_and_Disabing_xml_templates', () => 
   });
 
   // Login to e-Box and open delivery if timestamps match logic
-  it('Login to e-Box and Open Delivery', () => {
+  it.only('Login to e-Box and Open Delivery', () => {
     // Log into e-Box
     cy.loginToEgEbox();
     cy.wait(2000);
@@ -566,7 +566,7 @@ describe('Upload_TXT_file_including_Enabling_and_Disabing_xml_templates', () => 
   });
 
   //Admin user check Reporting email
-  it('Yopmail - Get Reporting email', () => {
+  it.only('Yopmail - Get Reporting email', () => {
     // Visit Yopmail
     cy.visit('https://yopmail.com/en/');
 

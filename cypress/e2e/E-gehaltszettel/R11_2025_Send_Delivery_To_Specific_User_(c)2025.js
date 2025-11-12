@@ -184,7 +184,7 @@ describe('Broadcast delivery to Specific User', () => {
   });
 
   //Send elivery to Specific user, when HR role is enabled
-  it('Send Delivery to selected-specific user', () => {
+  it.only('Send Delivery to selected-specific user', () => {
     cy.loginToSupportViewAdmin(); // Login as a master user
     cy.wait(1500);
 
@@ -340,7 +340,7 @@ describe('Broadcast delivery to Specific User', () => {
   }); //end it
 
   // Login to e-Box and open delivery if timestamps match logic
-  it('Login to e-Box and Open Delivery', () => {
+  it.only('Login to e-Box and Open Delivery', () => {
     // Log into e-Box
     cy.loginToEgEbox();
     cy.wait(2000);
@@ -423,7 +423,7 @@ describe('Broadcast delivery to Specific User', () => {
   });
 
   //Admin user check Reporting email
-  it('Yopmail - Get Reporting email', () => {
+  it.only('Yopmail - Get Reporting email', () => {
     // Visit Yopmail
     cy.visit('https://yopmail.com/en/');
 

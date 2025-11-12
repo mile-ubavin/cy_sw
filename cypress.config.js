@@ -816,6 +816,225 @@ const environments = {
   tages_dev: {
     usernameFromEmailBody: '',
     passwordFromEmailBody: '',
+    baseUrl: 'https://tages-post.edeja.com/',
+
+    username_stundung: 'k40.tages-post.testuser@yopmail.com',
+    password_stundung: 'Test1234!',
+
+    username_crteditCard: 'qa.testuser@yopmail.com',
+    password_crteditCard: 'Test1234!',
+
+    username_ILV: 'k106.tages-post.testuser@yopmail.com',
+    password_ILV: 'Test1234!',
+
+    menuLinks: [
+      'Home',
+      'Neue Sendung',
+      'Offene Sendungen',
+      'Auftragsliste',
+      'Preise',
+      'Tarifrechner',
+      'Häufige Fragen',
+      'Vorlagen',
+    ],
+
+    solutionsTitle: [
+      'e-Gehaltszettel',
+      'e-Signaturlösung',
+      'Posteingangslösungen',
+    ],
+
+    sendungen: ['Neue Sendung', 'Offene Sendungen', 'Auftragsliste'],
+
+    weiterführendeLinks: [
+      'Preise',
+      'Tarifrechner',
+      'Häufige Fragen',
+      'Vorlagen',
+    ],
+
+    solutionsData: {
+      // solutionsTitle: [
+      //   'e-Gehaltszettel',
+      //   'e-Signaturlösung',
+      //   'Intelligent Document Processing',
+      // ],
+      // solutionsP: [
+      //   'Mitarbeiter*innen erhalten Gehalts- und Lohnabrechnungen papierlos und Sie profitieren von verbesserten Workflows durch die direkte Anbindung an das Lohnverrechnungssystem.',
+      //   'Unterzeichnen Sie Dokumente, Verträge und mehr einfach digital, auch direkt am Point-of-Sale. So erhöht sich der Komfort für Ihre Kund*innen und vermeiden Medienbrüche.',
+      //   'Ob Rechnungen, Formulare, Bestellungen oder der komplette Posteingang – wir digitalisieren Ihre eingehenden Sendungen für eine automatisierte Weiterverarbeitung.',
+      //   ,
+      // ],
+      // solutionsLinks: [
+      //   'Weiter zu e-Gehaltszettel',
+      //   'Weiter zu e-Signaturlösung',
+      //   'Weiter zu Posteingangslösungen',
+      // ],
+    },
+
+    solutionsTitle: [
+      'e-Gehaltszettel',
+      'e-Signaturlösung',
+      'Intelligent Document Processing',
+    ],
+    solutionsTxt: [
+      'Mitarbeiter*innen erhalten Gehalts- und Lohnabrechnungen papierlos und Sie profitieren von verbesserten Workflows durch die direkte Anbindung an das Lohnverrechnungssystem.',
+      'Unterzeichnen Sie Dokumente, Verträge und mehr einfach digital, auch direkt am Point-of-Sale. So erhöht sich der Komfort für Ihre Kund*innen und vermeiden Medienbrüche.',
+      'Unsere Services digitalisieren und automatisieren Ihre Dokumentenprozesse. Mit der Plattform DAiTA verwandeln wir unstrukturierte Daten in nutzbare Informationen. Unsere Posteingangslösungen erfassen und verarbeiten Ihre Eingangspost effizient, während die Archivdigitalisierung Ihnen schnellen, ortsunabhängigen Zugriff auf Ihre Daten ermöglicht.',
+    ],
+    solutionsLink: [
+      'Weiter zu e-Gehaltszettel',
+      'Weiter zu e-Signaturlösung',
+      'Weiter zu Intelligent Document Processing',
+    ],
+    footerTitle: [
+      'HOTLINE: +43 800 2088 23',
+      'SERVICES',
+      'RECHTLICHE HINWEISE',
+    ],
+    footerLink: [
+      'Servicezeiten:',
+      'Montag – Donnerstag (werktags): 08:00 – 17:00',
+      'Freitag (werktags): 08:00 – 14:00',
+      'Paket versenden:',
+      'Schnell versenden (Post Express)',
+      'Paket empfangen',
+      'Sendungsverfolgung',
+      'Tarifrechner',
+      'Immobilien',
+      'Kontaktformular',
+      'Impressum',
+      'Rechtliche Hinweise / Datenschutzhinweise',
+      'Alternative Streitbeilegung',
+      'Allgemeine Geschäftsbedingungen',
+    ],
+
+    BitteWählenSieH2: ['Layout', 'Druck', 'Versandart', 'Zusatzleistungen'],
+
+    // headerLinks: [
+    //   'Home',
+    //   'Neue Sendung',
+    //   'Offene Sendungen',
+    //   'Auftragsliste',
+    //   'Preise',
+    //   'Tarifrechner',
+    //   'Häufige Fragen',
+    //   'Vorlagen',
+    // ],
+
+    //   company: 'Aqua',
+    //   companyPrefix: 'aqua',
+    //   companyEmail: 'aqua.gmbh@yopmail.com',
+
+    //   search: 'Android',
+    //   username_supportViewAdmin: 'aquaAdmin',
+    //   password_supportViewAdmin: 'Test1234!',
+    //   email_supportViewAdmin: 'aqua.admin@yopmail.com',
+    //   baseUrl_egEbox: 'https://eboxpayslip.edeja.com/fe.e-box_t/',
+    //   username_egEbox: 'aquaABBA000100279311',
+    //   password_egEbox: 'Test1234!',
+    //   accountNumber_egEbox: 'ABBA000100279311',
+    //   tagesBaseUrl: 'https://tages-post.edeja.com/',
+    //   downloadsFolder:
+    //     'C:/Users/mubavin/Cypress/EG/cypress-automatison-framework/cypress/downloads/',
+    //   dashboardURL: 'https://supportviewpayslip.edeja.com/fe/dashboard/groups',
+    //   eboxDeliveryPage: 'https://eboxpayslip.edeja.com/fe.e-box_t/deliveries',
+    //   enableXML: [
+    //     { id: 'T101', name: 'BB Care' },
+    //     { id: 'T102', name: 'Beiersdorfer' },
+    //     { id: 'L103', name: 'ISS' },
+    //   ],
+    //   disableXML: [
+    //     { id: 'T101', name: 'BB Care' },
+    //     { id: 'T102', name: 'Beiersdorfer' },
+    //   ],
+    //   enablePDFDictionary: [
+    //     { name: 'PDFTABDictionary-200' },
+    //     { name: 'PDFTABDictionary-301' },
+    //     { name: 'PDFTABDictionary-305' },
+    //   ],
+    //   disablePDFDictionary: [
+    //     { name: 'PDFTABDictionary-200' },
+    //     { name: 'PDFTABDictionary-301' },
+    //   ],
+    //   createAdminUser: [
+    //     {
+    //       firstName: 'Mustermann',
+    //       lastName: 'Admin',
+    //       username: 'maxmustermannAdmin',
+    //       email: 'max-mustermann@yopmail.com',
+    //     },
+    //   ],
+    //   createUserNoAddress: [
+    //     {
+    //       firstName: 'No Address',
+    //       lastName: 'Manual',
+    //       username: 'manualNoAddress',
+    //       email: 'manual.no-address@yopmail.com',
+    //       countryCodePhoneNum: '+43',
+    //       netNumberPhoneNum: '64',
+    //       subscriberNumberPhoneNum: '706360',
+    //       prefixedTitle: 'No Address Data - Title',
+    //       // Explicitly set address fields to empty strings
+    //       streetName: '',
+    //       streetNumber: '',
+    //       doorNumber: '',
+    //       zipCode: '',
+    //       city: '',
+    //     },
+    //   ],
+    //   createUser: [
+    //     {
+    //       firstName: 'Address Data',
+    //       lastName: 'Manual',
+    //       username: 'manualAddress',
+    //       email: 'manual.addres-data@yopmail.com',
+    //       countryCodePhoneNum: '+43',
+    //       netNumberPhoneNum: '64',
+    //       subscriberNumberPhoneNum: '707777',
+    //       streetName: 'Test Strasse',
+    //       streetNumber: '17',
+    //       doorNumber: '7',
+    //       zipCode: '8010',
+    //       city: 'Graz',
+    //       prefixedTitle: 'Address Data - Title',
+    //     },
+    //   ],
+    //   companyData: [
+    //     {
+    //       companyDispayName: 'Gmbh',
+    //       description: 'Description GmbH',
+    //       email: 'gmbh.sw@yopmail.com',
+    //       sapCustomerNumber: '0000000777',
+    //       streetName: 'Maine Strasse',
+    //       doorNumber: 'doorNumber/17',
+    //       zipCode: '8010',
+    //       city: 'Maresse',
+    //       userPrefix: 'uPr',
+    //       subcompanyPrefix: 'sPr',
+    //       subcompanyName: 'sNm',
+    //       prefixLength: '10',
+    //     },
+    //   ],
+    //   csvTestuser: [
+    //     {
+    //       accountNumber: 'ottoTestuser',
+    //       email: 'otto.testuser@yopmail.com',
+    //     },
+    //   ],
+
+    //   legacyTestuser: [
+    //     {
+    //       legacyURL:
+    //         'http://10.5.10.34:8085/be.e-gehaltszettel_t/supportView/v1/legacy/submit',
+    //       email: 'cy.legacy@yopmail.com',
+    //       username: 'CYLegacyTestuser',
+    //     },
+    //   ],
+  },
+  tages_test: {
+    usernameFromEmailBody: '',
+    passwordFromEmailBody: '',
     baseUrl: 'https://abn-www.einfach-brief.at/fe_t/',
 
     username_stundung: 'k40.tages-post.testuser@yopmail.com',
@@ -908,6 +1127,8 @@ const environments = {
       'Alternative Streitbeilegung',
       'Allgemeine Geschäftsbedingungen',
     ],
+
+    BitteWählenSieH2: ['Layout', 'Druck', 'Versandart', 'Zusatzleistungen'],
 
     // headerLinks: [
     //   'Home',
