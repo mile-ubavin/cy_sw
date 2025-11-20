@@ -1127,9 +1127,9 @@ Cypress.Commands.add('downloadBinary', (url, filename) => {
 //     });
 // });
 
-//Upload Register+nonAT
+//Upload Register+nonAT (Einzelbrief & Serianbrief)
 Cypress.Commands.add('uploadRegisterNonAT', () => {
-  const fileName = 'Register-NonAT.pdf';
+  const fileName = 'Register_NonAT.pdf';
   cy.fixture(`Tages/${fileName}`, 'base64').then((fileContent) => {
     cy.get('input[type="file"]').first().attachFile({
       fileContent,
@@ -1140,9 +1140,9 @@ Cypress.Commands.add('uploadRegisterNonAT', () => {
   });
 });
 
-//Upload Register+AT
+//Upload Register+AT - Einzelbrief
 Cypress.Commands.add('uploadRegisterAT', () => {
-  const fileName = 'Register-AT.pdf';
+  const fileName = 'Register_AT.pdf';
   cy.fixture(`Tages/${fileName}`, 'base64').then((fileContent) => {
     cy.get('input[type="file"]').first().attachFile({
       fileContent,
@@ -1181,4 +1181,23 @@ Cypress.Commands.add('downloadZipFromYopmail', () => {
     'fileServerFolder'
   )}/cypress/downloads/`;
   cy.log('Download directory:', downloadsDir);
+});
+
+//********************************DH******************************* */
+
+//Upload 305 Dictionary PDF - For AQUA ABBA000100279311
+Cypress.Commands.add('DHupload305Dictionary', function () {
+  cy.fixture('305_Dictionary_(AQUA_ABBA000100279311).pdf', 'binary')
+    .then(Cypress.Blob.binaryStringToBlob)
+    .then((fileContent) => {
+      // Interact with the button that triggers the file input
+      cy.get('.file-upload-button').click(); // Click the button to open file dialog
+
+      // Now attach the file
+      cy.get('input[type="file"]').attachFile({
+        fileContent,
+        filePath: '305_Dictionary_(AQUA_ABBA000100279311).pdf',
+        fileName: '305_Dictionary_(AQUA_ABBA000100279311).pdf',
+      });
+    });
 });

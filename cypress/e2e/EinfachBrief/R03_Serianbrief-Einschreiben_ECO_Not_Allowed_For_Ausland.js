@@ -1,4 +1,4 @@
-describe('Einzelbrief: Handling ECO + Registered Deliveries for Non-AT and AT Receivers', () => {
+describe('Serianbrief: Handling ECO + Registered Deliveries for Non-AT and AT Receivers', () => {
   //Handling ECO + Registered Delivery -> Non-AT Receivers
   it('Handling ECO + Registered Delivery Non-AT Receivers', () => {
     cy.visit(Cypress.env('baseUrl'));
@@ -46,7 +46,7 @@ describe('Einzelbrief: Handling ECO + Registered Deliveries for Non-AT and AT Re
     // List of available options:
     // deliveryType = {'Einzelbrief','Serienbrief','Adressierte Werbesendung'};
 
-    const deliveryType = ['Einzelbrief'];
+    const deliveryType = ['Serienbrief'];
 
     deliveryType.forEach((option) => {
       cy.get('.css-l7ltsz')
@@ -179,14 +179,94 @@ describe('Einzelbrief: Handling ECO + Registered Deliveries for Non-AT and AT Re
 
     cy.wait(2000);
 
-    //Click on wizzard next button
+    //Click on 'Weiter mit Serienbrief'button
     cy.get('#wizzard-next').click();
     cy.wait(1000);
+    //Upload Serian pdf Register_NonAT (1 NonAT reciver, 2 pages)
     cy.uploadRegisterNonAT();
     cy.wait(1000);
     cy.log('File uploaded');
 
-    cy.wait(3500);
+    //Set splitting nuber = 2
+    cy.get('#splitOn-input').clear().type('2');
+    cy.wait(2500);
+
+    //--- DOCUMENT PREVIEW ---
+
+    //Click on Preview document
+    cy.get('.css-19i5863>.css-19c0tfq>svg').click({ force: true });
+
+    //Check if page number is 1 (on the first page)
+    cy.get('.pdf-container>.pdf-actions>span')
+      .should('be.visible')
+      .invoke('text')
+      .then((text) => {
+        const pageNumber = text.trim();
+        cy.log(`pagination: "${pageNumber}"`);
+        expect(pageNumber).to.eq('1');
+      });
+    cy.wait(1000);
+
+    // Check if address block exists in 1st page of preview modal
+    cy.get('.pdf-content>div>.pdf-content__validation__item>span', {
+      timeout: 10000,
+    }).then(($spans) => {
+      expect($spans.length > 0, 'Address block exist:').to.be.true;
+    });
+    cy.wait(1000);
+
+    //Click on Next to preview next page
+    cy.get('.pdf-container>.pdf-actions>button')
+      .contains(/Weiter|Weiter/i)
+      .should('be.visible')
+      .should('not.be.disabled')
+      .click({ force: true });
+    cy.wait(1000);
+
+    //Check page number on second page
+    cy.get('.pdf-container>.pdf-actions>span')
+      .should('be.visible')
+      .invoke('text')
+      .then((text) => {
+        const pageNumber = text.trim();
+        cy.log(`pagination: "${pageNumber}"`);
+        expect(pageNumber).to.eq('2');
+      });
+    cy.wait(1000);
+
+    //Check if Next button disabled
+    cy.get('.pdf-container>.pdf-actions>button')
+      .contains(/Weiter|Weiter/i)
+      .should('be.visible')
+      .should('be.disabled');
+
+    // Check if address block doesn't exists in 2st page, of preview modal
+    cy.get('.pdf-content > div > .pdf-content__validation__item > span', {
+      timeout: 10000,
+    }).should('have.length', 0); // Assert that no address block exists
+    cy.wait(1000);
+
+    //Back to previous page
+    cy.get('.pdf-container>.pdf-actions>button')
+      .contains(/Zurück|Zurück/i)
+      .should('be.visible')
+      .should('not.be.disabled')
+      .click({ force: true });
+    cy.wait(1000);
+
+    //Check if page number is 1 (on the first page)
+    cy.get('.pdf-container>.pdf-actions>span')
+      .should('be.visible')
+      .invoke('text')
+      .then((text) => {
+        const pageNumber = text.trim();
+        cy.log(`pagination: "${pageNumber}"`);
+        expect(pageNumber).to.eq('1');
+      });
+    cy.wait(1000);
+
+    //Close doc preview dialog
+    cy.get('button[aria-label="Schließen"]').click();
 
     //validatePDF
     // --- Validate PDF upload ---
@@ -198,7 +278,6 @@ describe('Einzelbrief: Handling ECO + Registered Deliveries for Non-AT and AT Re
       .should('be.visible')
       .contains(/Weiter/i)
       .click();
-
     // --- Wait and validate /validatePdf request ---
     cy.wait('@validatePdfRequest', { timeout: 15000 }).then(
       ({ request, response }) => {
@@ -210,7 +289,7 @@ describe('Einzelbrief: Handling ECO + Registered Deliveries for Non-AT and AT Re
 
         expect(payload.postalPriority, 'postalPriority').to.eq('ECO');
         expect(payload.registeredMail, 'registeredMail').to.be.true;
-        expect(payload.shipmentType, 'shipmentType').to.eq('Einzelbrief');
+        expect(payload.shipmentType, 'shipmentType').to.eq('Serienbrief');
         expect(payload.mainDocumentPayload[0].name, 'file name').to.eq(
           'Register_NonAT.pdf'
         );
@@ -226,6 +305,8 @@ describe('Einzelbrief: Handling ECO + Registered Deliveries for Non-AT and AT Re
     });
 
     //Validate Shopping Cart page title
+    cy.scrollTo('top', { duration: 200 }); // smooth scroll
+    cy.wait(2500);
     cy.get('.css-i2aehn> h1')
       .should('be.visible')
       .and(($h1) => {
@@ -239,7 +320,7 @@ describe('Einzelbrief: Handling ECO + Registered Deliveries for Non-AT and AT Re
       const totalDeliveriesBefore = $Before.length;
       cy.log(`Initial count: ${totalDeliveriesBefore}`);
 
-      cy.wait(1500);
+      cy.wait(2500);
       // Click to expand details for first row
       cy.get('table>tbody>tr').first().click({ force: true });
 
@@ -251,40 +332,8 @@ describe('Einzelbrief: Handling ECO + Registered Deliveries for Non-AT and AT Re
           'have.text',
           'Auslands-Einschreiben ist nur mit der Versandart "Premium Brief" möglich.'
         );
-
       cy.log('Versandart and status validation successful');
       cy.wait(1500);
-
-      //Edit delivery - based on shoping cart
-      cy.get('table>tbody>tr>td>.css-tjchwd>span>.css-1i5bjpc>svg>path')
-        .eq(0)
-        .should('be.visible')
-        .click({ force: true });
-      cy.wait(2000);
-
-      //click on Versand input
-      cy.get('.css-db8fth>.css-3aalzm>.css-e20rve>div>div[role="combobox"]')
-        .eq(0)
-        .click();
-      cy.wait(2500);
-
-      //Change ECO to PRIO
-      cy.get('ul[role="listbox"]>li[data-value="PRIO"]').click();
-
-      //Save Changes - Finalize Edit Delivery
-      cy.intercept('POST', '**/editShoppingCart').as('editShoppingCart');
-      cy.get('button>.css-1am57kc').contains('Übernehmen').click();
-
-      // --- Wait and validate /editShoppingCart request ---
-      cy.wait('@editShoppingCart', { timeout: 15000 }).then(({ response }) => {
-        expect(response.statusCode).to.eq(200);
-      });
-      cy.wait(2000);
-      // Validate expanded Success message
-      cy.get('td[colspan="11"]>div>table>tbody>tr>td')
-        .eq(8)
-        .should('be.visible')
-        .should('have.text', 'Sendung versandbereit');
 
       // Close expand details for first delivey
       cy.get('table>tbody>tr').first().click({ force: true });
@@ -296,16 +345,6 @@ describe('Einzelbrief: Handling ECO + Registered Deliveries for Non-AT and AT Re
         .should('be.visible')
         .click({ force: true });
       cy.wait(2500);
-
-      //Get total number of deliveries after deletion
-      //   cy.get('tbody>tr>td>.css-ke8v56>label>span>input').then(($itemsAfter) => {
-      //     const totalDeliveriesAfterDeletion = $itemsAfter.length;
-      //     cy.log(`totalDeliveriesAfterDeletion: ${totalDeliveriesAfterDeletion}`);
-
-      //     //Validate total number of deliveries before and after deletion
-      //     expect(totalDeliveriesBefore - 1).to.eq(totalDeliveriesAfterDeletion);
-      //   }); //end then before
-      // }); //end before
 
       //Get total number of deliveries after deletion
       cy.get('tbody')
@@ -383,8 +422,7 @@ describe('Einzelbrief: Handling ECO + Registered Deliveries for Non-AT and AT Re
       .should('be.visible')
       .contains(/Neue Sendung|Neue Sendung/i)
       .click();
-
-    cy.wait(2000);
+    cy.wait(1000);
 
     //Check title under action buttons ()
     cy.get('.css-o8itw1>h1').should(
@@ -395,7 +433,7 @@ describe('Einzelbrief: Handling ECO + Registered Deliveries for Non-AT and AT Re
     // List of available options:
     // deliveryType = {'Einzelbrief','Serienbrief','Adressierte Werbesendung'};
 
-    const deliveryType = ['Einzelbrief'];
+    const deliveryType = ['Serienbrief'];
 
     deliveryType.forEach((option) => {
       cy.get('.css-l7ltsz')
@@ -526,17 +564,95 @@ describe('Einzelbrief: Handling ECO + Registered Deliveries for Non-AT and AT Re
       }
     });
 
-    cy.wait(2000);
-
-    //Click on wizzard next button
+    cy.wait(2500);
+    //Click on 'Weiter mit Serienbrief'button
     cy.get('#wizzard-next').click();
     cy.wait(1000);
-
-    //---------insert Register+At
+    //Upload Serian pdf Register_NonAT (1 NonAT reciver, 2 pages)
     cy.uploadRegisterAT();
     cy.wait(1000);
     cy.log('File uploaded');
-    cy.wait(3500);
+
+    //Set splitting nuber = 2
+    cy.get('#splitOn-input').clear().type('2');
+    cy.wait(2500);
+
+    //--- DOCUMENT PREVIEW ---
+
+    //Click on Preview document
+    cy.get('.css-19i5863>.css-19c0tfq>svg').click({ force: true });
+
+    //Check if page number is 1 (on the first page)
+    cy.get('.pdf-container>.pdf-actions>span')
+      .should('be.visible')
+      .invoke('text')
+      .then((text) => {
+        const pageNumber = text.trim();
+        cy.log(`pagination: "${pageNumber}"`);
+        expect(pageNumber).to.eq('1');
+      });
+    cy.wait(1000);
+
+    // Check if address block exists in 1st page of preview modal
+    cy.get('.pdf-content>div>.pdf-content__validation__item>span', {
+      timeout: 10000,
+    }).then(($spans) => {
+      expect($spans.length > 0, 'Address block exist:').to.be.true;
+    });
+    cy.wait(1000);
+
+    //Click on Next to preview next page
+    cy.get('.pdf-container>.pdf-actions>button')
+      .contains(/Weiter|Weiter/i)
+      .should('be.visible')
+      .should('not.be.disabled')
+      .click({ force: true });
+    cy.wait(1000);
+
+    //Check page number on second page
+    cy.get('.pdf-container>.pdf-actions>span')
+      .should('be.visible')
+      .invoke('text')
+      .then((text) => {
+        const pageNumber = text.trim();
+        cy.log(`pagination: "${pageNumber}"`);
+        expect(pageNumber).to.eq('2');
+      });
+    cy.wait(1000);
+
+    //Check if Next button disabled
+    cy.get('.pdf-container>.pdf-actions>button')
+      .contains(/Weiter|Weiter/i)
+      .should('be.visible')
+      .should('be.disabled');
+
+    // Check if address block doesn't exists in 2st page, of preview modal
+    cy.get('.pdf-content > div > .pdf-content__validation__item > span', {
+      timeout: 10000,
+    }).should('have.length', 0); // Assert that no address block exists
+    cy.wait(1000);
+
+    //Back to previous page
+    cy.get('.pdf-container>.pdf-actions>button')
+      .contains(/Zurück|Zurück/i)
+      .should('be.visible')
+      .should('not.be.disabled')
+      .click({ force: true });
+    cy.wait(1000);
+
+    //Check if page number is 1 (on the first page)
+    cy.get('.pdf-container>.pdf-actions>span')
+      .should('be.visible')
+      .invoke('text')
+      .then((text) => {
+        const pageNumber = text.trim();
+        cy.log(`pagination: "${pageNumber}"`);
+        expect(pageNumber).to.eq('1');
+      });
+    cy.wait(1000);
+
+    //Close doc preview dialog
+    cy.get('button[aria-label="Schließen"]').click();
 
     //validatePDF
     // --- Validate PDF upload ---
@@ -548,7 +664,6 @@ describe('Einzelbrief: Handling ECO + Registered Deliveries for Non-AT and AT Re
       .should('be.visible')
       .contains(/Weiter/i)
       .click();
-
     // --- Wait and validate /validatePdf request ---
     cy.wait('@validatePdfRequest', { timeout: 15000 }).then(
       ({ request, response }) => {
@@ -560,7 +675,7 @@ describe('Einzelbrief: Handling ECO + Registered Deliveries for Non-AT and AT Re
 
         expect(payload.postalPriority, 'postalPriority').to.eq('ECO');
         expect(payload.registeredMail, 'registeredMail').to.be.true;
-        expect(payload.shipmentType, 'shipmentType').to.eq('Einzelbrief');
+        expect(payload.shipmentType, 'shipmentType').to.eq('Serienbrief');
         expect(payload.mainDocumentPayload[0].name, 'file name').to.eq(
           'Register_AT.pdf'
         );
@@ -576,6 +691,8 @@ describe('Einzelbrief: Handling ECO + Registered Deliveries for Non-AT and AT Re
     });
 
     //Validate Shopping Cart page title
+    cy.scrollTo('top', { duration: 200 }); // smooth scroll
+    cy.wait(2500);
     cy.get('.css-i2aehn> h1')
       .should('be.visible')
       .and(($h1) => {
@@ -589,7 +706,7 @@ describe('Einzelbrief: Handling ECO + Registered Deliveries for Non-AT and AT Re
       const totalDeliveriesBefore = $Before.length;
       cy.log(`Initial count: ${totalDeliveriesBefore}`);
 
-      cy.wait(1500);
+      cy.wait(2500);
       // Click to expand details for first row
       cy.get('table>tbody>tr').first().click({ force: true });
 
@@ -598,6 +715,9 @@ describe('Einzelbrief: Handling ECO + Registered Deliveries for Non-AT and AT Re
         .eq(8)
         .should('be.visible')
         .should('have.text', 'Sendung versandbereit');
+
+      cy.log('Versandart and status validation successful');
+      cy.wait(1500);
 
       cy.log('Versandart and status validation successful');
       cy.wait(1500);
