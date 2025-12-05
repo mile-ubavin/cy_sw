@@ -358,7 +358,8 @@ const environments = {
         doorNumber: '7',
         zipCode: '8010',
         city: 'Graz',
-        prefixedTitle: 'Address Data - Title',
+        prefixedTitle: 'Address Data - Title 1',
+        prefixedTitle2: 'Address Data - Title 2',
       },
     ],
     companyData: [

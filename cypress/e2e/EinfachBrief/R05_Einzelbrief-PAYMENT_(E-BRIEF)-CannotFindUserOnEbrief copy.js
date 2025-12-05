@@ -1,5 +1,5 @@
-describe('Einzelbrief: Einseitig+Schwarz&Weiß+Premium Brief+E-Brief_AT and AT Receiver', () => {
-  it('Einzelbrief_AT-Receiver', () => {
+describe('Einzelbrief-sendDeliveryToPayment-ViaPrintChannel-CannotFindUserOnEbrief', () => {
+  it('Einzelbrief-sendDeliveryToPayment-CannotFindUserOnEbrief', () => {
     cy.visit(Cypress.env('baseUrl'));
     cy.url().should('include', Cypress.env('baseUrl'));
 
@@ -37,10 +37,9 @@ describe('Einzelbrief: Einseitig+Schwarz&Weiß+Premium Brief+E-Brief_AT and AT R
     cy.wait(2000);
 
     //Check title under action buttons ()
-    cy.get('.css-o8itw1>h1').should(
-      'have.text',
-      'Wählen Sie Ihre Versandoption'
-    );
+    cy.get(
+      'div[aria-label="stepper"]>div:last-of-type>div:first-of-type>section>h1'
+    ).should('have.text', 'Wählen Sie Ihre Versandoption');
 
     // List of available options:
     // deliveryType = {'Einzelbrief','Serienbrief','Adressierte Werbesendung'};
@@ -75,83 +74,55 @@ describe('Einzelbrief: Einseitig+Schwarz&Weiß+Premium Brief+E-Brief_AT and AT R
     }); //end deliveryType
     cy.wait(2500);
 
-    // Desired user selection (one from each group)
+    // List of available options groups:
+    // [
+    //   {'Einseitig', 'Beidseitig'},
+    //   {'Schwarz & Weiss', 'Farbe'},
+    //   {'Premium Brief','Brief'},
+    //   {'Einschreiben','E-Brief'}
+    // ];
 
+    // Desired user selection (one from each group)
     const desiredSelection = [
-      'Einseitig', // <-- can be {'Einseitig', 'Beidseitig'}
-      'Schwarz & Weiß', // <-- can be {'Schwarz & Weiss', 'Farbe'}
-      'Premium Brief', // <-- can be {'Premium Brief','Brief'},
-      '', // <-- can be  {'Einschreiben','E-Brief',''}
+      'Einseitig',
+      'Schwarz & Weiß',
+      'Premium Brief',
+      'E-Brief',
     ];
 
-    // Generic selector for all option labels on the page
-    const radioButtons =
-      '.css-11mknlo>div>fieldset>div>div>label>.MuiFormControlLabel-label>span';
-
-    desiredSelection.forEach((option, index) => {
-      // --- CASE 1: NORMAL GROUPS (index 0–2) ---
-      if (index < 3) {
-        cy.get(radioButtons).each(($label) => {
+    desiredSelection.forEach((option) => {
+      cy.get('div>fieldset>div>div>label>.MuiFormControlLabel-label>span').each(
+        ($label) => {
           cy.wrap($label)
             .invoke('text')
-            .then((labelText) => {
-              labelText = labelText.trim();
+            .then((text) => {
+              const labelText = text.trim();
 
+              // match your desired option
               if (labelText === option) {
                 cy.wrap($label)
                   .closest('label')
                   .find('input')
                   .then(($input) => {
+                    // If not checked → click it
                     if (!$input.prop('checked')) {
                       cy.wrap($label).click({ force: true });
                       cy.wait(200);
-                      cy.log(`Selected: ${labelText}`);
+                      cy.log(`Clicked: ${labelText}`);
+                    } else {
+                      cy.log(`Skipped (already checked): ${labelText}`);
                     }
+                    //optional
+                    // VALIDATION #1: label must be from desiredSelection
                     expect(labelText).to.be.oneOf(desiredSelection);
+                    // VALIDATION #2: the input must now be checked
                     cy.wrap($input).should('be.checked');
                   });
               }
             });
-        });
-      }
-
-      // --- CASE 2: ZUSATZLEISTUNGEN GROUP (index = 3) ---
-      if (index === 3) {
-        const zusatzOption = option.trim(); // "Einschreiben" | "E-Brief" | ""
-
-        const checkBox = '.css-11mknlo>div:last-of-type';
-
-        // Step 1 — Always attempt to deselect both first
-        cy.get(`${checkBox} input[type="checkbox"]`).each(($cb) => {
-          const isChecked = $cb.prop('checked');
-          const isDisabled = $cb.prop('disabled');
-
-          if (isChecked && !isDisabled) {
-            cy.wrap($cb).click({ force: true });
-            cy.log('Unchecked Zusatzleistung checkbox');
-          }
-          cy.wrap($cb).should('not.be.checked');
-        });
-
-        // Step 2 — If empty ("") => we are DONE → both remain unselected
-        if (!zusatzOption) {
-          cy.log('Zusatzleistungen: both remain deselected');
-          return;
         }
-
-        // Step 3 — Select only the requested option ("Einschreiben" or "E-Brief")
-        cy.contains('span', zusatzOption, { matchCase: false })
-          .closest('label')
-          .find('input[type="checkbox"]')
-          .then(($input) => {
-            if (!$input.prop('checked')) {
-              cy.wrap($input).click({ force: true });
-              cy.log(`Selected Zusatzleistung: ${zusatzOption}`);
-            }
-            cy.wrap($input).should('be.checked');
-          });
-      }
-    });
+      );
+    }); // end desiredSelection
 
     //Expand all available Accordions
     const accordions = [

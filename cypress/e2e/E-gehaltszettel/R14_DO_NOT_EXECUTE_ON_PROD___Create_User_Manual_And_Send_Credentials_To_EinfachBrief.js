@@ -235,7 +235,7 @@ describe('Send welcome mail via post/EinfachBrief', () => {
   }); //end it
 
   // Precondition: Search for the user and if user exists, proceed with deletion
-  it('Search for the user and if user(s) exists, proceed with deletion', () => {
+  it.only('Search for the user and if user(s) exists, proceed with deletion', () => {
     cy.loginToSupportViewMaster();
     cy.wait(3500);
 
@@ -323,7 +323,7 @@ describe('Send welcome mail via post/EinfachBrief', () => {
   }); //end it
 
   // Admin user, can create e-box users by filling registration form and sent user's credentials to print (einfachBrief)
-  it('Create 2 Users Manually And Send Credentials To EinfachBrief', () => {
+  it.only('Create 2 Users Manually And Send Credentials To EinfachBrief', () => {
     cy.loginToSupportViewAdmin();
     cy.wait(3500);
 
@@ -693,7 +693,7 @@ describe('Send welcome mail via post/EinfachBrief', () => {
 
   //********************NEW EinfachBrief*************************************** */
   //Login to einfachBrief and check welcome pdf
-  it('Login to einfachBrief and check welcome pdf', () => {
+  it.only('Login to einfachBrief and check welcome pdf', () => {
     cy.visit(Cypress.env('tagesBaseUrl'));
     cy.url().should('include', Cypress.env('tagesBaseUrl'));
 

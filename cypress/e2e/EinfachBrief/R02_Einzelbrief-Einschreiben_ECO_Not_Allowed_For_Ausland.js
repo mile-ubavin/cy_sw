@@ -36,12 +36,11 @@ describe('Einzelbrief: Handling ECO + Registered Deliveries for Non-AT and AT Re
       .click();
 
     cy.wait(2000);
-
     //Check title under action buttons ()
-    cy.get('.css-o8itw1>h1').should(
-      'have.text',
-      'Wählen Sie Ihre Versandoption'
-    );
+    //cy.get('.css-o8itw1>h1').should(
+    cy.get(
+      'div[aria-label="stepper"]>div:last-of-type>div:first-of-type>section>h1'
+    ).should('have.text', 'Wählen Sie Ihre Versandoption');
 
     // List of available options:
     // deliveryType = {'Einzelbrief','Serienbrief','Adressierte Werbesendung'};
@@ -93,37 +92,37 @@ describe('Einzelbrief: Handling ECO + Registered Deliveries for Non-AT and AT Re
     ];
 
     desiredSelection.forEach((option) => {
-      cy.get(
-        '.css-11mknlo>div>fieldset>div>div>label>.MuiFormControlLabel-label>span'
-      ).each(($label) => {
-        cy.wrap($label)
-          .invoke('text')
-          .then((text) => {
-            const labelText = text.trim();
+      cy.get('div>fieldset>div>div>label>.MuiFormControlLabel-label>span').each(
+        ($label) => {
+          cy.wrap($label)
+            .invoke('text')
+            .then((text) => {
+              const labelText = text.trim();
 
-            // match your desired option
-            if (labelText === option) {
-              cy.wrap($label)
-                .closest('label')
-                .find('input')
-                .then(($input) => {
-                  // If not checked → click it
-                  if (!$input.prop('checked')) {
-                    cy.wrap($label).click({ force: true });
-                    cy.wait(200);
-                    cy.log(`Clicked: ${labelText}`);
-                  } else {
-                    cy.log(`Skipped (already checked): ${labelText}`);
-                  }
-                  //optional
-                  // VALIDATION #1: label must be from desiredSelection
-                  expect(labelText).to.be.oneOf(desiredSelection);
-                  // VALIDATION #2: the input must now be checked
-                  cy.wrap($input).should('be.checked');
-                });
-            }
-          });
-      });
+              // match your desired option
+              if (labelText === option) {
+                cy.wrap($label)
+                  .closest('label')
+                  .find('input')
+                  .then(($input) => {
+                    // If not checked → click it
+                    if (!$input.prop('checked')) {
+                      cy.wrap($label).click({ force: true });
+                      cy.wait(200);
+                      cy.log(`Clicked: ${labelText}`);
+                    } else {
+                      cy.log(`Skipped (already checked): ${labelText}`);
+                    }
+                    //optional
+                    // VALIDATION #1: label must be from desiredSelection
+                    expect(labelText).to.be.oneOf(desiredSelection);
+                    // VALIDATION #2: the input must now be checked
+                    cy.wrap($input).should('be.checked');
+                  });
+              }
+            });
+        }
+      );
     });
 
     //Expand all available Accordions
@@ -233,10 +232,13 @@ describe('Einzelbrief: Handling ECO + Registered Deliveries for Non-AT and AT Re
         expect(text).to.match(/Zusammenfassung/i);
       });
 
-    cy.get('tbody>tr>td>.css-ke8v56>label>span>input').then(($Before) => {
+    //cy.get('tbody>tr>td>.css-ke8v56>label>span>input').then(($Before) => {
+    cy.get('span>input[type="checkbox"]').then(($Before) => {
       // const totalDeliveriesBefore;
 
-      const totalDeliveriesBefore = $Before.length;
+      //const totalDeliveriesBefore = $Before.length;
+      const totalDeliveriesBefore = $Before.length > 0 ? $Before.length - 1 : 0;
+
       cy.log(`Initial count: ${totalDeliveriesBefore}`);
 
       cy.wait(1500);
@@ -349,7 +351,7 @@ describe('Einzelbrief: Handling ECO + Registered Deliveries for Non-AT and AT Re
   }); //end it
 
   //Handling ECO + Registered Delivery -> AT Receivers
-  it('Handling ECO + Registered Delivery AT Receivers', () => {
+  it.only('Handling ECO + Registered Delivery AT Receivers', () => {
     cy.visit(Cypress.env('baseUrl'));
     cy.url().should('include', Cypress.env('baseUrl'));
 
@@ -387,10 +389,10 @@ describe('Einzelbrief: Handling ECO + Registered Deliveries for Non-AT and AT Re
     cy.wait(2000);
 
     //Check title under action buttons ()
-    cy.get('.css-o8itw1>h1').should(
-      'have.text',
-      'Wählen Sie Ihre Versandoption'
-    );
+    // cy.get('.css-o8itw1>h1').should(
+    cy.get(
+      'div[aria-label="stepper"]>div:last-of-type>div:first-of-type>section>h1'
+    ).should('have.text', 'Wählen Sie Ihre Versandoption');
 
     // List of available options:
     // deliveryType = {'Einzelbrief','Serienbrief','Adressierte Werbesendung'};
@@ -442,37 +444,37 @@ describe('Einzelbrief: Handling ECO + Registered Deliveries for Non-AT and AT Re
     ];
 
     desiredSelection.forEach((option) => {
-      cy.get(
-        '.css-11mknlo>div>fieldset>div>div>label>.MuiFormControlLabel-label>span'
-      ).each(($label) => {
-        cy.wrap($label)
-          .invoke('text')
-          .then((text) => {
-            const labelText = text.trim();
+      cy.get('div>fieldset>div>div>label>.MuiFormControlLabel-label>span').each(
+        ($label) => {
+          cy.wrap($label)
+            .invoke('text')
+            .then((text) => {
+              const labelText = text.trim();
 
-            // match your desired option
-            if (labelText === option) {
-              cy.wrap($label)
-                .closest('label')
-                .find('input')
-                .then(($input) => {
-                  // If not checked → click it
-                  if (!$input.prop('checked')) {
-                    cy.wrap($label).click({ force: true });
-                    cy.wait(200);
-                    cy.log(`Clicked: ${labelText}`);
-                  } else {
-                    cy.log(`Skipped (already checked): ${labelText}`);
-                  }
-                  //optional
-                  // VALIDATION #1: label must be from desiredSelection
-                  expect(labelText).to.be.oneOf(desiredSelection);
-                  // VALIDATION #2: the input must now be checked
-                  cy.wrap($input).should('be.checked');
-                });
-            }
-          });
-      });
+              // match your desired option
+              if (labelText === option) {
+                cy.wrap($label)
+                  .closest('label')
+                  .find('input')
+                  .then(($input) => {
+                    // If not checked → click it
+                    if (!$input.prop('checked')) {
+                      cy.wrap($label).click({ force: true });
+                      cy.wait(200);
+                      cy.log(`Clicked: ${labelText}`);
+                    } else {
+                      cy.log(`Skipped (already checked): ${labelText}`);
+                    }
+                    //optional
+                    // VALIDATION #1: label must be from desiredSelection
+                    expect(labelText).to.be.oneOf(desiredSelection);
+                    // VALIDATION #2: the input must now be checked
+                    cy.wrap($input).should('be.checked');
+                  });
+              }
+            });
+        }
+      );
     });
 
     //Expand all available Accordions
@@ -583,7 +585,9 @@ describe('Einzelbrief: Handling ECO + Registered Deliveries for Non-AT and AT Re
         expect(text).to.match(/Zusammenfassung/i);
       });
 
-    cy.get('tbody>tr>td>.css-ke8v56>label>span>input').then(($Before) => {
+    cy.get(
+      'span[classname="shopping_cart_table_row_checkbox"]>input[type="checkbox"]'
+    ).then(($Before) => {
       // const totalDeliveriesBefore;
 
       const totalDeliveriesBefore = $Before.length;

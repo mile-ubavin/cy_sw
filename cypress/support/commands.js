@@ -1190,14 +1190,80 @@ Cypress.Commands.add('DHupload305Dictionary', function () {
   cy.fixture('305_Dictionary_(AQUA_ABBA000100279311).pdf', 'binary')
     .then(Cypress.Blob.binaryStringToBlob)
     .then((fileContent) => {
-      // Interact with the button that triggers the file input
-      cy.get('.file-upload-button').click(); // Click the button to open file dialog
-
-      // Now attach the file
-      cy.get('input[type="file"]').attachFile({
-        fileContent,
-        filePath: '305_Dictionary_(AQUA_ABBA000100279311).pdf',
-        fileName: '305_Dictionary_(AQUA_ABBA000100279311).pdf',
-      });
+      // attach directly to file input = NO file picker
+      cy.get('input[type="file"]', { timeout: 5000 })
+        .should('exist')
+        .attachFile({
+          fileContent,
+          fileName: '305_Dictionary_(AQUA_ABBA000100279311).pdf',
+          mimeType: 'application/pdf',
+          encoding: 'utf8',
+        });
     });
+});
+
+//createNewUser_viaCSV
+Cypress.Commands.add('DHcreateNewUser_viaCSV', function () {
+  cy.fixture('1_createUser.csv', 'binary')
+    .then(Cypress.Blob.binaryStringToBlob)
+    .then((fileContent) => {
+      cy.get('input[type="file"]', { timeout: 5000 })
+        .should('exist')
+        .attachFile({
+          fileContent,
+          filePath: '1_createUser.csv',
+          fileName: '1_createUser.csv',
+          mimeType: 'text/csv',
+        });
+    });
+});
+
+//updateExistingUser_viaCSV
+Cypress.Commands.add('DHupdateExistingUser_viaCSV', function () {
+  cy.fixture('2_updateUser.csv', 'binary')
+    .then(Cypress.Blob.binaryStringToBlob)
+    .then((fileContent) => {
+      cy.get('input[type="file"]', { timeout: 5000 })
+        .should('exist')
+        .attachFile({
+          fileContent,
+          filePath: '2_updateUser.csv',
+          fileName: '2_updateUser.csv',
+          mimeType: 'text/csv',
+        });
+    });
+});
+
+// Upload multiple files, any extension
+Cypress.Commands.add('uploadFiles', (fileNames) => {
+  const files = Array.isArray(fileNames) ? fileNames : [fileNames];
+
+  const mimeTypes = {
+    pdf: 'application/pdf',
+    xml: 'application/xml',
+    txt: 'text/plain',
+    json: 'application/json',
+    zip: 'application/zip',
+    doc: 'application/msword',
+    docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  };
+
+  const uploads = files.map((name) => {
+    const ext = name.split('.').pop().toLowerCase();
+    const mimeType = mimeTypes[ext] || 'application/octet-stream'; // fallback
+
+    return cy
+      .fixture(name, 'binary')
+      .then(Cypress.Blob.binaryStringToBlob)
+      .then((fileContent) => ({
+        fileContent,
+        fileName: name,
+        mimeType,
+      }));
+  });
+
+  cy.wrap(null).then(() => {
+    cy.get('.file-upload-button').click(); // Open dialog
+    cy.get('input[type="file"]').attachFile(uploads);
+  });
 });
