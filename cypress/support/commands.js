@@ -1202,6 +1202,23 @@ Cypress.Commands.add('DHupload305Dictionary', function () {
     });
 });
 
+//Upload A4 PDF - Mass Upload
+Cypress.Commands.add('DHmassUpload', function () {
+  cy.fixture('Mass_A4.pdf', 'binary')
+    .then(Cypress.Blob.binaryStringToBlob)
+    .then((fileContent) => {
+      cy.get('input[type="file"]', { timeout: 5000 })
+        .should('exist')
+        .attachFile({
+          fileContent,
+          filePath: 'Mass_A4.pdf',
+          fileName: 'Mass_A4.pdf',
+          mimeType: 'application/pdf',
+          encoding: 'utf8',
+        });
+    });
+});
+
 //createNewUser_viaCSV
 Cypress.Commands.add('DHcreateNewUser_viaCSV', function () {
   cy.fixture('1_createUser.csv', 'binary')

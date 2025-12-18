@@ -1,7 +1,8 @@
 ///<reference types="cypress" />
 
 describe('Login to DH using keycloak and upload-send PDF dictionary', () => {
-  it('DH - Try  to Create New User when User already exist', () => {
+  //Try to Create New User when User already exist
+  it('DH - Try to Create New User when accountNumber already exist', () => {
     // Visit DH
     cy.visit(Cypress.env('dh_baseUrl'));
     cy.url().should('include', Cypress.env('dh_baseUrl'));
@@ -80,7 +81,6 @@ describe('Login to DH using keycloak and upload-send PDF dictionary', () => {
       });
 
     cy.wait(500);
-
     // Validate steps counter
     cy.get('form>div>p')
       .should('be.visible')
@@ -115,14 +115,13 @@ describe('Login to DH using keycloak and upload-send PDF dictionary', () => {
         const text = $el.text().trim().toLowerCase();
         cy.log('***************************', text);
 
-        if (text === 'aqua - aqua') {
+        if (text === 'aqua - aqua' || text === 'aqua - Aqua') {
           cy.wrap($el).click({ force: true });
         }
       });
 
     cy.get('input[name="accountNumber"]').type(user.username);
     cy.wait(1000);
-
     // Try Switching to 2nd step
     cy.get('form>div:nth-of-type(3)>button>div:nth-of-type(1)')
       .contains(/weiter|continue/i)
@@ -139,7 +138,7 @@ describe('Login to DH using keycloak and upload-send PDF dictionary', () => {
         );
       });
 
-    cy.wait(1500);
+    cy.wait(3500);
   });
 
   // Precondition: Search for the user and if user exists, proceed with deletion
@@ -177,11 +176,17 @@ describe('Login to DH using keycloak and upload-send PDF dictionary', () => {
       const searchAndDeleteUser = (userName) => {
         cy.get('.search-label').click();
 
-        // Search for the user
+        ///person/fromGroup/
+
+        cy.intercept('POST', '**/person/fromGroup/**').as('personFromGroup');
         cy.get('.mat-mdc-form-field-infix>input[formcontrolname="userName"]')
           .clear()
           .type(userName);
         cy.get('button[type="submit"]').click();
+        cy.wait('@personFromGroup', { timeout: 10000 }).then((interception) => {
+          expect(interception.response.statusCode).to.eq(200);
+          cy.log('Search completed');
+        });
 
         // Wait for the search results
         cy.wait(2000);
@@ -230,6 +235,7 @@ describe('Login to DH using keycloak and upload-send PDF dictionary', () => {
     cy.wait(3000);
   }); //end it
 
+  //Create New User when SentToPint:true
   it('DH - Create New User when SentToPint:true', () => {
     // Visit DH
     cy.visit(Cypress.env('dh_baseUrl'));
@@ -539,10 +545,107 @@ describe('Login to DH using keycloak and upload-send PDF dictionary', () => {
 
     // //Search for user by username
     // cy.get('input[placeholder="Benutzername"]').type(user.username);
-
-    // cy.pause();
   });
 
+  //Reset Password from Persons table
+  it('DH - Reset Password from Persons table', () => {
+    // Visit AUT
+    cy.visit(Cypress.env('dh_baseUrl'));
+    cy.url().should('include', Cypress.env('dh_baseUrl'));
+    cy.wait(1500);
+
+    // Remove Cookie dialog if present
+    cy.get('body').then(($body) => {
+      if ($body.find('#onetrust-policy-title').length) {
+        cy.get('#onetrust-accept-btn-handler').click({ force: true });
+      } else {
+        cy.log('Cookie bar not visible');
+      }
+    });
+    cy.wait(1500);
+
+    // Intercept backend call after login
+    cy.intercept('GET', '**/generalInfo').as('generalInfo');
+
+    // Login Dummy button
+    cy.get('button[id=":r2:"]').contains('Login Dummy').click();
+    cy.wait(2000);
+
+    // Wait & Assert response
+    cy.wait('@generalInfo', { timeout: 15000 }).then((interception) => {
+      expect(interception.response.statusCode).to.eq(200);
+      cy.log('Login successful, generalInfo loaded');
+    });
+
+    cy.url().should('include', `${Cypress.env('dh_baseUrl')}home/persons`);
+    cy.wait(1000);
+
+    //Select Company
+    const companyName = Cypress.env('company').toLowerCase();
+
+    // Open the dropdown
+    cy.get('div[role="combobox"]').click({ force: true });
+
+    // Find and click the matching option (ignore case)
+    cy.get('ul[aria-labelledby=":r5:-label"] > li > span')
+      .should('be.visible')
+      .each(($el) => {
+        const text = $el.text().trim().toLowerCase();
+
+        if (text === companyName) {
+          cy.wrap($el).click({ force: true });
+        }
+      });
+
+    // Get user test data from cypress.config.js
+    const user = Cypress.env('createUser')[0];
+    cy.wait(1500);
+
+    //Search for user by username
+    cy.get('input[placeholder="Benutzername"]').type(user.username);
+    cy.wait(1000);
+
+    //Scroll UP
+    cy.window().then((win) => {
+      win.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+    cy.wait(500);
+
+    // Open 3-dot menu
+    cy.get('button[aria-label="More Row actions"]').click({ force: true });
+    cy.wait(1000);
+
+    // Target the "Reset Pass" button
+
+    // Target all visible span elements inside the menu
+    cy.get('ul[role="menu"] span')
+      .should('be.visible') // Ensure the elements are visible
+      .each(($el) => {
+        // Iterate through each of the elements
+        // Check if the text matches either "Reset password" or "Passwort zurücksetzen"
+        if ($el.text().match(/Reset password|Passwort zurücksetzen/i)) {
+          // Highlight the element for debugging (optional)
+          cy.wrap($el).invoke(
+            'attr',
+            'style',
+            'border: 2px solid black; padding: 2px;'
+          );
+          cy.wait(2000);
+          // Click the element
+          cy.wrap($el).click();
+        }
+      });
+    cy.intercept('POST', '**/person/resetPersonPassword').as('resetPassword');
+    //Wait & Assert response
+    cy.wait('@resetPassword', { timeout: 15000 }).then((interception) => {
+      expect(interception.response.statusCode).to.eq(200);
+      cy.log('Password reset successful');
+    });
+
+    cy.wait(3500);
+  }); //End IT
+
+  //Edit E-Box user`s data, from Persons table
   it('DH - Edit E-Box user`s data, from Persons table', () => {
     // Visit AUT
     cy.visit(Cypress.env('dh_baseUrl'));
@@ -602,34 +705,34 @@ describe('Login to DH using keycloak and upload-send PDF dictionary', () => {
     //cy.get('input[placeholder="Telefonnummer"]').type(user.email);
     cy.wait(1000);
 
-    //Move filers to right
-    cy.get('div[role="toolbar"]>button:nth-of-type(2)')
-      .should('be.enabled')
-      .invoke('attr', 'style', 'border: 2px solid black; padding: 2px;')
-      .wait(1500)
-      .click();
-    cy.wait(1500);
+    // //Move filers to right
+    // cy.get('div[role="toolbar"]>button:nth-of-type(2)')
+    //   .should('be.enabled')
+    //   .invoke('attr', 'style', 'border: 2px solid black; padding: 2px;')
+    //   .wait(1500)
+    //   .click();
+    // cy.wait(1500);
 
-    //Filter by Status
-    cy.get('button>p')
-      .should('be.visible')
-      .contains(/Status|Status/)
-      .click();
-    cy.wait(2000);
+    // //Filter by Status
+    // cy.get('button>p')
+    //   .should('be.visible')
+    //   .contains(/Status|Status/)
+    //   .click();
+    // cy.wait(2000);
 
-    // Reset filter
-    cy.get('div[role="toolbar"] > button')
-      .last()
-      .should('be.visible')
-      .invoke('attr', 'style', 'border: 2px solid black; padding: 2px;') // highlight element
-      .wait(2500)
+    // // Reset filter
+    // cy.get('div[role="toolbar"] > button')
+    //   .last()
+    //   .should('be.visible')
+    //   .invoke('attr', 'style', 'border: 2px solid black; padding: 2px;') // highlight element
+    //   .wait(2500)
 
-      .click();
-    cy.wait(200);
+    //   .click();
+    // cy.wait(200);
 
-    // Re-search user
-    cy.get('input[placeholder="Benutzername"]').clear().type(user.username);
-    cy.wait(1000);
+    // // Re-search user
+    // cy.get('input[placeholder="Benutzername"]').clear().type(user.username);
+    // cy.wait(1000);
 
     //Togle Filters Bar HIDE
     cy.get('#toggle-filters')
@@ -704,13 +807,25 @@ describe('Login to DH using keycloak and upload-send PDF dictionary', () => {
     cy.get('button[aria-label="More Row actions"]').click({ force: true });
     cy.wait(1000);
 
-    // Target the "Bearbeiten" button
-    cy.get('ul[role="menu"] > li:nth-of-type(1) > div:nth-of-type(2) > span')
-      .should('be.visible')
-      .invoke('attr', 'style', 'border: 2px solid black; padding: 2px;') // highlight element
-      .wait(1000)
-      .contains(/Bearbeiten|Edit/i) // DE + EN
-      .click();
+    // Target the "Edit" button
+    // Target all visible span elements inside the menu
+    cy.get('ul[role="menu"] span')
+      .should('be.visible') // Ensure the elements are visible
+      .each(($el) => {
+        // Iterate through each of the elements
+        // Check if the text matches either "Edit" or "Bearbeiten"
+        if ($el.text().match(/Bearbeiten|Edit/i)) {
+          // Highlight the element for debugging (optional)
+          cy.wrap($el).invoke(
+            'attr',
+            'style',
+            'border: 2px solid black; padding: 2px;'
+          );
+          cy.wait(2000);
+          // Click the element
+          cy.wrap($el).click();
+        }
+      });
 
     cy.wait(3000);
 
@@ -754,7 +869,7 @@ describe('Login to DH using keycloak and upload-send PDF dictionary', () => {
 
     cy.wait(3500);
 
-    //Click on Edit User`s data
+    //Save chanages
     cy.get('.linkbtn--primary>div:nth-of-type(1)')
       .contains(/Änderungen speichern|Änderungen speichern/i) // DE + EN
       .click({ force: true });
@@ -762,85 +877,8 @@ describe('Login to DH using keycloak and upload-send PDF dictionary', () => {
     cy.wait(3000);
   }); //End IT
 
-  it.skip('DH - Reset Password from Persons table', () => {
-    // Visit AUT
-    cy.visit(Cypress.env('dh_baseUrl'));
-    cy.url().should('include', Cypress.env('dh_baseUrl'));
-    cy.wait(1500);
-
-    // Remove Cookie dialog if present
-    cy.get('body').then(($body) => {
-      if ($body.find('#onetrust-policy-title').length) {
-        cy.get('#onetrust-accept-btn-handler').click({ force: true });
-      } else {
-        cy.log('Cookie bar not visible');
-      }
-    });
-    cy.wait(1500);
-
-    // Intercept backend call after login
-    cy.intercept('GET', '**/generalInfo').as('generalInfo');
-
-    // Login Dummy button
-    cy.get('button[id=":r2:"]').contains('Login Dummy').click();
-    cy.wait(2000);
-
-    // Wait & Assert response
-    cy.wait('@generalInfo', { timeout: 15000 }).then((interception) => {
-      expect(interception.response.statusCode).to.eq(200);
-      cy.log('Login successful, generalInfo loaded');
-    });
-
-    cy.url().should('include', `${Cypress.env('dh_baseUrl')}home/persons`);
-    cy.wait(1000);
-
-    //Select Company
-    const companyName = Cypress.env('company').toLowerCase();
-
-    // Open the dropdown
-    cy.get('div[role="combobox"]').click({ force: true });
-
-    // Find and click the matching option (ignore case)
-    cy.get('ul[aria-labelledby=":r5:-label"] > li > span')
-      .should('be.visible')
-      .each(($el) => {
-        const text = $el.text().trim().toLowerCase();
-
-        if (text === companyName) {
-          cy.wrap($el).click({ force: true });
-        }
-      });
-
-    // Get user test data from cypress.config.js
-    const user = Cypress.env('createUser')[0];
-    cy.wait(1500);
-
-    //Search for user by username
-    cy.get('input[placeholder="Benutzername"]').type(user.username);
-    cy.wait(1000);
-
-    //Scroll UP
-    cy.window().then((win) => {
-      win.scrollTo({ top: 0, behavior: 'smooth' });
-    });
-    cy.wait(500);
-
-    // Open 3-dot menu
-    cy.get('button[aria-label="More Row actions"]').click({ force: true });
-    cy.wait(1000);
-
-    // Target the "Bearbeiten" button
-    cy.get('ul[role="menu"] > li:nth-of-type(5) > div:nth-of-type(2) > span')
-      .should('be.visible')
-      .invoke('attr', 'style', 'border: 2px solid black; padding: 2px;') // highlight element
-      .wait(1000)
-      .contains(/Passwort zurücksetzen|Passwort zurücksetzen/i) // DE + EN
-      .click();
-
-    cy.wait(3000);
-  }); //End IT
-
-  it('DH - Disable/Enable E-Box user from Persons table', () => {
+  //Targer Activate/Deactivate E-Box user from Persons table
+  it('DH - Targer Activate/Deactivate E-Box user from Persons table', () => {
     // Visit AUT
     cy.visit(Cypress.env('dh_baseUrl'));
     cy.url().should('include', Cypress.env('dh_baseUrl'));
@@ -912,246 +950,467 @@ describe('Login to DH using keycloak and upload-send PDF dictionary', () => {
 
     // 2. Open 3-dot menu
     cy.get('button[aria-label="More Row actions"]').click({ force: true });
-    cy.wait(500);
+    cy.wait(1000);
 
-    // const activateUser = /^(Aktivieren|Activate)$/i; // Matches exact "Aktivieren" or "Activate"
-    // const deactivateUser = /^(Deaktivieren|Deactivate)$/i; // Matches exact "Deaktivieren" or "Deactivate"
+    // Define regex patterns for activate/deactivate buttons
+    const activateUser = /^(Aktivieren|Activate)$/i;
+    const deactivateUser = /^(Deaktivieren|Deactivate)$/i;
 
-    // // Get the button and check its text
-    // cy.get('.MuiListItemText-root>span')
-    //   .should('be.visible') // Ensure the button is visible
-    //   .invoke('text') // Get the text of the button
-    //   .then((text) => {
-    //     const trimmedText = text.trim(); // Remove any extra spaces from the text
-    //     if (activateUser.test(trimmedText)) {
-    //       cy.log('Activating user...');
-    //       cy.get('.MuiListItemText-root>span') // Find the button again using the correct selector
-    //         .contains(activateUser) // Match "Aktivieren" or "Activate"
-    //         .click({ force: true }); // Force the click to happen
-    //     } else if (deactivateUser.test(trimmedText)) {
-    //       cy.log('Deactivating user...');
-    //       cy.get('.MuiListItemText-root>span') // Find the button again using the correct selector
-    //         .contains(deactivateUser) // Match "Deaktivieren" or "Deactivate"
-    //         .click({ force: true }); // Force the click to happen
-    //     } else {
-    //       cy.log('Unexpected button state: ' + trimmedText); // Log if an unexpected state occurs
-    //     }
-    //   });
+    // Find and click the Activate or Deactivate button
+    cy.get('ul[role="menu"] li .MuiListItemText-root > span')
+      .filter(':visible')
+      .each(($el, index) => {
+        const buttonText = $el.text().trim();
+        cy.log(`Menu button ${index}: "${buttonText}"`);
 
-    cy.get('li .MuiListItemText-root > span')
-      .filter(':visible') // only visible elements
-      .then(($spans) => {
-        const texts = [...$spans].map((el) => el.innerText.trim());
-        cy.log('Extracted texts: ' + texts.join(', '));
+        // Check for Deactivate button (user is currently active)
+        if (deactivateUser.test(buttonText)) {
+          cy.log(
+            `Found DEACTIVATE button: "${buttonText}" - User is currently Active`
+          );
+          cy.wrap($el)
+            .invoke('attr', 'style', 'border: 2px solid red; padding: 2px;')
+            .wait(1500)
+            .click({ force: true });
+          return false; // stop the .each() loop
+        }
 
-        // Example: use the texts
-        texts.forEach((t) => {
-          if (/Aktivieren|Activate/i.test(t)) {
-            cy.log('Found Activate button: ' + t);
-          } else if (/Deaktivieren|Deactivate/i.test(t)) {
-            cy.log('Found Deactivate button: ' + t);
-          }
-        });
+        // Check for Activate button (user is currently inactive)
+        if (activateUser.test(buttonText)) {
+          cy.log(
+            `Found ACTIVATE button: "${buttonText}" - User is currently Inactive`
+          );
+          cy.wrap($el)
+            .invoke('attr', 'style', 'border: 2px solid green; padding: 2px;')
+            .wait(1500)
+            .click({ force: true });
+          return false; // stop the .each() loop
+        }
       });
-
-    //********************************************************************************** */
-
-    // cy.get('li .MuiListItemText-root > span')
-    //   .filter(':visible') // only visible menu options
-    //   .then(($buttons) => {
-    //     const count = $buttons.length;
-    //     cy.log('Number of visible menu buttons:', count);
-
-    //     // Store texts in array
-    //     let buttonTexts = [];
-
-    //     cy.wrap($buttons)
-    //       .each(($el, index) => {
-    //         buttonTexts[index] = $el.innerText.trim();
-    //         cy.log(`Button ${index}:`, buttonTexts[index]);
-    //       })
-
-    //       // Validate text count & content
-    //       .then(() => {
-    //         for (let i = 0; i < count; i++) {
-    //           cy.get('li .MuiListItemText-root > span')
-    //             .filter(':visible')
-    //             .eq(i)
-    //             .invoke('text')
-    //             .then((txt) => {
-    //               const trimmed = txt.trim();
-    //               expect(trimmed).to.eq(buttonTexts[i]);
-    //               cy.log('Validated button text:', trimmed);
-    //             });
-    //         }
-    //       });
-    //   });
-
-    const activateUser = /^(Aktivieren|Activate)$/i; // Matches exact "Aktivieren" or "Activate"
-    const deactivateUser = /^(Deaktivieren|Deactivate)$/i; // Matches exact "Deaktivieren" or "Deactivate"
-
-    //Get total number of inputfields labels, and his validate txt
-    cy.get('li > .MuiListItemText-root')
-      .find('span')
-      .then((inputFieldLabel) => {
-        //Get total number of inputfields labels
-        const listingCount = Cypress.$(inputFieldLabel).length;
-        expect(inputFieldLabel).to.have.length(listingCount);
-        cy.log('number of buttons: ', listingCount); //Optional
-        //Get txt of inputfields labels, and validate it
-        let labeName = [];
-        cy.get('li> .MuiListItemText-root > span')
-          .each(($el, index, $list) => {
-            labeName[index] = $el.text(); //Get labele text for each element
-            cy.log('Button title', labeName[index]); //Optional
-          })
-          //Validating name of input field labels
-          .then(() => {
-            for (let index = 0; index < listingCount; index++) {
-              cy.get('li .MuiListItemText-root > span')
-                .eq(index)
-                .invoke('text')
-                .as('labels');
-              cy.get('@labels').should('include', labeName[index]); //Validate name of input field label
-              cy.log('inputfields label', labeName[index]);
-              // Check for Deactivate first
-              if (deactivateUser.test(labeName[index] + 1)) {
-                cy.log(`Clicking DEACTIVATE: ${labeName[index]}`);
-                cy.wait(500);
-                cy.get('.MuiListItemText-root>span')
-                  .eq(index)
-                  .invoke(
-                    'attr',
-                    'style',
-                    'border: 2px solid black; padding: 2px;'
-                  ) // highlight element
-                  .wait(1500)
-                  .pause()
-                  .click({ force: true });
-                return; // stop after click
-              } else if (activateUser.test(labeName[index])) {
-                cy.log(`Clicking ACTIVATE: ${labeName[index] + 1}`);
-                cy.wait(500);
-                cy.get('.MuiListItemText-root>span')
-                  .eq(index)
-                  .invoke(
-                    'attr',
-                    'style',
-                    'border: 2px solid black; padding: 2px;'
-                  ) // highlight element
-                  .wait(1500)
-                  .pause()
-                  .click({ force: true });
-                return; // stop after click
-              }
-            }
-          });
-
-        // .then(() => {
-        //   // ---- CLICK CHECK ----
-
-        //   // Check for Deactivate first
-        //   if (deactivateUser.test(text)) {
-        //     cy.log(`Clicking DEACTIVATE: ${text}`);
-        //     cy.get('li .MuiListItemText-root').eq(i).click({ force: true });
-        //     return; // stop after click
-        //   }
-
-        //   // Then check for Activate
-        //   if (activateUser.test(text)) {
-        //     cy.log(`Clicking ACTIVATE: ${text}`);
-        //     cy.get('li .MuiListItemText-root').eq(i).click({ force: true });
-        //     return; // stop after click
-        //   }
-        //   //   }//end for
-        // });
-      });
-
-    // //******************************************************************************* */
 
     cy.wait(3000);
   }); //End IT
 
-  // it('DH - Check If Reset Password - from Persons table is hidden, after Disabling user', () => {
-  //   // Visit AUT
-  //   cy.visit(Cypress.env('dh_baseUrl'));
-  //   cy.url().should('include', Cypress.env('dh_baseUrl'));
-  //   cy.wait(1500);
+  //Assign user to another company
 
-  //   // Remove Cookie dialog if present
-  //   cy.get('body').then(($body) => {
-  //     if ($body.find('#onetrust-policy-title').length) {
-  //       cy.get('#onetrust-accept-btn-handler').click({ force: true });
-  //     } else {
-  //       cy.log('Cookie bar not visible');
-  //     }
-  //   });
-  //   cy.wait(1500);
+  it('DH - Assign user to another company', () => {
+    // Visit AUT
+    cy.visit(Cypress.env('dh_baseUrl'));
+    cy.url().should('include', Cypress.env('dh_baseUrl'));
+    cy.wait(1500);
 
-  //   // Intercept backend call after login
-  //   cy.intercept('GET', '**/generalInfo').as('generalInfo');
+    // Remove Cookie dialog if present
+    cy.get('body').then(($body) => {
+      if ($body.find('#onetrust-policy-title').length) {
+        cy.get('#onetrust-accept-btn-handler').click({ force: true });
+      } else {
+        cy.log('Cookie bar not visible');
+      }
+    });
+    cy.wait(1500);
 
-  //   // Login Dummy button
-  //   cy.get('button[id=":r2:"]').contains('Login Dummy').click();
-  //   cy.wait(2000);
+    // Intercept backend call after login
+    cy.intercept('GET', '**/generalInfo').as('generalInfo');
 
-  //   // Wait & Assert response
-  //   cy.wait('@generalInfo', { timeout: 15000 }).then((interception) => {
-  //     expect(interception.response.statusCode).to.eq(200);
-  //     cy.log('Login successful, generalInfo loaded');
-  //   });
+    // Login Dummy button
+    cy.get('button[id=":r2:"]').contains('Login Dummy').click();
+    cy.wait(2000);
 
-  //   cy.url().should('include', `${Cypress.env('dh_baseUrl')}home/persons`);
-  //   cy.wait(1000);
+    // Wait & Assert response
+    cy.wait('@generalInfo', { timeout: 15000 }).then((interception) => {
+      expect(interception.response.statusCode).to.eq(200);
+      cy.log('Login successful, generalInfo loaded');
+    });
 
-  //   //Select Company
-  //   const companyName = Cypress.env('company').toLowerCase();
+    cy.url().should('include', `${Cypress.env('dh_baseUrl')}home/persons`);
+    cy.wait(1000);
 
-  //   // Open the dropdown
-  //   cy.get('div[role="combobox"]').click({ force: true });
+    //Select Company
+    const companyName = Cypress.env('company').toLowerCase();
 
-  //   // Find and click the matching option (ignore case)
-  //   cy.get('ul[aria-labelledby=":r5:-label"] > li > span')
-  //     .should('be.visible')
-  //     .each(($el) => {
-  //       const text = $el.text().trim().toLowerCase();
+    // Open the dropdown
+    cy.get('div[role="combobox"]').click({ force: true });
 
-  //       if (text === companyName) {
-  //         cy.wrap($el).click({ force: true });
-  //       }
-  //     });
+    // Find and click the matching option (ignore case)
+    cy.get('ul[aria-labelledby=":r5:-label"] > li > span')
+      .should('be.visible')
+      .each(($el) => {
+        const text = $el.text().trim().toLowerCase();
 
-  //   // Get user test data from cypress.config.js
-  //   const user = Cypress.env('createUser')[0];
-  //   cy.wait(1500);
+        if (text === companyName) {
+          cy.wrap($el).click({ force: true });
+        }
+      });
 
-  //   //Search for user by username
-  //   cy.get('input[placeholder="Benutzername"]').type(user.username);
-  //   cy.wait(1000);
+    // Get user test data from cypress.config.js
+    const user = Cypress.env('createUser')[0];
+    cy.wait(1500);
 
-  //   //Scroll UP
-  //   cy.window().then((win) => {
-  //     win.scrollTo({ top: 0, behavior: 'smooth' });
-  //   });
-  //   cy.wait(500);
+    //Search for user by username
+    cy.get('input[placeholder="Benutzername"]').type(user.username);
+    cy.wait(1000);
 
-  //   // Open 3-dot menu
-  //   cy.get('button[aria-label="More Row actions"]').click({ force: true });
-  //   cy.wait(1000);
+    //Scroll UP
+    cy.window().then((win) => {
+      win.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+    cy.wait(500);
 
-  //   // // Target the "Bearbeiten" button
-  //   // cy.get('ul[role="menu"] > li:nth-of-type(5) > div:nth-of-type(2) > span')
-  //   //   .should('be.visible')
-  //   //   .invoke('attr', 'style', 'border: 2px solid black; padding: 2px;') // highlight element
-  //   //   .wait(1000)
-  //   //   .contains(/Passwort zurücksetzen|Passwort zurücksetzen/i) // DE + EN
-  //   //   .click();
+    // Open 3-dot menu
+    cy.get('button[aria-label="More Row actions"]').click({ force: true });
+    cy.wait(1000);
 
-  //   cy.pause();
+    // Target the "Firmen" button
+    // Target all visible span elements inside the menu
+    cy.get('ul[role="menu"] span')
+      .should('be.visible') // Ensure the elements are visible
+      .each(($el) => {
+        // Iterate through each of the elements
+        // Check if the text matches either "Company" or "Firmen"
+        if ($el.text().match(/Firmen|Firmen/i)) {
+          // Highlight the element for debugging (optional)
+          cy.wrap($el).invoke(
+            'attr',
+            'style',
+            'border: 2px solid black; padding: 2px;'
+          );
+          cy.wait(2000);
+          // Click the element
+          cy.wrap($el).click();
+        }
+      });
 
-  //   cy.wait(3000);
-  // }); //End IT
+    cy.wait(3500);
 
+    //Assign Admin to another company
+    const companiesToAssign = ['AQUA', 'ABBA'];
+
+    companiesToAssign.forEach((company) => {
+      cy.get('tbody > tr').then(($rows) => {
+        // Find row where 2nd td text matches company
+        const targetRow = [...$rows].find((row) => {
+          const secondTdText = row
+            .querySelector('td:nth-child(2)')
+            ?.textContent.trim();
+          return secondTdText === company;
+        });
+
+        if (targetRow) {
+          cy.wrap(targetRow).within(() => {
+            // Find checkbox input inside 1st td
+            cy.get('td:nth-child(1)').then(($td) => {
+              // Prefer the input element for clicking, fallback to span if needed
+              const checkboxInput = $td.find('input[type="checkbox"]');
+              if (checkboxInput.length) {
+                // Check if already checked
+                if (checkboxInput.is(':checked')) {
+                  cy.log(`User already assigned to ${company}, skipping.`);
+                } else {
+                  cy.log(
+                    `Assigning user to ${company} by clicking checkbox input.`
+                  );
+                  cy.wrap(checkboxInput)
+                    .scrollIntoView()
+                    .click({ force: true });
+                }
+              } else {
+                // If no input found, try span with role=checkbox
+                const checkboxSpan = $td.find('span[role="checkbox"]');
+                if (checkboxSpan.length) {
+                  const isChecked =
+                    checkboxSpan.attr('aria-checked') === 'true';
+                  if (isChecked) {
+                    cy.log(`User already assigned to ${company}, skipping.`);
+                  } else {
+                    cy.log(
+                      `Assigning user to ${company} by clicking checkbox span.`
+                    );
+                    cy.wrap(checkboxSpan)
+                      .scrollIntoView()
+                      .click({ force: true });
+                  }
+                } else {
+                  cy.log(
+                    `No checkbox input or span found for company ${company}`
+                  );
+                }
+              }
+            });
+          });
+        } else {
+          cy.log(`Company row "${company}" not found!`);
+        }
+      });
+    });
+
+    cy.wait(2000);
+    //Click on next button
+    cy.get('.linkbtn--primary')
+      .contains(/Nächste|Nächste/i)
+      .click();
+
+    cy.wait(2000);
+    // Get user test data from cypress.config.js
+    // const user1 = Cypress.env('createUser')[0];
+    cy.get('input[placeholder="Firmenspezifische Benutzer ID"]').type(
+      user.username
+    );
+    cy.wait(1000);
+
+    // Target the "Übernahmen" button
+    // Target all visible span elements inside the menu
+    cy.get('.linkbtn--primary>div')
+      .should('be.visible') // Ensure the elements are visible
+      .each(($el) => {
+        // Iterate through each of the elements
+        // Check if the text matches either "Übernahmen" or "Übernahmen"
+        if ($el.text().match(/Übernahmen|Übernahmen/i)) {
+          // Highlight the element for debugging (optional)
+          cy.wrap($el).invoke(
+            'attr',
+            'style',
+            'border: 2px solid black; padding: 2px;'
+          );
+          cy.wait(2000);
+          // Click the element
+          cy.wrap($el).click();
+        }
+      });
+
+    cy.wait(3500);
+  }); //End IT
+
+  //Remove user from company
+  it('DH - Remove user from company', () => {
+    // Visit AUT
+    cy.visit(Cypress.env('dh_baseUrl'));
+    cy.url().should('include', Cypress.env('dh_baseUrl'));
+    cy.wait(1500);
+
+    // Remove Cookie dialog if present
+    cy.get('body').then(($body) => {
+      if ($body.find('#onetrust-policy-title').length) {
+        cy.get('#onetrust-accept-btn-handler').click({ force: true });
+      } else {
+        cy.log('Cookie bar not visible');
+      }
+    });
+    cy.wait(1500);
+
+    // Intercept backend call after login
+    cy.intercept('GET', '**/generalInfo').as('generalInfo');
+
+    // Login Dummy button
+    cy.get('button[id=":r2:"]').contains('Login Dummy').click();
+    cy.wait(2000);
+
+    // Wait & Assert response
+    cy.wait('@generalInfo', { timeout: 15000 }).then((interception) => {
+      expect(interception.response.statusCode).to.eq(200);
+      cy.log('Login successful, generalInfo loaded');
+    });
+
+    cy.url().should('include', `${Cypress.env('dh_baseUrl')}home/persons`);
+    cy.wait(1000);
+
+    //Select Company
+    const companyName = Cypress.env('company').toLowerCase();
+
+    // Open the dropdown
+    cy.get('div[role="combobox"]').click({ force: true });
+
+    // Find and click the matching option (ignore case)
+    cy.get('ul[aria-labelledby=":r5:-label"] > li > span')
+      .should('be.visible')
+      .each(($el) => {
+        const text = $el.text().trim().toLowerCase();
+
+        if (text === companyName) {
+          cy.wrap($el).click({ force: true });
+        }
+      });
+
+    // Get user test data from cypress.config.js
+    const user = Cypress.env('createUser')[0];
+    cy.wait(1500);
+
+    //Search for user by username
+    cy.get('input[placeholder="Benutzername"]').type(user.username);
+    cy.wait(1000);
+
+    //Scroll UP
+    cy.window().then((win) => {
+      win.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+    cy.wait(500);
+
+    // Open 3-dot menu
+    cy.get('button[aria-label="More Row actions"]').click({ force: true });
+    cy.wait(1000);
+
+    // Target the "Firmen" button
+    // Target all visible span elements inside the menu
+    cy.get('ul[role="menu"] span')
+      .should('be.visible') // Ensure the elements are visible
+      .each(($el) => {
+        // Iterate through each of the elements
+        // Check if the text matches either "Company" or "Firmen"
+        if ($el.text().match(/Firmen|Firmen/i)) {
+          // Highlight the element for debugging (optional)
+          cy.wrap($el).invoke(
+            'attr',
+            'style',
+            'border: 2px solid black; padding: 2px;'
+          );
+          cy.wait(2000);
+          // Click the element
+          cy.wrap($el).click();
+        }
+      });
+    cy.wait(2000);
+    const companiesToUnassign = ['ABBA']; // List of companies to unassign
+
+    companiesToUnassign.forEach((company) => {
+      // Locate the row containing the company name and uncheck the checkbox inside the row
+      cy.get('tbody > tr') // Get all rows in the table
+        .contains(company) // Find the row that contains the company name
+        .parent() // Get the parent <tr> of the row containing the company name
+        .find('td') // Find all <td> in the row
+        .eq(0) // Assuming the checkbox is in the first <td>, adjust index if needed
+        .find('span > input[type="checkbox"]') // Locate the checkbox inside <span>
+        .then(($checkbox) => {
+          // If the checkbox is checked, uncheck it
+          if ($checkbox.prop('checked')) {
+            cy.wrap($checkbox).click({ force: true }); // Uncheck the checkbox
+            cy.log(`Checkbox for ${company} was checked, now unchecked`);
+          } else {
+            cy.log(`Checkbox for ${company} is already unchecked`);
+          }
+        });
+    });
+    cy.wait(1500);
+    // Target the "Übernahmen" button
+    // Target all visible span elements inside the menu
+    cy.get('.linkbtn--primary>div')
+      .should('be.visible') // Ensure the elements are visible
+      .each(($el) => {
+        // Iterate through each of the elements
+        // Check if the text matches either "Übernahmen" or "Übernahmen"
+        if ($el.text().match(/Übernahmen|Übernahmen/i)) {
+          // Highlight the element for debugging (optional)
+          cy.wrap($el).invoke(
+            'attr',
+            'style',
+            'border: 2px solid black; padding: 2px;'
+          );
+          cy.wait(2000);
+          // Click the element
+          cy.wrap($el).click();
+        }
+      });
+
+    cy.wait(2500);
+
+    //Logout
+
+    // //Click on avatar
+    // cy.get('.MuiAvatar-root').click();
+    // cy.wait(1000);
+    // //Click on Logout button
+    // cy.get('ul[role="menu"]>li')
+    //   .contains(/Abmelden|Abmelden/i)
+    //   .click();
+    // cy.wait(1500);
+  }); //End IT
+
+  //Delete already created user
+  it('Delete already created user', () => {
+    const user = Cypress.env('createUser')[0];
+    cy.loginToSupportViewMaster();
+    cy.wait(3500);
+
+    // Remove pop up if exists
+    cy.get('body').then(($body) => {
+      if ($body.find('.release-note-dialog__close-icon').length > 0) {
+        cy.get('.release-note-dialog__close-icon').click();
+      } else {
+        cy.log('Close icon is NOT present');
+      }
+    });
+    cy.wait(1500);
+
+    // Search for Group by Display Name
+    cy.get('#searchButton>span').click();
+    const companyName = Cypress.env('company');
+    cy.get('.search-dialog>form>.form-fields>.searchText-wrap')
+      .eq(1)
+      .type(companyName);
+    cy.get('.search-dialog>form>div>.mat-primary').click();
+
+    // Switch to user section
+    cy.get('.action-buttons > .mdc-button').eq(4).click();
+
+    // Array of users to delete
+    const usersToDelete = ['ottoTestuser']; // Add more usernames as needed
+
+    usersToDelete.forEach((userName) => {
+      const searchAndDeleteUser = (userName) => {
+        cy.get('.search-label').click();
+
+        // Search for the user
+        cy.intercept('POST', '**/person/fromGroup/**').as('personFromGroup');
+        cy.get('.mat-mdc-form-field-infix>input[formcontrolname="userName"]')
+          .clear()
+          .type(userName);
+        cy.get('button[type="submit"]').click();
+        cy.wait('@personFromGroup', { timeout: 10000 }).then((interception) => {
+          expect(interception.response.statusCode).to.eq(200);
+          cy.log('Search completed');
+        });
+
+        // Wait for the search results
+        cy.wait(2000);
+
+        // Check results
+        cy.get('body').then(($body) => {
+          if ($body.find('.cdk-row').length === 0) {
+            cy.log(`User ${userName} not found or already deleted.`);
+            // Close search dialog if needed
+            cy.get('.mdc-evolution-chip__cell--trailing > .mat-icon').click({
+              force: true,
+            });
+          } else {
+            // User exists -> proceed with deletion
+            cy.get('.cdk-row').should('exist');
+            cy.log(`User ${userName} found. Proceeding with deletion.`);
+
+            cy.contains('button', /Delete|DSGVO-Löschung/)
+              .should('be.visible')
+              .click();
+
+            cy.get('.confirm-buttons > button')
+              .contains(/YES|JA/)
+              .should('be.visible')
+              .click();
+
+            cy.log(`User ${userName} has been deleted.`);
+          }
+        });
+      };
+
+      cy.wait(1500);
+      searchAndDeleteUser(userName);
+      cy.wait(1000);
+    });
+
+    // Logout
+    cy.get('.logout-icon').click();
+    cy.get('.confirm-buttons > :nth-child(2)').click();
+    cy.url().should('include', Cypress.env('baseUrl'));
+    cy.log('The tests have been completed successfully.');
+  });
+
+  //Crete User from CSV file
   it('DH - Crete User from CSV file', () => {
     // Visit DH
     cy.visit(Cypress.env('dh_baseUrl'));
@@ -1387,6 +1646,7 @@ describe('Login to DH using keycloak and upload-send PDF dictionary', () => {
       .click();
   }); //End IT
 
+  //Update existing CSV user
   it('DH - Update existing CSV user', () => {
     // Visit DH
     cy.visit(Cypress.env('dh_baseUrl'));
@@ -1513,5 +1773,161 @@ describe('Login to DH using keycloak and upload-send PDF dictionary', () => {
       .wait(1000)
       .contains(/OK|OK/i) // DE + EN
       .click();
+  }); //End IT
+
+  //Switch to ebox using magiclink
+  it.skip('DH - Switch to ebox using magiclink', () => {
+    // Visit AUT
+    cy.visit(Cypress.env('dh_baseUrl'));
+    cy.url().should('include', Cypress.env('dh_baseUrl'));
+    cy.wait(1500);
+
+    // Remove Cookie dialog if present
+    cy.get('body').then(($body) => {
+      if ($body.find('#onetrust-policy-title').length) {
+        cy.get('#onetrust-accept-btn-handler').click({ force: true });
+      } else {
+        cy.log('Cookie bar not visible');
+      }
+    });
+    cy.wait(1500);
+
+    // Intercept backend call after login
+    cy.intercept('GET', '**/generalInfo').as('generalInfo');
+
+    // Login Dummy button
+    cy.get('button[id=":r2:"]').contains('Login Dummy').click();
+    cy.wait(2000);
+
+    // Wait & Assert response
+    cy.wait('@generalInfo', { timeout: 15000 }).then((interception) => {
+      expect(interception.response.statusCode).to.eq(200);
+      cy.log('Login successful, generalInfo loaded');
+    });
+
+    cy.url().should('include', `${Cypress.env('dh_baseUrl')}home/persons`);
+    cy.wait(1000);
+
+    //Select Company
+    const companyName = Cypress.env('company').toLowerCase();
+
+    // Open the dropdown
+    cy.get('div[role="combobox"]').click({ force: true });
+
+    // Find and click the matching option (ignore case)
+    cy.get('ul[aria-labelledby=":r5:-label"] > li > span')
+      .should('be.visible')
+      .each(($el) => {
+        const text = $el.text().trim().toLowerCase();
+
+        if (text === companyName) {
+          cy.wrap($el).click({ force: true });
+        }
+      });
+
+    // Get user test data from cypress.config.js
+    const user = Cypress.env('createUser')[0];
+    cy.wait(1500);
+
+    //Search for user by username
+    cy.get('input[placeholder="Benutzername"]').type(user.username);
+    cy.wait(1000);
+
+    //Scroll UP
+    cy.window().then((win) => {
+      win.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+    cy.wait(500);
+
+    // Intercept any API calls that might return magic link
+    cy.intercept('**/magic-link**').as('magicLinkAPI');
+    cy.intercept('**/magicLink**').as('magicLinkAPI2');
+    cy.intercept('GET', '**/ebox/**').as('eboxAPI');
+
+    // Open 3-dot menu
+    cy.get('button[aria-label="More Row actions"]').click({ force: true });
+    cy.wait(1000);
+
+    // Get the menu item and check its properties
+    cy.get('ul[role="menu"] span')
+      .contains(/Ebox öffnen|Open Ebox/i)
+      .should('be.visible')
+      .then(($span) => {
+        // Log all parent elements to understand structure
+        cy.log('🔍 Menu item structure:');
+        let $current = $span;
+        for (let i = 0; i < 5; i++) {
+          $current = $current.parent();
+          cy.log(`Level ${i}:`, $current[0]?.outerHTML?.substring(0, 200));
+
+          // Check for any event listeners or data
+          const allAttributes = {};
+          Array.from($current[0]?.attributes || []).forEach((attr) => {
+            allAttributes[attr.name] = attr.value;
+          });
+          cy.log(`Attributes:`, allAttributes);
+        }
+      });
+
+    // Try removing target="_blank" if it exists and click
+    cy.get('ul[role="menu"] span')
+      .contains(/Ebox öffnen|Open Ebox/i)
+      .parents('li')
+      .first()
+      .then(($li) => {
+        // Remove any target="_blank" attributes
+        $li.find('*').removeAttr('target');
+        $li.removeAttr('target');
+
+        // Try to find and click
+        cy.wrap($li)
+          .find('span')
+          .contains(/Ebox öffnen|Open Ebox/i)
+          .click({ force: true });
+      });
+
+    // Check if any API was called with magic link
+    cy.wait(3000).then(() => {
+      // Try to get magic link from intercepted requests
+      cy.get('@magicLinkAPI.all').then((interceptions) => {
+        if (interceptions && interceptions.length > 0) {
+          cy.log('📡 Magic Link API was called:', interceptions);
+        }
+      });
+      cy.get('@magicLinkAPI2.all').then((interceptions) => {
+        if (interceptions && interceptions.length > 0) {
+          cy.log('📡 Magic Link API2 was called:', interceptions);
+        }
+      });
+    });
+
+    // Check if URL changed (maybe it navigated)
+    cy.url({ timeout: 10000 }).then((url) => {
+      cy.log(`Current URL: ${url}`);
+      if (url.includes('magic-link?session=')) {
+        // Extract and validate the session token
+        const urlObj = new URL(url);
+        const sessionToken = urlObj.searchParams.get('session');
+        cy.log(`🔑 Session Token: ${sessionToken}`);
+
+        // Validate token format
+        expect(sessionToken, 'Session token should exist').to.exist;
+        expect(
+          sessionToken,
+          'Token length should be > 20'
+        ).to.have.length.greaterThan(20);
+        expect(sessionToken, 'Token should be alphanumeric').to.match(
+          /^[A-Za-z0-9]+$/
+        );
+
+        cy.log('Successfully navigated to user inbox via magic link');
+      } else {
+        cy.log(
+          'URL did not change to magic link. Need to investigate further.'
+        );
+      }
+    });
+
+    cy.wait(2000);
   }); //End IT
 });

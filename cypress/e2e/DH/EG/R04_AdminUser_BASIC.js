@@ -1,7 +1,7 @@
 ///<reference types="cypress" />
 
 describe('Admin User', () => {
-  it('DH - Create New User', () => {
+  it('DH - Create New User ', () => {
     // Visit DH
     cy.visit(Cypress.env('dh_baseUrl'));
     cy.url().should('include', Cypress.env('dh_baseUrl'));
@@ -125,6 +125,7 @@ describe('Admin User', () => {
 
     //Submit
     cy.get('button[type="submit"]').click();
+    cy.wait(3500);
   });
 
   it('DH - Edit Admin User', () => {
@@ -483,6 +484,10 @@ describe('Admin User', () => {
     //
     // --- STEP 3: VALIDATE saved roles in the table ---
     //
+
+    // Search for user by username
+    cy.get('input[placeholder="Benutzername"]').type(user.username);
+    cy.wait(2000);
 
     // Expected roles in the exact format used in table.
     // NOTE → Table uses comma-separated DE labels.
@@ -1050,4 +1055,333 @@ describe('Admin User', () => {
     //   .click();
     // cy.wait(1500);
   }); //End IT
+
+  //(c) 2025
+  // it.skip('Get Credentials from emails and Login as a New Admin', () => {
+  //   const adminUser = Cypress.env('createAdminUser')[0];
+
+  //   // Visit the Yopmail inbox
+  //   cy.visit('https://yopmail.com/en/');
+  //   cy.get('#login').type(adminUser.email);
+  //   cy.get('#refreshbut > .md > .material-icons-outlined').click();
+
+  //   cy.iframe('#ifinbox')
+  //     .find('.mctn > .m > button > .lms')
+  //     .then((emails) => {
+  //       const emailList = [...emails];
+
+  //       let usernameEmailIndex = -1;
+  //       let passwordEmailIndex = -1;
+
+  //       for (let i = 0; i < emailList.length; i++) {
+  //         const subject = emailList[i].textContent.trim();
+  //         if (
+  //           usernameEmailIndex === -1 &&
+  //           subject.includes(
+  //             'Neuer Benutzer e-Gehaltszettel Portal – Benutzername'
+  //           )
+  //         ) {
+  //           usernameEmailIndex = i;
+  //         } else if (
+  //           passwordEmailIndex === -1 &&
+  //           subject.includes('Neuer Benutzer e-Gehaltszettel Portal – Passwort')
+  //         ) {
+  //           passwordEmailIndex = i;
+  //         }
+
+  //         if (usernameEmailIndex !== -1 && passwordEmailIndex !== -1) {
+  //           break;
+  //         }
+  //       }
+
+  //       if (usernameEmailIndex !== -1) {
+  //         cy.iframe('#ifinbox')
+  //           .find('.mctn > .m > button > .lms')
+  //           .eq(usernameEmailIndex)
+  //           .click()
+  //           .wait(1500);
+
+  //         cy.iframe('#ifmail')
+  //           .find(
+  //             '#mail>div>div:nth-child(2)>div:nth-child(3)>table>tbody>tr>td>p:nth-child(2)>span'
+  //           )
+  //           .invoke('text')
+  //           .then((innerText) => {
+  //             const startIndex =
+  //               innerText.indexOf('Hier ist Ihr Benutzername:') +
+  //               'Hier ist Ihr Benutzername:'.length;
+  //             const usernameFromEmailBody = innerText
+  //               .substring(startIndex)
+  //               .trim();
+
+  //             cy.wrap(usernameFromEmailBody).as('capturedUsername');
+  //             Cypress.env('usernameFromEmailBody', usernameFromEmailBody);
+
+  //             expect(usernameFromEmailBody).to.equal(adminUser.username);
+  //             cy.log('Username:', usernameFromEmailBody);
+  //           });
+  //       }
+
+  //       if (passwordEmailIndex !== -1) {
+  //         cy.iframe('#ifinbox')
+  //           .find('.mctn > .m > button > .lms')
+  //           .eq(passwordEmailIndex)
+  //           .click()
+  //           .wait(1500);
+
+  //         cy.iframe('#ifmail')
+  //           .find(
+  //             '#mail>div>div:nth-child(2)>div:nth-child(3)>table>tbody>tr>td>p:nth-child(2)>span'
+  //           )
+  //           .invoke('text')
+  //           .then((innerText) => {
+  //             const startIndex =
+  //               innerText.indexOf('hier ist Ihr Passwort:') +
+  //               'hier ist Ihr Passwort:'.length;
+  //             const passwordFromEmailBody = innerText
+  //               .substring(startIndex)
+  //               .trim();
+
+  //             cy.wrap(passwordFromEmailBody).as('capturedPassword');
+  //             Cypress.env('passwordFromEmailBody', passwordFromEmailBody);
+
+  //             cy.log('Password:', passwordFromEmailBody);
+  //           });
+  //       }
+  //     });
+
+  //   // Login and validate behavior
+  //   cy.wait(2500);
+  //   cy.intercept('GET', '**/supportView/v1/generalInfo**').as('visitURL');
+  //   cy.visit(Cypress.env('baseUrl'), { failOnStatusCode: false });
+
+  //   cy.wait(['@visitURL'], { timeout: 27000 }).then((interception) => {
+  //     expect(interception.response.statusCode).to.eq(200);
+  //   });
+
+  //   cy.url().should('include', '/login');
+
+  //   cy.get('@capturedUsername').then((username) => {
+  //     cy.get('@capturedPassword').then((password) => {
+  //       cy.get('input[formcontrolname="username"]').type(username);
+  //       cy.get('input[formcontrolname="password"]').type(password);
+  //       cy.wait(1500);
+  //       cy.get('button[type="submit"]').click();
+
+  //       cy.wait(2500);
+  //       cy.visit(Cypress.env('dashboardURL'), {
+  //         failOnStatusCode: false,
+  //       });
+  //       cy.wait(5500);
+
+  //       cy.get('body').then(($body) => {
+  //         if ($body.find('.release-note-dialog__close-icon').length > 0) {
+  //           cy.get('.release-note-dialog__close-icon').click();
+  //         }
+  //       });
+
+  //       const buttonLabelsCompaniesPage = [
+  //         { en: 'Upload Document', de: 'Personalisierte Dokumente hochladen' },
+  //         { en: 'Mass Upload', de: 'Massensendung hochladen' },
+  //         { en: 'User', de: 'Benutzer' },
+  //       ];
+  //       cy.get('button > .mdc-button__label').each(($button) => {
+  //         cy.wrap($button)
+  //           .invoke('text')
+  //           .then((text) => {
+  //             const trimmedText = text.trim();
+  //             const isValid = buttonLabelsCompaniesPage.some(
+  //               (label) => label.en === trimmedText || label.de === trimmedText
+  //             );
+  //             expect(isValid, `Unexpected button label: "${trimmedText}"`).to.be
+  //               .true;
+  //           });
+  //       });
+
+  //       cy.get('button > .mdc-button__label')
+  //         .filter((index, el) => {
+  //           const text = Cypress.$(el).text().trim();
+  //           return text === 'User' || text === 'Benutzer';
+  //         })
+  //         .click();
+  //       cy.wait(1500);
+
+  //       const buttonLabels = [
+  //         {
+  //           en: 'Select users to deliver documents',
+  //           de: 'Benutzer für die Zustellung von Dokumenten auswählen',
+  //         },
+  //         { en: 'Create User', de: 'Neuen Benutzer Anlegen' },
+  //         { en: 'Edit', de: 'Bearbeiten' },
+  //         { en: 'Password reset', de: 'Passwort wiederherstellen' },
+  //         { en: 'Open E-Box', de: 'E-Box Öffnen' },
+  //       ];
+
+  //       cy.get('button > .mdc-button__label').each(($button) => {
+  //         cy.wrap($button)
+  //           .invoke('text')
+  //           .then((text) => {
+  //             const trimmedText = text.trim();
+  //             const isValid = buttonLabels.some(
+  //               (label) => label.en === trimmedText || label.de === trimmedText
+  //             );
+  //             expect(isValid, `Unexpected button label: "${trimmedText}"`).to.be
+  //               .true;
+  //           });
+  //       });
+
+  //       cy.get('.menu-trigger>.mat-mdc-menu-trigger>.user-display-name').click({
+  //         force: true,
+  //       });
+  //       cy.wait(2000);
+  //       cy.get('.password-bttn').click({ force: true });
+  //       cy.wait(1500);
+
+  //       cy.get('@capturedPassword').then((password) => {
+  //         cy.get('input[formcontrolname="oldPassword"]').type(password);
+  //         cy.get('button>mat-icon[data-mat-icon-name="password_invisible"]')
+  //           .eq(0)
+  //           .click({ force: true });
+  //         cy.wait(1000);
+  //         cy.get('input[formcontrolname="newPassword"]').type(
+  //           Cypress.env('password_supportViewAdmin')
+  //         );
+  //         cy.get('button>mat-icon[data-mat-icon-name="password_invisible"]')
+  //           .eq(0)
+  //           .click({ force: true });
+  //         cy.wait(1000);
+  //         cy.get('input[formcontrolname="confirmedNewPassword"]').type(
+  //           Cypress.env('password_supportViewAdmin')
+  //         );
+  //         cy.get('button>mat-icon[data-mat-icon-name="password_invisible"]')
+  //           .eq(0)
+  //           .click({ force: true });
+  //         cy.wait(1000);
+  //       });
+
+  //       cy.get('.button-container>button[type="submit"]').click({
+  //         force: true,
+  //       });
+
+  //       cy.get('.logout-icon ').click();
+  //       cy.wait(2000);
+  //       cy.get('.confirm-buttons > :nth-child(2)').click();
+  //       cy.log('Test completed successfully.');
+  //     });
+  //   });
+  // });
+
+  //Delete already created Admin user
+  it('Master user delete Admin user', () => {
+    const companyName = Cypress.env('company');
+    const adminUser = Cypress.env('createAdminUser')[0];
+
+    // Login as Master User using a custom command
+    cy.loginToSupportViewMaster();
+    cy.wait(3500);
+
+    //Remove pop up
+    cy.get('body').then(($body) => {
+      if ($body.find('.release-note-dialog__close-icon').length > 0) {
+        cy.get('.release-note-dialog__close-icon').click();
+      } else {
+        cy.log('Close icon is NOT present');
+      }
+    });
+
+    //Search for the Test Company
+    cy.get('#searchButton>span').click(); //Click on search button
+    cy.wait(1000);
+
+    // Search for Group by Display Name using the company name
+    cy.get('.search-dialog>form>.form-fields>.searchText-wrap')
+      .eq(1)
+      .type(companyName);
+    cy.wait(1500);
+    //Find the Search button by button name and click on it
+    cy.get('.search-dialog>form>div>.mat-primary').click();
+    cy.wait(1500);
+
+    // Switch on Admin User page
+    cy.get('.ng-star-inserted>.action-buttons>button')
+      .contains(/Admin User|Admin Benutzer/)
+      .then(($button) => {
+        if ($button.length > 0) {
+          cy.wrap($button).click({ force: true });
+        }
+      });
+
+    cy.wait(2500);
+    //Search for Admin user
+    cy.get('#searchButton').click({ force: true });
+    cy.wait(1500);
+    cy.get('input[formcontrolname="userName"]')
+      .click()
+      .type(adminUser.username); //Search for newly created user using username
+    cy.get('button[type="submit"]').click(); //Click on Search button
+    cy.wait(2500);
+
+    //Delete Admin
+    cy.get('.action-buttons>button>.mdc-button__label')
+      .should('exist') // Ensure the element exists
+      .filter((index, el) => {
+        const text = Cypress.$(el).text().trim();
+        return text === 'GDPR-Delete' || text === 'DSGVO-Löschung'; // Find the Delete button
+      })
+      .first() // Use the first matching element if multiple exist
+      .should('be.visible') // Ensure it's visible
+      .click({ force: true }); // Force the click to handle asynchronous rendering
+    cy.wait(2500);
+
+    //Confirm Admin delte action
+    cy.get('button[color="primary"]>.mdc-button__label')
+      .should('exist') // Ensure the element exists
+      .filter((index, el) => {
+        const text = Cypress.$(el).text().trim();
+        return text === 'YES' || text === 'JA'; // Find the Delete button
+      })
+      .click({ force: true }); // Force the click to handle asynchronous rendering
+    cy.wait(2500);
+
+    // Verify  User deleted succesfully message
+    cy.get('.mat-mdc-simple-snack-bar > .mat-mdc-snack-bar-label')
+      .should('be.visible') // Ensure it's visible first
+      .invoke('text') // Get the text of the element
+      .then((text) => {
+        // Trim the text and validate it
+        const trimmedText = text.trim();
+        expect(trimmedText).to.match(
+          /User deleted succesfully|Benutzer erfolgreich gelöscht/
+        );
+      });
+
+    //Search for just deleted Admin user
+    cy.get('#searchButton').click({ force: true });
+    cy.wait(1500);
+    // cy.get('input[formcontrolname="userName"]')
+    //   .click()
+    //   .type(adminUser.username); //Search for newly created user using username
+
+    cy.get('button[type="submit"]').click(); //Click on Search button
+    cy.wait(2500);
+
+    //Already deleted Admin user is not founded
+
+    cy.get('.mat-mdc-paginator-range-actions>.mat-mdc-paginator-range-label')
+      .invoke('css', 'border', '1px solid blue')
+      .invoke('text') // Get the text of the element
+      .then((text) => {
+        // Trim the text and validate it
+        const trimmedText = text.trim();
+        expect(trimmedText).to.match(/0 of 0|0 von 0/);
+      });
+
+    cy.wait(2500);
+    //Logout from SW
+    cy.get('.logout-icon ').click();
+    cy.wait(2000);
+    cy.get('.confirm-buttons > :nth-child(2)').click();
+    cy.wait(2500);
+    cy.log('Test is successfully executed.');
+  }); //end it
 });

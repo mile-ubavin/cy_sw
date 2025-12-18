@@ -2,6 +2,43 @@
 
 describe('Login to DH using keycloak and upload-send PDF dictionary', () => {
   it('DH - Sent PDF Dictionary', () => {
+    // // Visit AUT
+    // cy.visit(Cypress.env('dh_baseUrl'));
+    // cy.url().should('include', Cypress.env('dh_baseUrl'));
+    // cy.wait(1500);
+
+    // // Remove Cookie dialog if present
+    // cy.get('body').then(($body) => {
+    //   if ($body.find('#onetrust-policy-title').is(':visible')) {
+    //     cy.get('#onetrust-accept-btn-handler').click({ force: true });
+    //   } else {
+    //     cy.log('Cookie bar not visible');
+    //   }
+    // });
+    // cy.wait(1500);
+
+    // // Click Login button (first page)
+    // cy.get('button[id=":r0:"]').contains('Login').click();
+    // cy.wait(2000);
+
+    // // --- Keycloak Login ---
+    // cy.get('input[id="username"]').type(Cypress.env('email_supportViewAdmin'));
+    // cy.get('input[name="password"]').type(
+    //   Cypress.env('password_supportViewAdmin')
+    // );
+
+    // // Intercept backend call after login
+    // cy.intercept('GET', '**/generalInfo').as('generalInfo');
+
+    // // Click Keycloak Login Button
+    // cy.get('button#kc-login').contains('Jetzt einloggen').click();
+
+    // // Wait & Assert response
+    // cy.wait('@generalInfo', { timeout: 15000 }).then((interception) => {
+    //   expect(interception.response.statusCode).to.eq(200);
+    //   cy.log('Login successful, generalInfo loaded');
+    // });
+
     // Visit AUT
     cy.visit(Cypress.env('dh_baseUrl'));
     cy.url().should('include', Cypress.env('dh_baseUrl'));
@@ -9,7 +46,7 @@ describe('Login to DH using keycloak and upload-send PDF dictionary', () => {
 
     // Remove Cookie dialog if present
     cy.get('body').then(($body) => {
-      if ($body.find('#onetrust-policy-title').is(':visible')) {
+      if ($body.find('#onetrust-policy-title').length) {
         cy.get('#onetrust-accept-btn-handler').click({ force: true });
       } else {
         cy.log('Cookie bar not visible');
@@ -17,27 +54,25 @@ describe('Login to DH using keycloak and upload-send PDF dictionary', () => {
     });
     cy.wait(1500);
 
-    // Click Login button (first page)
-    cy.get('button[id=":r0:"]').contains('Login').click();
-    cy.wait(2000);
-
-    // --- Keycloak Login ---
-    cy.get('input[id="username"]').type(Cypress.env('email_supportViewAdmin'));
-    cy.get('input[name="password"]').type(
-      Cypress.env('password_supportViewAdmin')
-    );
-
     // Intercept backend call after login
     cy.intercept('GET', '**/generalInfo').as('generalInfo');
 
-    // Click Keycloak Login Button
-    cy.get('button#kc-login').contains('Jetzt einloggen').click();
+    // Login Dummy button
+    cy.get('button[id=":r2:"]').contains('Login Dummy').click();
+    cy.wait(2000);
 
     // Wait & Assert response
     cy.wait('@generalInfo', { timeout: 15000 }).then((interception) => {
       expect(interception.response.statusCode).to.eq(200);
       cy.log('Login successful, generalInfo loaded');
     });
+
+    cy.url().should('include', `${Cypress.env('dh_baseUrl')}home/persons`);
+    cy.wait(1000);
+
+    //Click on Admin User page
+    cy.contains('nav ul li div span', /Arbeitsbereich/i).click();
+    cy.wait(1500);
 
     // Click on Personal Document Upload button
     cy.get('div[id="send-action-cards-grid"]>div>.css-1d9g5hj')
@@ -240,7 +275,7 @@ describe('Login to DH using keycloak and upload-send PDF dictionary', () => {
         cy.log('Coffee icon is visible');
       });
 
-    cy.pause();
+    cy.wait(1500);
 
     //Click on Fetig button
     cy.get('button>.css-1am57kc')

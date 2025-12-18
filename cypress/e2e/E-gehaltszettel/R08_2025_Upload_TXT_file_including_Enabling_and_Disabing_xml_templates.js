@@ -566,7 +566,7 @@ describe('Upload_TXT_file_including_Enabling_and_Disabing_xml_templates', () => 
   });
 
   //Admin user check Reporting email
-  it.only('Yopmail - Get Reporting email', () => {
+  it('Yopmail - Get Reporting email', () => {
     // Visit Yopmail
     cy.visit('https://yopmail.com/en/');
 

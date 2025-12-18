@@ -395,6 +395,8 @@ const environments = {
     ],
   },
   eg_test: {
+    dh_baseUrl:
+      'https://e-gehaltszettel-t.post-business-solutions.at/fe.documenthub_t/',
     baseUrl:
       'https://e-gehaltszettel-t.post-business-solutions.at/fe.e-gehaltszettel_t',
 
@@ -481,7 +483,8 @@ const environments = {
         doorNumber: '7',
         zipCode: '8010',
         city: 'Graz',
-        prefixedTitle: 'Address Data - Title',
+        prefixedTitle: 'Address Data - Title 1',
+        prefixedTitle2: 'Address Data - Title 2',
       },
     ],
     companyData: [
@@ -1371,7 +1374,7 @@ module.exports = defineConfig({
         /*********************************** */
       });
       //  Set executing tests on various environments, targeting appropriate json from const=environments
-      const envConfig = environments['eg_dev'];
+      const envConfig = environments['eg_test'];
       return { ...config, env: { ...config.env, ...envConfig } };
     }, //end
     specPattern: 'cypress/e2e/**/*.{js,jsx,ts,tsx}', // Ensure this matches your structure

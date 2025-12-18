@@ -227,7 +227,7 @@ describe('Broadcast delivery to Specific User', () => {
   }); //end it
 
   //Send delivery to Specific user
-  it('Send Delivery to selected-specific user', () => {
+  it.only('Send Delivery to selected-specific user', () => {
     cy.loginToSupportViewAdmin(); // Login as a master user
     cy.wait(1500);
 
@@ -375,7 +375,7 @@ describe('Broadcast delivery to Specific User', () => {
   }); //end it
 
   //Login to e-Box and Open Delivery
-  it('Ebox user Open delivery', () => {
+  it.only('Ebox user Open delivery', () => {
     cy.loginToEgEbox();
     cy.wait(2500);
 
