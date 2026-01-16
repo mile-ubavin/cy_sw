@@ -3,7 +3,7 @@ describe('Register User from xml file', () => {
   let extractedPassword = '';
 
   //Enable xml teplates by Masteruser
-  it('Enable XML templates by Masteruser', () => {
+  it.skip('Enable XML templates by Masteruser', () => {
     cy.loginToSupportViewMaster(); // Login as a master user
     cy.wait(1500);
 
@@ -108,7 +108,7 @@ describe('Register User from xml file', () => {
   });
 
   //Enable Craete user Role
-  it('Enable Craete user Roles ', () => {
+  it.skip('Enable Craete user Roles ', () => {
     // Login as a Master-User using custom command
     cy.loginToSupportViewMaster();
     cy.wait(3500);

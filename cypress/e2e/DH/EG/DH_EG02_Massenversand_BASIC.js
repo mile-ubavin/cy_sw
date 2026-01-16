@@ -341,11 +341,18 @@ describe('DH Mass upload', () => {
 
     cy.log(`Upload DateTime to verify: ${uploadDateTime}`);
 
+    cy.intercept('POST', '**/deliveryHandler/checkDocumentProcessingStatus').as(
+      'processDocuments'
+    );
     //Click on Weiter button
     cy.get('button[aria-label="Weiter zum nächsten Schritt"]')
       .should('be.enabled')
       .click();
-
+    cy.wait('@processDocuments', { timeout: 20000 }).then((interception) => {
+      expect(interception.response.statusCode).to.eq(200);
+      cy.log('Documents processed successfully');
+    });
+    cy.wait(1500);
     //Check Success message after document processing
     cy.get('#file-list>div>div>div>div>span')
       .should('be.visible')
@@ -516,9 +523,8 @@ describe('DH Mass upload', () => {
 
     // Open the dropdown
     cy.get('div[role="combobox"]').click({ force: true });
-
     // Find and click the matching option (ignore case)
-    cy.get('ul[aria-labelledby=":r5:-label"] > li > span')
+    cy.get('ul[role="listbox"] > li > span')
       .should('be.visible')
       .each(($el) => {
         const text = $el.text().trim().toLowerCase();
@@ -530,42 +536,42 @@ describe('DH Mass upload', () => {
     cy.wait(500);
 
     // Variables to store counts - track users and delivery types
-    let activeUsersCount = 0; // Count of users with "Aktiv" status
-    let sendToPrintUsersCount = 0; // Count of users with "Druck/Print" delivery type
-    let deliveryTypeElectronicalCount = 0; // Count of users with "Elektronisch" delivery type
-    let statusInactiveCount = 0; // Count of users with "Inaktiv" status (can be 0)
+    let activeUsersCount = 0; // Count of users with "Aktiv" status - used for total validation
+    let sendToPrintUsersCount = 0; // Count of users with "Druck/Print" delivery type - expected postal deliveries
+    let deliveryTypeElectronicalCount = 0; // Count of users with "Elektronisch" delivery type - expected digital deliveries
+    let statusInactiveCount = 0; // Count of users with "Inaktiv" status - tracked but not used in validation
 
     // Iterate through each row to count users and their delivery types
     cy.get('tbody>tr').then(($rows) => {
-      const totalRows = $rows.length;
-      cy.log(`Total Users in table: ${totalRows}`);
+      const totalRows = $rows.length; // Get total number of rows in the table
+      cy.log(`Total Users in table: ${totalRows}`); // Log total rows for debugging
 
       // Process each row to check status and delivery type
       $rows.each((rowIndex, row) => {
-        const $row = Cypress.$(row);
-        const $cells = $row.find('td');
+        const $row = Cypress.$(row); // Wrap row in Cypress jQuery object
+        const $cells = $row.find('td'); // Get all cells in the current row
 
-        let isActiveUser = false;
-        let hasElektronisch = false;
-        let hasDruck = false;
+        let isActiveUser = false; // Flag to track if current row is an active user
+        let hasElektronisch = false; // Flag to track if user has electronic delivery
+        let hasDruck = false; // Flag to track if user has print/postal delivery
 
-        // Check all cells in this row
+        // Check all cells in this row to find status and delivery type
         $cells.each((cellIndex, cell) => {
-          const cellValue = Cypress.$(cell).text().trim();
+          const cellValue = Cypress.$(cell).text().trim(); // Get cell text and remove whitespace
 
-          // Check if user is Active
+          // Check if user is Active (German or English)
           if (cellValue === 'Aktiv' || cellValue === 'Active') {
-            isActiveUser = true;
+            isActiveUser = true; // Mark user as active
           }
 
-          // Check if user is Inactive
+          // Check if user is Inactive (German or English)
           if (cellValue === 'Inaktiv' || cellValue === 'Inactive') {
-            statusInactiveCount++;
+            statusInactiveCount++; // Increment inactive count
           }
 
-          // Check delivery type - Elektronisch
+          // Check delivery type - Elektronisch (German or English)
           if (cellValue === 'Elektronisch' || cellValue === 'Electronic') {
-            hasElektronisch = true;
+            hasElektronisch = true; // Mark user as having electronic delivery
           }
 
           // Check delivery type - Druck/Print (check for all possible values)
@@ -574,31 +580,31 @@ describe('DH Mass upload', () => {
             cellValue === 'Print' ||
             cellValue === 'Druck/Print'
           ) {
-            hasDruck = true;
+            hasDruck = true; // Mark user as having print/postal delivery
           }
         });
 
-        // Count active users
+        // Count active users and their delivery types
         if (isActiveUser) {
-          activeUsersCount++;
+          activeUsersCount++; // Increment active user count
 
           // Only count delivery types for active users
           if (hasElektronisch) {
-            deliveryTypeElectronicalCount++;
+            deliveryTypeElectronicalCount++; // Increment electronic delivery count
           }
           if (hasDruck) {
-            sendToPrintUsersCount++;
+            sendToPrintUsersCount++; // Increment print/postal delivery count
           }
         }
       });
 
-      // Log summary after processing all cells
+      // Log summary after processing all rows
       cy.log(`\n========== SUMMARY ==========`);
       // cy.log(`Total cells processed: ${$cells.length}`);
-      cy.log(`Active Users Count: ${activeUsersCount}`);
-      cy.log(`Inactive Users Count: ${statusInactiveCount}`);
-      cy.log(`Elektronisch Delivery Count: ${deliveryTypeElectronicalCount}`);
-      cy.log(`Druck/Print Delivery Count: ${sendToPrintUsersCount}`);
+      cy.log(`Active Users Count: ${activeUsersCount}`); // Total active users found in table
+      cy.log(`Inactive Users Count: ${statusInactiveCount}`); // Total inactive users found in table
+      cy.log(`Elektronisch Delivery Count: ${deliveryTypeElectronicalCount}`); // Expected digital deliveries from table
+      cy.log(`Druck/Print Delivery Count: ${sendToPrintUsersCount}`); // Expected postal deliveries from table
 
       // Validate that required counts are not zero (except inactive can be 0)
       expect(
@@ -671,40 +677,81 @@ describe('DH Mass upload', () => {
             )}, Personalnummern: ${inactiveUsersList}`;
           }
 
-          // Assert email contains either success message, postal message, or inactive users info
+          // Normalize whitespace for comparison
+          const normalizedText = text.replace(/\s+/g, ' ');
+          cy.log(`Email Body (normalized): ${normalizedText}`);
+
+          // Extract actual counts from email using regex
+          const digitalSuccessMatch = normalizedText.match(
+            /Sie haben (\d+) Sendung\(en\) erfolgreich digital/
+          );
+          const actualDigitalSuccess = digitalSuccessMatch
+            ? parseInt(digitalSuccessMatch[1])
+            : 0;
+
+          const postalSuccessMatch = normalizedText.match(
+            /Zusätzlich haben Sie (\d+) Sendung\(en\) erfolgreich über den postalischen Weg/
+          );
+          const actualPostalSuccess = postalSuccessMatch
+            ? parseInt(postalSuccessMatch[1])
+            : 0;
+
+          const digitalFailedMatch = normalizedText.match(
+            /(\d+) Sendung\(en\) die Sie elektronisch verschicken wollten, konnten nicht zugestellt werden/
+          );
+          const actualDigitalFailed = digitalFailedMatch
+            ? parseInt(digitalFailedMatch[1])
+            : 0;
+
+          const postalFailedMatch = normalizedText.match(
+            /(\d+) Sendung\(en\) die Sie postalisch als Brief verschicken wollten/
+          );
+          const actualPostalFailed = postalFailedMatch
+            ? parseInt(postalFailedMatch[1])
+            : 0;
+
+          cy.log(`========== EMAIL COUNTS ==========`);
+          cy.log(`Digital Success: ${actualDigitalSuccess}`);
+          cy.log(`Postal Success: ${actualPostalSuccess}`);
+          cy.log(`Digital Failed: ${actualDigitalFailed}`);
+          cy.log(`Postal Failed: ${actualPostalFailed}`);
+
+          // Validate: successful digital deliveries
+          // Digital success in email should equal elektronisch count from table
           expect(
-            text.includes(successMessage) ||
-              text.includes(postalMessage) ||
-              text.includes(inactiveUsersMessage)
-          ).to.be.true;
+            actualDigitalSuccess,
+            `Digital success (${actualDigitalSuccess}) should equal Elektronisch count from table (${deliveryTypeElectronicalCount})`
+          ).to.equal(deliveryTypeElectronicalCount);
 
-          // Validate electronic delivery count in email
-          if (sendToElChannel > 0) {
-            expect(text).to.include(
-              `${sendToElChannel} Sendung(en) erfolgreich digital`
-            );
-            cy.log(
-              `Validated ${sendToElChannel} electronic deliveries in email`
-            );
-          }
+          // Validate: successful postal deliveries
+          // Postal success should be 0 if there were failures, otherwise should match table count
+          const expectedPostalSuccess = Math.max(
+            sendToPrintUsersCount - actualPostalFailed,
+            0
+          );
+          expect(
+            actualPostalSuccess,
+            `Postal success (${actualPostalSuccess}) should be ${expectedPostalSuccess} (table: ${sendToPrintUsersCount}, failed: ${actualPostalFailed})`
+          ).to.equal(expectedPostalSuccess);
 
-          // Validate postal delivery count in email
-          if (sendToPrintUsersCount > 0) {
-            expect(text).to.include(
-              `${sendToPrintUsersCount} Sendung(en) erfolgreich über den postalischen Weg`
-            );
-            cy.log(
-              `Validated ${sendToPrintUsersCount} postal deliveries in email`
-            );
-          }
+          // Log summary for verification
+          cy.log(`========== VALIDATION SUMMARY ==========`);
+          cy.log(
+            `✓ Digital deliveries validated: ${actualDigitalSuccess} successful`
+          );
+          cy.log(
+            `✓ Postal deliveries validated: ${actualPostalSuccess} successful, ${actualPostalFailed} failed`
+          );
+          cy.log(
+            `✓ Total attempted deliveries: ${
+              actualDigitalSuccess +
+              actualPostalSuccess +
+              actualDigitalFailed +
+              actualPostalFailed
+            }`
+          );
 
-          // Log email content for debugging
-          cy.log(`Email Content: ${text}`);
-          if (inactiveUsersMessage) {
-            cy.log(`Inactive Users Info: ${inactiveUsersMessage}`);
-          }
-
-          cy.log(`Email content validation passed`);
+          cy.log(`Email validation passed!`);
         });
     }
 

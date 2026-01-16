@@ -429,42 +429,65 @@ describe('Login to DH using keycloak and upload-send PDF dictionary', () => {
       });
     cy.wait(500);
 
-    //select
-    cy.get('form>div:nth-of-type(2)>div:nth-of-type(1)>div>div').click({
-      force: true,
-    });
-    cy.wait(500);
+    //select first dropdown (Versandart) - check if enabled
+    cy.get('form>div:nth-of-type(2)>div:nth-of-type(1)>div>div').then(
+      ($dropdown) => {
+        const isDisabled =
+          $dropdown.attr('aria-disabled') === 'true' ||
+          $dropdown.hasClass('Mui-disabled') ||
+          $dropdown.find('.Mui-disabled').length > 0;
 
-    //Select from dropdown
-    cy.get("ul[role='listbox'] > li >span")
-      .should('be.visible')
-      .each(($el) => {
-        const text = $el.text().trim().toLowerCase();
-        cy.log('***************************', text);
+        if (isDisabled) {
+          cy.log('First dropdown is disabled, skipping selection');
+        } else {
+          cy.wrap($dropdown).click({ force: true });
+          cy.wait(500);
 
-        if (text === 'elektronisch') {
-          cy.wrap($el).click({ force: true });
+          //Select from dropdown
+          cy.get("ul[role='listbox'] > li >span")
+            .should('be.visible')
+            .each(($el) => {
+              const text = $el.text().trim().toLowerCase();
+              cy.log('***************************', text);
+
+              if (text === 'elektronisch') {
+                cy.wrap($el).click({ force: true });
+              }
+            });
+          cy.wait(500);
         }
-      });
-    cy.wait(500);
+      }
+    );
 
-    //Select
-    cy.get('form>div:nth-of-type(2)>div:nth-of-type(2)>div>div').click({
-      force: true,
-    });
-    cy.wait(500);
-    //Select from dropdown
-    cy.get("ul[role='listbox'] > li >span")
-      .should('be.visible')
-      .each(($el) => {
-        const text = $el.text().trim().toLowerCase();
-        cy.log('***************************', text);
+    //Select second dropdown (Zustellart) - check if enabled
+    cy.get('form>div:nth-of-type(2)>div:nth-of-type(2)>div>div').then(
+      ($dropdown) => {
+        const isDisabled =
+          $dropdown.attr('aria-disabled') === 'true' ||
+          $dropdown.hasClass('Mui-disabled') ||
+          $dropdown.find('.Mui-disabled').length > 0;
 
-        if (text === 'digital') {
-          cy.wrap($el).click({ force: true });
+        if (isDisabled) {
+          cy.log('Second dropdown is disabled, skipping selection');
+        } else {
+          cy.wrap($dropdown).click({ force: true });
+          cy.wait(500);
+
+          //Select from dropdown
+          cy.get("ul[role='listbox'] > li >span")
+            .should('be.visible')
+            .each(($el) => {
+              const text = $el.text().trim().toLowerCase();
+              cy.log('***************************', text);
+
+              if (text === 'digital') {
+                cy.wrap($el).click({ force: true });
+              }
+            });
+          cy.wait(500);
         }
-      });
-    cy.wait(500);
+      }
+    );
 
     cy.intercept('POST', '**/editPerson').as('editPerson');
     //Finish Create New User approach

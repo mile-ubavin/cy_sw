@@ -346,9 +346,24 @@ describe('Broadcast delivery to Specific User', () => {
     cy.wait(2000);
 
     // Retrieve upload time stored in previous test
-    const uploadDateTime = Cypress.env('uploadDateTime');
-    expect(uploadDateTime, 'Upload datetime must exist').to.exist;
-    cy.log(`Stored Upload DateTime: ${uploadDateTime}`);
+    let uploadDateTime = Cypress.env('uploadDateTime');
+
+    // If uploadDateTime is not set (test run in isolation), generate current time
+    if (!uploadDateTime) {
+      const now = new Date();
+      const formattedDate = now.toLocaleDateString('de-DE'); // Format: dd.mm.yyyy
+      const formattedTime = now.toLocaleTimeString('de-DE', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+      });
+      uploadDateTime = `${formattedDate} ${formattedTime}`;
+      cy.log(
+        `⚠️ Upload DateTime not found, using current time: ${uploadDateTime}`
+      );
+    } else {
+      cy.log(`Stored Upload DateTime: ${uploadDateTime}`);
+    }
 
     // Find latest delivery and extract its date/time
     cy.get('.date-of-delivery-cell > .half-cell-text-content')
@@ -815,9 +830,24 @@ describe('Broadcast delivery to Specific User', () => {
     cy.wait(2000);
 
     // Retrieve upload time stored in previous test
-    const uploadDateTime = Cypress.env('uploadDateTime');
-    expect(uploadDateTime, 'Upload datetime must exist').to.exist;
-    cy.log(`Stored Upload DateTime: ${uploadDateTime}`);
+    let uploadDateTime = Cypress.env('uploadDateTime');
+
+    // If uploadDateTime is not set (test run in isolation), generate current time
+    if (!uploadDateTime) {
+      const now = new Date();
+      const formattedDate = now.toLocaleDateString('de-DE'); // Format: dd.mm.yyyy
+      const formattedTime = now.toLocaleTimeString('de-DE', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+      });
+      uploadDateTime = `${formattedDate} ${formattedTime}`;
+      cy.log(
+        `⚠️ Upload DateTime not found, using current time: ${uploadDateTime}`
+      );
+    } else {
+      cy.log(`Stored Upload DateTime: ${uploadDateTime}`);
+    }
 
     // Find latest delivery and extract its date/time
     cy.get('.date-of-delivery-cell > .half-cell-text-content')

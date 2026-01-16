@@ -564,7 +564,7 @@ describe('Sent pdf file', () => {
     });
     cy.wait(1500);
 
-    // Upload serviceLine file
+    // Upload PDFdictionary305
     cy.uploadPDFdictionary305();
     cy.wait(2500);
 

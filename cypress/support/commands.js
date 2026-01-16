@@ -1185,7 +1185,7 @@ Cypress.Commands.add('downloadZipFromYopmail', () => {
 
 //********************************DH******************************* */
 
-//Upload 305 Dictionary PDF - For AQUA ABBA000100279311
+//DH Upload 305 Dictionary PDF - For AQUA ABBA000100279311
 Cypress.Commands.add('DHupload305Dictionary', function () {
   cy.fixture('305_Dictionary_(AQUA_ABBA000100279311).pdf', 'binary')
     .then(Cypress.Blob.binaryStringToBlob)
@@ -1202,7 +1202,7 @@ Cypress.Commands.add('DHupload305Dictionary', function () {
     });
 });
 
-//Upload A4 PDF - Mass Upload
+//DH Upload A4 PDF - Mass Upload
 Cypress.Commands.add('DHmassUpload', function () {
   cy.fixture('Mass_A4.pdf', 'binary')
     .then(Cypress.Blob.binaryStringToBlob)
@@ -1219,7 +1219,7 @@ Cypress.Commands.add('DHmassUpload', function () {
     });
 });
 
-//createNewUser_viaCSV
+//DH createNewUser_viaCSV
 Cypress.Commands.add('DHcreateNewUser_viaCSV', function () {
   cy.fixture('1_createUser.csv', 'binary')
     .then(Cypress.Blob.binaryStringToBlob)
@@ -1235,7 +1235,7 @@ Cypress.Commands.add('DHcreateNewUser_viaCSV', function () {
     });
 });
 
-//updateExistingUser_viaCSV
+//DH updateExistingUser_viaCSV
 Cypress.Commands.add('DHupdateExistingUser_viaCSV', function () {
   cy.fixture('2_updateUser.csv', 'binary')
     .then(Cypress.Blob.binaryStringToBlob)
@@ -1251,7 +1251,55 @@ Cypress.Commands.add('DHupdateExistingUser_viaCSV', function () {
     });
 });
 
-// Upload multiple files, any extension
+//DH Upload Structured XML file
+Cypress.Commands.add('DHuploadStructuredXMLfile', function () {
+  cy.fixture('XML_Structured(ABBA000100279311_L103-ISS).xml', 'binary')
+    .then(Cypress.Blob.binaryStringToBlob)
+    .then((fileContent) => {
+      cy.get('input[type="file"]', { timeout: 5000 })
+        .should('exist')
+        .attachFile({
+          mimeType: 'text/xml',
+          fileContent,
+          filePath: 'XML_Structured(ABBA000100279311_L103-ISS).xml',
+          fileName: 'XML_Structured(ABBA000100279311_L103-ISS).xml',
+        });
+    });
+});
+
+// Create new user from XML file
+Cypress.Commands.add('createNewUserFromXMLfile', function () {
+  cy.fixture('JAT-XML_1receiver__(ISS BBcare).xml', 'binary')
+    .then(Cypress.Blob.binaryStringToBlob)
+    .then((fileContent) => {
+      cy.get('input[type="file"]', { timeout: 5000 })
+        .should('exist')
+        .attachFile({
+          mimeType: 'text/xml',
+          fileContent,
+          filePath: 'JAT-XML_1receiver__(ISS BBcare).xml',
+          fileName: 'JAT-XML_1receiver__(ISS BBcare).xml',
+        });
+    });
+});
+
+// Upload TXT file
+Cypress.Commands.add('uploadTXTfile', function () {
+  cy.fixture('TXT_1receiver__(AQUA_ABBA000100279311_ISS BBcare).txt', 'binary')
+    .then(Cypress.Blob.binaryStringToBlob)
+    .then((fileContent) => {
+      cy.get('input[type="file"]', { timeout: 5000 })
+        .should('exist')
+        .attachFile({
+          mimeType: 'text/plain',
+          fileContent,
+          filePath: 'TXT_1receiver__(AQUA_ABBA000100279311_ISS BBcare).txt',
+          fileName: 'TXT_1receiver__(AQUA_ABBA000100279311_ISS BBcare).txt',
+        });
+    });
+});
+
+//DH Upload multiple files, any extension
 Cypress.Commands.add('uploadFiles', (fileNames) => {
   const files = Array.isArray(fileNames) ? fileNames : [fileNames];
 
