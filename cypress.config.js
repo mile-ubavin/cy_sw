@@ -37,7 +37,7 @@ async function downloadZipAndReadFirstPdf() {
   const zipEntries = zip.getEntries();
 
   const pdfEntry = zipEntries.find((e) =>
-    e.entryName.toLowerCase().endsWith('.pdf')
+    e.entryName.toLowerCase().endsWith('.pdf'),
   );
   if (!pdfEntry) throw new Error('No PDF file found in ZIP');
 
@@ -63,7 +63,7 @@ function extractPasswordProtectedZip({ zipFilePath, password, outputDir }) {
 
       cy.log(
         '------------------------------------------------>>>',
-        zipFilePath
+        zipFilePath,
       );
 
       if (!fs.existsSync(zipFilePath)) {
@@ -239,8 +239,8 @@ const downloadFileToFolder = ({ url, fileName }) => {
         if (response.statusCode !== 200) {
           return reject(
             new Error(
-              `Failed to download file: ${url} returned status code ${response.statusCode}`
-            )
+              `Failed to download file: ${url} returned status code ${response.statusCode}`,
+            ),
           );
         }
 
@@ -1344,7 +1344,7 @@ module.exports = defineConfig({
 
           // Use regex to extract headerLinks array
           const match = fileContent.match(
-            /weiterführendeLinks:\s*\[([\s\S]*?)\]/
+            /weiterführendeLinks:\s*\[([\s\S]*?)\]/,
           );
           if (match) {
             return match[1]
@@ -1360,7 +1360,7 @@ module.exports = defineConfig({
 
           // Use regex to extract the solutionsData object from the file content
           const solutionsDataMatch = fileContent.match(
-            /solutionsData:\s*({[\s\S]*?})/
+            /solutionsData:\s*({[\s\S]*?})/,
           );
 
           if (solutionsDataMatch) {

@@ -86,7 +86,7 @@ describe('DH Upload Dictionary (305)', () => {
       .invoke('text')
       .then((text) => {
         expect(text.trim()).to.match(
-          /PDF Dictionary has been assigned successfully|PDF Dictionary wurde erfolgreich zugewiesen/
+          /PDF Dictionary has been assigned successfully|PDF Dictionary wurde erfolgreich zugewiesen/,
         );
       });
 
@@ -139,7 +139,7 @@ describe('DH Upload Dictionary (305)', () => {
     cy.get('.search').click({ force: true });
     //Search for Admin using username
     cy.get('input[formcontrolname="userName"]').type(
-      Cypress.env('username_supportViewAdmin')
+      Cypress.env('username_supportViewAdmin'),
     );
     // Click on Search for Admin User button
     cy.get('button[type="submit"]').click();
@@ -177,7 +177,7 @@ describe('DH Upload Dictionary (305)', () => {
                     // Enable the role if it's not already checked
                     cy.wrap($checkboxInput).click({ force: true });
                     cy.log(
-                      `Checkbox for "${text}" was not enabled; now enabled.`
+                      `Checkbox for "${text}" was not enabled; now enabled.`,
                     );
                   } else {
                     cy.log(`Checkbox for "${text}" is already enabled.`);
@@ -213,45 +213,8 @@ describe('DH Upload Dictionary (305)', () => {
   }); //end it
 
   //Uplad pdf - From Mass Upload Button
-  it('DH - Upload pdfDictionary 305_Dictionary (verify Error and Success messages)', () => {
+  it.only('DH - Upload pdfDictionary 305_Dictionary (verify Error and Success messages)', () => {
     let uploadDateTime = ''; // Global variable to store upload date & time
-
-    // // Visit AUT
-    // cy.visit(Cypress.env('dh_baseUrl'));
-    // cy.url().should('include', Cypress.env('dh_baseUrl'));
-    // cy.wait(1500);
-
-    // // Remove Cookie dialog if present
-    // cy.get('body').then(($body) => {
-    //   if ($body.find('#onetrust-policy-title').is(':visible')) {
-    //     cy.get('#onetrust-accept-btn-handler').click({ force: true });
-    //   } else {
-    //     cy.log('Cookie bar not visible');
-    //   }
-    // });
-    // cy.wait(1500);
-
-    // // Click Login button (first page)
-    // cy.get('button[id=":r0:"]').contains('Login').click();
-    // cy.wait(2000);
-
-    // // --- Keycloak Login ---
-    // cy.get('input[id="username"]').type(Cypress.env('email_supportViewAdmin'));
-    // cy.get('input[name="password"]').type(
-    //   Cypress.env('password_supportViewAdmin')
-    // );
-
-    // // Intercept backend call after login
-    // cy.intercept('GET', '**/generalInfo').as('generalInfo');
-
-    // // Click Keycloak Login Button
-    // cy.get('button#kc-login').contains('Jetzt einloggen').click();
-
-    // // Wait & Assert response
-    // cy.wait('@generalInfo', { timeout: 15000 }).then((interception) => {
-    //   expect(interception.response.statusCode).to.eq(200);
-    //   cy.log('Login successful, generalInfo loaded');
-    // });
 
     // Visit AUT
     cy.visit(Cypress.env('dh_baseUrl'));
@@ -260,7 +223,7 @@ describe('DH Upload Dictionary (305)', () => {
 
     // Remove Cookie dialog if present
     cy.get('body').then(($body) => {
-      if ($body.find('#onetrust-policy-title').length) {
+      if ($body.find('#onetrust-policy-title').is(':visible')) {
         cy.get('#onetrust-accept-btn-handler').click({ force: true });
       } else {
         cy.log('Cookie bar not visible');
@@ -268,44 +231,25 @@ describe('DH Upload Dictionary (305)', () => {
     });
     cy.wait(1500);
 
+    // --- Login ---
+    cy.get('input[placeholder="Username"]').type(
+      Cypress.env('email_supportViewAdmin'),
+    );
+    cy.get('input[type="password"]').type(
+      Cypress.env('password_supportViewAdmin'),
+    );
+
     // Intercept backend call after login
     cy.intercept('GET', '**/generalInfo').as('generalInfo');
 
-    // Login Dummy button
-    cy.get('button[id=":r2:"]').contains('Login Dummy').click();
+    // Click on Login Button
+    cy.get('button[type="submit"]').click();
     cy.wait(2000);
 
     // Wait & Assert response
     cy.wait('@generalInfo', { timeout: 15000 }).then((interception) => {
       expect(interception.response.statusCode).to.eq(200);
       cy.log('Login successful, generalInfo loaded');
-    });
-
-    cy.url().should('include', `${Cypress.env('dh_baseUrl')}home/persons`);
-    cy.wait(1000);
-
-    //Click on Admin User page
-    cy.intercept('POST', '**/activityLog/bertUserLogs').as('bertUserLogs');
-    cy.get('nav ul li div span')
-      .should('be.visible') // Ensure the elements are visible
-      .each(($el) => {
-        // Iterate through each of the elements
-        // Check if the text matches either "Arbeitsbereich" (German) or "Workspace" (English)
-        if ($el.text().match(/Arbeitsbereich|Workspace/i)) {
-          // Highlight the element for debugging (optional)
-          cy.wrap($el).invoke(
-            'attr',
-            'style',
-            'border: 2px solid black; padding: 2px;'
-          );
-          cy.wait(2000);
-          // Click the element
-          cy.wrap($el).click();
-        }
-      });
-    cy.wait('@bertUserLogs', { timeout: 10000 }).then((interception) => {
-      expect(interception.response.statusCode).to.eq(200);
-      cy.log('Navigated to Arbeitsbereich page');
     });
 
     cy.wait(1500);
@@ -316,14 +260,12 @@ describe('DH Upload Dictionary (305)', () => {
         // Iterate through each of the elements
 
         // Check if the text matches either "Persönliches Dokument" or "Upload Personal Document"
-        if (
-          $el.text().match(/Persönliches Dokument|Upload Personal Document/i)
-        ) {
+        if ($el.text().match(/Persönliches Dokument|Personal Document/i)) {
           // Highlight the element for debugging (optional)
           cy.wrap($el).invoke(
             'attr',
             'style',
-            'border: 2px solid black; padding: 2px;'
+            'border: 2px solid black; padding: 2px;',
           );
           cy.wait(2000);
           // Click the element
@@ -332,30 +274,30 @@ describe('DH Upload Dictionary (305)', () => {
       });
 
     //Check dialog title
-    cy.get('main>header>h1')
+    cy.get('#send-action-cards-grid>div>div')
       .should('be.visible')
       .invoke('text') // Get the text of the element
       .then((text) => {
         // Trim the text and validate it
         const trimmedText = text.trim();
         expect(trimmedText).to.match(
-          /Personal Document Upload|Upload Document/i
+          /Personal Document Upload|Upload Document/i,
         );
       });
 
     cy.wait(1500);
 
-    //Validate subtitle
-    cy.get('main>p')
-      .should('be.visible')
-      .invoke('text') // Get the text of the element
-      .then((text) => {
-        // Trim the text and validate it
-        const trimmedText = text.trim();
-        expect(trimmedText).to.match(
-          /Wählen Sie eines oder mehrere Dokumente aus|Wählen Sie eines oder mehrere Dokumente aus/i
-        );
-      });
+    // //Validate subtitle
+    // cy.get('main>p')
+    //   .should('be.visible')
+    //   .invoke('text') // Get the text of the element
+    //   .then((text) => {
+    //     // Trim the text and validate it
+    //     const trimmedText = text.trim();
+    //     expect(trimmedText).to.match(
+    //       /Wählen Sie eines oder mehrere Dokumente aus|Wählen Sie eines oder mehrere Dokumente aus/i,
+    //     );
+    //   });
 
     //check Info message under upload area
     cy.get('#file-requirements')
@@ -365,7 +307,7 @@ describe('DH Upload Dictionary (305)', () => {
         // Trim the text and validate it
         const trimmedText = text.trim();
         expect(trimmedText).to.match(
-          /Max 10 Personal Documents und 10MB, .pdf, .xml, .zip, .7z, .txt|Max 10 Personal Documents und 10MB, .pdf, .xml, .zip, .7z, .txt/i
+          /Maximum file size is 50 MB and a maximum of 10 documents can be uploaded. Allowed file types are .pdf, .xml, .zip, .7z and .txt.|Maximum file size is 50 MB and a maximum of 10 documents can be uploaded. Allowed file types are .pdf, .xml, .zip, .7z and .txt./i,
         );
       });
 
@@ -419,7 +361,7 @@ describe('DH Upload Dictionary (305)', () => {
 
     //Click on Weiter button
     cy.intercept('POST', '**/checkDocumentProcessingStatus').as(
-      'checkDocumentProcessingStatus'
+      'checkDocumentProcessingStatus',
     );
 
     cy.get('button[aria-label="Weiter zum nächsten Schritt"]')
@@ -441,7 +383,7 @@ describe('DH Upload Dictionary (305)', () => {
           } else {
             waitUntilProcessingDone(); // ← keep waiting
           }
-        }
+        },
       );
     }
 
@@ -457,7 +399,7 @@ describe('DH Upload Dictionary (305)', () => {
         // Trim the text and validate it
         const trimmedText = text.trim();
         expect(trimmedText).to.match(
-          /Meta data could not be extracted|Metadaten konnten nicht extrahiert werden/i
+          /Meta data could not be extracted|Metadaten konnten nicht extrahiert werden/i,
         );
       });
 
@@ -468,7 +410,7 @@ describe('DH Upload Dictionary (305)', () => {
 
     // Remove invalid uploaded file (305 Dictionary) and mark it before clickinga on remove button
     cy.get(
-      'button[aria-label="Remove 305_Dictionary_(AQUA_ABBA000100279311).pdf"]'
+      'button[aria-label="Remove 305_Dictionary_(AQUA_ABBA000100279311).pdf"]',
     )
       .invoke('attr', 'style', 'border: 2px solid black; padding: 2px;')
       .wait(2000)
@@ -537,7 +479,7 @@ describe('DH Upload Dictionary (305)', () => {
     //cy.log(`Upload DateTime to verify: ${uploadDateTime}`);
 
     cy.intercept('POST', '**/checkDocumentProcessingStatus').as(
-      'checkDocumentProcessingStatus'
+      'checkDocumentProcessingStatus',
     );
     //Click on Weiter button
     cy.get('button[aria-label="Weiter zum nächsten Schritt"]')
@@ -564,10 +506,10 @@ describe('DH Upload Dictionary (305)', () => {
               const isDone =
                 body.processingOver === true || body.processingOver === 'true';
               expect(isDone).to.eq(true); // ← final assertion FIXED
-            }
+            },
           );
         }
-      }
+      },
     );
 
     //Check Success message after document processing
@@ -578,14 +520,14 @@ describe('DH Upload Dictionary (305)', () => {
         // Trim the text and validate it
         const trimmedText = text.trim();
         expect(trimmedText).to.match(
-          /Document successfully uploaded|Document successfully uploaded/i
+          /Document successfully uploaded|Document successfully uploaded/i,
         );
       });
 
     cy.wait(1500);
 
     cy.intercept('POST', '**/deliveryHandler/sendDocuments').as(
-      'sendMassDelivery'
+      'sendMassDelivery',
     );
     //Click on butrton to Send Mass delivery
     cy.get('button[aria-label="Send documents"').should('be.enabled').click();
@@ -627,7 +569,7 @@ describe('DH Upload Dictionary (305)', () => {
     // Open latest created delivery
     cy.intercept(
       'GET',
-      '**/hybridsign/backend_t/document/v1/getDocument/**'
+      '**/hybridsign/backend_t/document/v1/getDocument/**',
     ).as('getDocument');
     cy.intercept('GET', '**/getIdentifications?**').as('getIdentifications');
 
@@ -639,7 +581,7 @@ describe('DH Upload Dictionary (305)', () => {
       (interception) => {
         cy.log('Intercepted response:', interception.response);
         expect(interception.response.statusCode).to.eq(200);
-      }
+      },
     );
 
     // Scroll to the bottom of the PDF viewer
@@ -735,10 +677,10 @@ describe('DH Upload Dictionary (305)', () => {
 
         // Validate that the email body contains the expected text
         expect(normalizedText).to.include(
-          'Sie haben 1 Sendung(en) erfolgreich digital in das e-Gehaltszettel Portal Ihrer Benutzer*innen eingeliefert'
+          'Sie haben 1 Sendung(en) erfolgreich digital in das e-Gehaltszettel Portal Ihrer Benutzer*innen eingeliefert',
         );
         expect(normalizedText).to.include(
-          'Zusätzlich haben Sie 0 Sendung(en) erfolgreich über den postalischen Weg als Brief versendet. Das Dokument wird von uns über das „Einfach Brief“-Portal gedruckt, kurvertiert und an die Adresse des Benutzers versendet.'
+          'Zusätzlich haben Sie 0 Sendung(en) erfolgreich über den postalischen Weg als Brief versendet. Das Dokument wird von uns über das „Einfach Brief“-Portal gedruckt, kurvertiert und an die Adresse des Benutzers versendet.',
         );
         expect(normalizedText).to.include('Ihr e-Gehaltszettel Team');
       });

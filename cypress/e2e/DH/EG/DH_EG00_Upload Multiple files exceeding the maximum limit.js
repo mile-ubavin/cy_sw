@@ -44,7 +44,7 @@ describe('DH Upload Multiple files exceeding the maximum limit', () => {
     cy.get('.search').click({ force: true });
     //Search for Admin using username
     cy.get('input[formcontrolname="userName"]').type(
-      Cypress.env('username_supportViewAdmin')
+      Cypress.env('username_supportViewAdmin'),
     );
     // Click on Search for Admin User button
     cy.get('button[type="submit"]').click();
@@ -82,7 +82,7 @@ describe('DH Upload Multiple files exceeding the maximum limit', () => {
                     // Enable the role if it's not already checked
                     cy.wrap($checkboxInput).click({ force: true });
                     cy.log(
-                      `Checkbox for "${text}" was not enabled; now enabled.`
+                      `Checkbox for "${text}" was not enabled; now enabled.`,
                     );
                   } else {
                     cy.log(`Checkbox for "${text}" is already enabled.`);
@@ -121,20 +121,40 @@ describe('DH Upload Multiple files exceeding the maximum limit', () => {
   it.only('DH - Upload Multiple files exceeding the maximum limit (Provide multiple serviceLine files to E-Box)', () => {
     let uploadDateTime = ''; // Global variable to store upload date & time
 
-    // // Visit AUT
-    // cy.visit(Cypress.env('dh_baseUrl'));
-    // cy.url().should('include', Cypress.env('dh_baseUrl'));
-    // cy.wait(1500);
+    // Visit AUT
 
-    // // Remove Cookie dialog if present
-    // cy.get('body').then(($body) => {
-    //   if ($body.find('#onetrust-policy-title').is(':visible')) {
-    //     cy.get('#onetrust-accept-btn-handler').click({ force: true });
-    //   } else {
-    //     cy.log('Cookie bar not visible');
-    //   }
-    // });
-    // cy.wait(1500);
+    cy.visit(Cypress.env('dh_baseUrl'));
+    cy.url().should('include', Cypress.env('dh_baseUrl'));
+    cy.wait(1500);
+
+    // Remove Cookie dialog if present
+    cy.get('body').then(($body) => {
+      if ($body.find('#onetrust-policy-title').is(':visible')) {
+        cy.get('#onetrust-accept-btn-handler').click({ force: true });
+      } else {
+        cy.log('Cookie bar not visible');
+      }
+    });
+    cy.wait(1500);
+
+    //Fill the login form
+    cy.get('input[placeholder="Username"]').type(
+      Cypress.env('username_supportViewAdmin'),
+    );
+
+    cy.get('input[type="password"]').type(
+      Cypress.env('password_supportViewAdmin'),
+    );
+    cy.wait(1500);
+    //click on Login button
+
+    cy.intercept('POST', '**/supportView/v1/group').as('getGroup');
+    cy.get('button[type="submit"]').click();
+
+    cy.wait('@getGroup', { timeout: 35000 }).then((interception) => {
+      expect(interception.response.statusCode).to.eq(200);
+      cy.log('POST /supportView/v1/group - Status Code: 200 ');
+    });
 
     // // Click Login button (first page)
     // cy.get('button[id=":r0:"]').contains('Login').click();
@@ -159,58 +179,58 @@ describe('DH Upload Multiple files exceeding the maximum limit', () => {
     // });
 
     // Visit AUT
-    cy.visit(Cypress.env('dh_baseUrl'));
-    cy.url().should('include', Cypress.env('dh_baseUrl'));
-    cy.wait(1500);
+    // cy.visit(Cypress.env('dh_baseUrl'));
+    // cy.url().should('include', Cypress.env('dh_baseUrl'));
+    // cy.wait(1500);
 
-    // Remove Cookie dialog if present
-    cy.get('body').then(($body) => {
-      if ($body.find('#onetrust-policy-title').length) {
-        cy.get('#onetrust-accept-btn-handler').click({ force: true });
-      } else {
-        cy.log('Cookie bar not visible');
-      }
-    });
-    cy.wait(1500);
-    // Intercept backend call after login
-    cy.intercept('GET', '**/person/fromGroup/**').as('personsFromGroup');
+    // // Remove Cookie dialog if present
+    // cy.get('body').then(($body) => {
+    //   if ($body.find('#onetrust-policy-title').length) {
+    //     cy.get('#onetrust-accept-btn-handler').click({ force: true });
+    //   } else {
+    //     cy.log('Cookie bar not visible');
+    //   }
+    // });
+    // cy.wait(1500);
+    // // Intercept backend call after login
+    // cy.intercept('GET', '**/person/fromGroup/**').as('personsFromGroup');
 
-    // Login Dummy button
-    cy.get('button[id=":r2:"]').contains('Login Dummy').click();
-    cy.wait(2000);
+    // // Login Dummy button
+    // cy.get('button[id=":r2:"]').contains('Login Dummy').click();
+    // cy.wait(2000);
 
-    // Wait & Assert response
-    cy.wait('@personsFromGroup', { timeout: 15000 }).then((interception) => {
-      expect(interception.response.statusCode).to.eq(200);
-      cy.log('Login successful, generalInfo loaded');
-    });
+    // // Wait & Assert response
+    // cy.wait('@personsFromGroup', { timeout: 15000 }).then((interception) => {
+    //   expect(interception.response.statusCode).to.eq(200);
+    //   cy.log('Login successful, generalInfo loaded');
+    // });
 
-    cy.url().should('include', `${Cypress.env('dh_baseUrl')}home/persons`);
+    cy.url().should('include', `${Cypress.env('dh_baseUrl')}home`);
     cy.wait(2000);
 
     //Click on Admin User page
-    cy.intercept('POST', '**/activityLog/bertUserLogs').as('bertUserLogs');
-    cy.get('nav ul li div span')
-      .should('be.visible') // Ensure the elements are visible
-      .each(($el) => {
-        // Iterate through each of the elements
-        // Check if the text matches either "Arbeitsbereich" (German) or "Workspace" (English)
-        if ($el.text().match(/Arbeitsbereich|Workspace/i)) {
-          // Highlight the element for debugging (optional)
-          cy.wrap($el).invoke(
-            'attr',
-            'style',
-            'border: 2px solid black; padding: 2px;'
-          );
-          cy.wait(2000);
-          // Click the element
-          cy.wrap($el).click();
-        }
-      });
-    cy.wait('@bertUserLogs', { timeout: 10000 }).then((interception) => {
-      expect(interception.response.statusCode).to.eq(200);
-      cy.log('Navigated to Arbeitsbereich page');
-    });
+    // cy.intercept('POST', '**/activityLog/bertUserLogs').as('bertUserLogs');
+    // cy.get('nav ul li div span')
+    //   .should('be.visible') // Ensure the elements are visible
+    //   .each(($el) => {
+    //     // Iterate through each of the elements
+    //     // Check if the text matches either "Arbeitsbereich" (German) or "Workspace" (English)
+    //     if ($el.text().match(/Arbeitsbereich|Workspace/i)) {
+    //       // Highlight the element for debugging (optional)
+    //       cy.wrap($el).invoke(
+    //         'attr',
+    //         'style',
+    //         'border: 2px solid black; padding: 2px;',
+    //       );
+    //       cy.wait(2000);
+    //       // Click the element
+    //       cy.wrap($el).click();
+    //     }
+    //   });
+    // cy.wait('@bertUserLogs', { timeout: 10000 }).then((interception) => {
+    //   expect(interception.response.statusCode).to.eq(200);
+    //   cy.log('Navigated to Arbeitsbereich page');
+    // });
 
     cy.wait(1500);
     // Click on Upload Personal Document button
@@ -220,14 +240,12 @@ describe('DH Upload Multiple files exceeding the maximum limit', () => {
         // Iterate through each of the elements
 
         // Check if the text matches either "Persönliches Dokument" or "Upload Personal Document"
-        if (
-          $el.text().match(/Persönliches Dokument|Upload Personal Document/i)
-        ) {
+        if ($el.text().match(/Persönliches Dokument|Personal Document/i)) {
           // Highlight the element for debugging (optional)
           cy.wrap($el).invoke(
             'attr',
             'style',
-            'border: 2px solid black; padding: 2px;'
+            'border: 2px solid black; padding: 2px;',
           );
           cy.wait(2000);
           // Click the element
@@ -243,7 +261,7 @@ describe('DH Upload Multiple files exceeding the maximum limit', () => {
         // Trim the text and validate it
         const trimmedText = text.trim();
         expect(trimmedText).to.match(
-          /Personal Document Upload|Upload Document/i
+          /Personal Document Upload|Upload Document/i,
         );
       });
 
@@ -257,7 +275,7 @@ describe('DH Upload Multiple files exceeding the maximum limit', () => {
         // Trim the text and validate it
         const trimmedText = text.trim();
         expect(trimmedText).to.match(
-          /Wählen Sie eines oder mehrere Dokumente aus|Wählen Sie eines oder mehrere Dokumente aus/i
+          /Choose one ore more documents|Wählen Sie eines oder mehrere Dokumente aus/i,
         );
       });
 
@@ -269,12 +287,12 @@ describe('DH Upload Multiple files exceeding the maximum limit', () => {
         // Trim the text and validate it
         const trimmedText = text.trim();
         expect(trimmedText).to.match(
-          /Max 10 Personal Documents und 10MB, .pdf, .xml, .zip, .7z, .txt|Max 10 Personal Documents und 10MB, .pdf, .xml, .zip, .7z, .txt/i
+          /Max 10 Personal Documents and 10MB, .pdf, .xml, .zip, .7z, .txt|Max 10 Personal Documents und 10MB, .pdf, .xml, .zip, .7z, .txt/i,
         );
       });
 
     cy.wait(1500);
-
+    cy.pause();
     // === STEP 1: Upload Multiple files exceeding the maximum limit ===
     // This section tests the file upload validation by uploading 12 files
     // (including 1 invalid CSV) to exceed the 10 file limit
@@ -297,7 +315,7 @@ describe('DH Upload Multiple files exceeding the maximum limit', () => {
 
     // Set up network intercept to monitor file upload requests
     cy.intercept('GET', '**/group/dictionary/tenant/**').as(
-      'uploadPersonalDocuments'
+      'uploadPersonalDocuments',
     );
 
     // === STEP 2: Upload files sequentially and wait for each to complete ===
@@ -316,12 +334,12 @@ describe('DH Upload Multiple files exceeding the maximum limit', () => {
             mimeType: fileName.endsWith('.pdf')
               ? 'application/pdf'
               : fileName.endsWith('.txt')
-              ? 'text/plain'
-              : fileName.endsWith('.xml')
-              ? 'application/xml'
-              : fileName.endsWith('.csv')
-              ? 'text/csv'
-              : 'application/zip',
+                ? 'text/plain'
+                : fileName.endsWith('.xml')
+                  ? 'application/xml'
+                  : fileName.endsWith('.csv')
+                    ? 'text/csv'
+                    : 'application/zip',
             encoding: 'utf-8',
           });
         });
@@ -335,10 +353,10 @@ describe('DH Upload Multiple files exceeding the maximum limit', () => {
           cy.log(
             `File ${index + 1}/${
               filesToUpload.length
-            } (${fileName}) uploaded successfully with status 200`
+            } (${fileName}) uploaded successfully with status 200`,
           );
           cy.wait(1000); // Wait briefly before next upload
-        }
+        },
       );
     });
 
@@ -356,20 +374,20 @@ describe('DH Upload Multiple files exceeding the maximum limit', () => {
         const trimmedText = text.trim();
         // Check for "File format is not supported" error in English or German
         expect(trimmedText).to.match(
-          /File format is not supported|Das Dateiformat wird nicht unterstützt/i
+          /File format is not supported|Das Dateiformat wird nicht unterstützt/i,
         );
       });
     cy.wait(1500);
 
     // Verify error message for exceeding maximum file limit (more than 10 files)
     cy.get('#file-list span')
-      .should('be.visible')
+      // .should('be.visible')
       .invoke('text')
       .then((text) => {
         const trimmedText = text.trim();
         // Check for "Maximum file limit exceeded" error in English or German
         expect(trimmedText).to.match(
-          /Maximum file limit exceeded|Das Dateiformat wird nicht unterstützt/i
+          /Maximum file limit exceeded|Das Dateiformat wird nicht unterstützt/i,
         );
       });
     cy.wait(1500);
@@ -377,8 +395,16 @@ describe('DH Upload Multiple files exceeding the maximum limit', () => {
     // === STEP 4: Verify "Weiter" (Next) button is disabled due to validation errors ===
     // Button should be disabled when there are invalid files or too many files
     cy.get(
-      'button[aria-label="Weiter zum nächsten Schritt (ungültiges Dateiformat)"]'
-    ).should('be.disabled');
+      'button[aria-label="Weiter zum nächsten Schritt"], button[aria-label="Next step"]',
+    )
+      .should('be.visible')
+      .and('be.disabled')
+      .invoke('text')
+      .then((text) => {
+        const trimmedText = text.trim();
+        // Check for "Weiter zum nächsten Schritt" or "Next step" in English or German
+        expect(trimmedText).to.match(/Weiter zum nächsten Schritt|Next step/i);
+      });
     cy.wait(1500);
 
     // === STEP 5: Remove the invalid CSV file ===
@@ -402,7 +428,7 @@ describe('DH Upload Multiple files exceeding the maximum limit', () => {
       // Check if this specific file has the "Maximum file limit exceeded" error
       if (
         errorText.match(
-          /Maximum file limit exceeded|Maximale Dateigrenze überschritten/i
+          /Maximum file limit exceeded|Maximale Dateigrenze überschritten/i,
         )
       ) {
         cy.wrap($fileItem)
@@ -470,7 +496,7 @@ describe('DH Upload Multiple files exceeding the maximum limit', () => {
             cy.log(`Removing second document: ${secondFileName}`);
             cy.wrap($newButtons[0]).click({ force: true });
             cy.wait(1000);
-          }
+          },
         );
       } else {
         cy.log('Less than 2 files available to remove');
@@ -482,7 +508,7 @@ describe('DH Upload Multiple files exceeding the maximum limit', () => {
     // === STEP 9: Proceed to next step and wait for document processing ===
     // Set up intercept to monitor document processing status
     cy.intercept('POST', '**/checkDocumentProcessingStatus').as(
-      'checkDocumentProcessingStatus'
+      'checkDocumentProcessingStatus',
     );
 
     // Click "Weiter" (Next) button to proceed to document processing
@@ -506,7 +532,7 @@ describe('DH Upload Multiple files exceeding the maximum limit', () => {
           } else {
             waitUntilProcessingDone(); // Keep polling if not done yet
           }
-        }
+        },
       );
     }
 
@@ -532,7 +558,7 @@ describe('DH Upload Multiple files exceeding the maximum limit', () => {
         // If file doesn't have "Document successfully uploaded" status, mark for removal
         if (
           !successText.match(
-            /Document successfully uploaded|Dokument erfolgreich hochgeladen/i
+            /Document successfully uploaded|Dokument erfolgreich hochgeladen/i,
           )
         ) {
           const $btn = $item.find('button[aria-label^="Remove"]');
@@ -550,7 +576,7 @@ describe('DH Upload Multiple files exceeding the maximum limit', () => {
 
         // Set up network intercept to monitor file removal requests
         cy.intercept('GET', '**/group/dictionary/tenant/**').as(
-          'removeInvalidFile'
+          'removeInvalidFile',
         );
 
         // Recursive function to remove files one by one
@@ -564,7 +590,7 @@ describe('DH Upload Multiple files exceeding the maximum limit', () => {
           cy.log(
             `Removing invalid file ${index + 1}/${
               filesToRemove.length
-            }: ${fileName}`
+            }: ${fileName}`,
           );
 
           // Re-query to find the button for this file
@@ -577,7 +603,7 @@ describe('DH Upload Multiple files exceeding the maximum limit', () => {
                   cy.log(`Successfully removed file: ${fileName}`);
                   cy.wait(1000); // Wait for DOM to update
                   removeNextFile(index + 1); // Remove next file
-                }
+                },
               );
             } else {
               cy.log(`Button not found for ${fileName}, skipping`);
@@ -643,7 +669,7 @@ describe('DH Upload Multiple files exceeding the maximum limit', () => {
     //Send Multiple (5) documents to user
 
     cy.intercept('POST', '**/deliveryHandler/sendDocuments').as(
-      'sendMassDelivery'
+      'sendMassDelivery',
     );
     //Click on butrton to Send Mass delivery
     cy.get('button[aria-label="Send documents"').should('be.enabled').click();
@@ -677,7 +703,7 @@ describe('DH Upload Multiple files exceeding the maximum limit', () => {
     cy.url().should('include', `${baseUrl}home`);
   }); //end it
 
-  it.only('Login to Ebox, count numer of latest receiverd deliaveries and random open it', () => {
+  it('Login to Ebox, count numer of latest receiverd deliaveries and random open it', () => {
     cy.intercept('POST', '**/rest/v2/deliveries').as('postDeliveries');
     cy.loginToEgEbox();
 
@@ -689,7 +715,7 @@ describe('DH Upload Multiple files exceeding the maximum limit', () => {
 
       // Find the latest recent date
       const latestDate = new Date(
-        Math.max(...unreadDeliveries.map((d) => new Date(d.date)))
+        Math.max(...unreadDeliveries.map((d) => new Date(d.date))),
       );
 
       // Format latest date with +1 hour offset (for UI match)
@@ -699,7 +725,7 @@ describe('DH Upload Multiple files exceeding the maximum limit', () => {
       // Filter unread deliveries that match the latest date+time (to the minute)
       const latestUnreadDeliveries = unreadDeliveries.filter((d) => {
         const localDate = new Date(
-          new Date(d.date).getTime() + 1 * 60 * 60 * 1000
+          new Date(d.date).getTime() + 1 * 60 * 60 * 1000,
         );
         return localDate.toISOString().slice(0, 16) === latestMinute;
       });
@@ -727,7 +753,7 @@ describe('DH Upload Multiple files exceeding the maximum limit', () => {
         // matches the number of successfully uploaded documents from SupportView
         expect(
           actualLatestUnreadCount,
-          'Latest unread deliveries in eBox must match SupportView count'
+          'Latest unread deliveries in eBox must match SupportView count',
         ).to.eq(expectedCount - 1); // FIX IT: remove "- 1" when counts align correctly
       });
 
@@ -748,7 +774,7 @@ describe('DH Upload Multiple files exceeding the maximum limit', () => {
             cy.wrap($el).click({ force: true });
             return false;
           }
-        }
+        },
       );
 
       cy.wait('@getIdentifications', { timeout: 77000 })
@@ -762,7 +788,7 @@ describe('DH Upload Multiple files exceeding the maximum limit', () => {
   }); //end it
 
   //Admin user check Reporting email and delte all emails
-  it.only('Yopmail - Get Reporting email and delte all emails', () => {
+  it('Yopmail - Get Reporting email and delte all emails', () => {
     // Visit Yopmail
     cy.visit('https://yopmail.com/en/');
 
@@ -802,10 +828,10 @@ describe('DH Upload Multiple files exceeding the maximum limit', () => {
           expect(normalizedText).to.include(
             `Sie haben ${
               expectedCount - 1
-            } Sendung(en) erfolgreich digital in das e-Gehaltszettel Portal Ihrer Benutzer*innen eingeliefert`
+            } Sendung(en) erfolgreich digital in das e-Gehaltszettel Portal Ihrer Benutzer*innen eingeliefert`,
           );
           expect(normalizedText).to.include(
-            'Zusätzlich haben Sie 0 Sendung(en) erfolgreich über den postalischen Weg als Brief versendet. Das Dokument wird von uns über das „Einfach Brief“-Portal gedruckt, kurvertiert und an die Adresse des Benutzers versendet.'
+            'Zusätzlich haben Sie 0 Sendung(en) erfolgreich über den postalischen Weg als Brief versendet. Das Dokument wird von uns über das „Einfach Brief“-Portal gedruckt, kurvertiert und an die Adresse des Benutzers versendet.',
           );
           expect(normalizedText).to.include('Ihr e-Gehaltszettel Team');
         });

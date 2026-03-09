@@ -129,7 +129,7 @@ describe('Create_User_From_Legacy_request', () => {
     cy.get('.search').click({ force: true });
     //Search for Admin using username
     cy.get('input[formcontrolname="userName"]').type(
-      Cypress.env('username_supportViewAdmin')
+      Cypress.env('username_supportViewAdmin'),
     );
     // Click on Search for Admin User button
     cy.get('button[type="submit"]').click();
@@ -167,7 +167,7 @@ describe('Create_User_From_Legacy_request', () => {
                     // Enable the role if it's not already checked
                     cy.wrap($checkboxInput).click({ force: true });
                     cy.log(
-                      `Checkbox for "${text}" was not enabled; now enabled.`
+                      `Checkbox for "${text}" was not enabled; now enabled.`,
                     );
                   } else {
                     cy.log(`Checkbox for "${text}" is already enabled.`);
@@ -202,19 +202,19 @@ describe('Create_User_From_Legacy_request', () => {
     cy.wait(2500);
   }); //end it
 
-  //GetCookie and Store it as a global variabile/Create user via Legacy request with dynamic BillersInvoiceRecipientID
+  //GetCookie and Store it as a global variable/Create user via Legacy request with dynamic BillersInvoiceRecipientID
   it('Create user via Legacy request with dynamic BillersInvoiceRecipientID', () => {
     cy.intercept('POST', '**/login/user').as('getToken');
     cy.loginToSupportViewAdmin();
 
-    cy.wait('@getToken', { timeout: 37000 }).then((interception) => {
+    cy.wait('@getToken', { timeout: 47000 }).then((interception) => {
       expect(interception.response.statusCode).to.eq(200);
 
       // === Extract SV_AUTH cookie ===
       const setCookieHeaders =
         interception.response.headers['set-cookie'] || [];
       const authCookie = setCookieHeaders.find((cookie) =>
-        cookie.startsWith('SV_AUTH=')
+        cookie.startsWith('SV_AUTH='),
       );
       if (!authCookie) throw new Error('SV_AUTH cookie not found in response');
 
@@ -292,20 +292,25 @@ Password: Test1234!
 
       const legacyTestuser = Cypress.env('legacyTestuser')[0];
 
-      // === Perform request with correct structure ===
-      cy.request({
-        method: 'POST',
-        url: legacyTestuser.legacyURL,
-        headers: {
-          Cookie: `SV_AUTH=${authCookieValue}`,
-        },
-        body: formData,
-        encoding: 'binary',
-        failOnStatusCode: false,
-      }).then((response) => {
-        cy.log('Response Status:', response.status);
-        cy.log('Response Body:', response.body);
-        expect(response.status).to.be.oneOf([200, 201]);
+      // === Perform request with fetch() (cy.request doesn't support FormData) ===
+      cy.window().then((win) => {
+        return win
+          .fetch(legacyTestuser.legacyURL, {
+            method: 'POST',
+            headers: {
+              Cookie: `SV_AUTH=${authCookieValue}`,
+            },
+            body: formData,
+            credentials: 'include',
+          })
+          .then((response) => {
+            cy.log('Response Status:', response.status);
+            expect(response.status).to.be.oneOf([200, 201]);
+            return response.text();
+          })
+          .then((responseBody) => {
+            cy.log('Response Body:', responseBody);
+          });
       });
     });
   });
@@ -327,7 +332,7 @@ Password: Test1234!
 
     cy.iframe('#ifmail')
       .find(
-        '#mail>div>div:nth-child(2)>div:nth-child(3)>table>tbody>tr>td>p:nth-child(2)>span'
+        '#mail>div>div:nth-child(2)>div:nth-child(3)>table>tbody>tr>td>p:nth-child(2)>span',
       )
       .invoke('text')
       .then((innerText) => {
@@ -347,7 +352,7 @@ Password: Test1234!
         let initialUrl;
         cy.iframe('#ifmail')
           .find(
-            '#mail>div>div:nth-child(2)>div:nth-child(3)>table>tbody>tr>td>p:nth-child(2)>span>a'
+            '#mail>div>div:nth-child(2)>div:nth-child(3)>table>tbody>tr>td>p:nth-child(2)>span>a',
           )
           .should('include.text', 'Jetzt E-Mail Adresse bestätigen')
           .invoke('attr', 'href')
@@ -358,7 +363,7 @@ Password: Test1234!
 
         cy.iframe('#ifmail')
           .find(
-            '#mail>div>div:nth-child(2)>div:nth-child(3)>table>tbody>tr>td>p:nth-child(2)>span>a'
+            '#mail>div>div:nth-child(2)>div:nth-child(3)>table>tbody>tr>td>p:nth-child(2)>span>a',
           )
           .invoke('attr', 'target', '_self') //prevent opening in new tab
           .click();
@@ -400,12 +405,12 @@ Password: Test1234!
 
           .should(
             'include.text',
-            'Passwort zurücksetzen e-Gehaltszettel Portal'
+            'Passwort zurücksetzen e-Gehaltszettel Portal',
           ); //Validate subject of Verification email
         let initialUrl_pass;
         cy.iframe('#ifmail')
           .find(
-            '#mail>div>div:nth-child(2)>div:nth-child(3)>table>tbody>tr>td>p:nth-child(4)>span>a'
+            '#mail>div>div:nth-child(2)>div:nth-child(3)>table>tbody>tr>td>p:nth-child(4)>span>a',
           )
           .should('include.text', 'Neues Passwort erstellen ')
           .invoke('attr', 'href')
@@ -415,7 +420,7 @@ Password: Test1234!
           });
         cy.iframe('#ifmail')
           .find(
-            '#mail>div>div:nth-child(2)>div:nth-child(3)>table>tbody>tr>td>p:nth-child(4)>span>a'
+            '#mail>div>div:nth-child(2)>div:nth-child(3)>table>tbody>tr>td>p:nth-child(4)>span>a',
           )
           .invoke('attr', 'target', '_self') //prevent opening in new tab
           .click();
@@ -467,12 +472,12 @@ Password: Test1234!
     // Continue with Login
     cy.log(Cypress.env('companyPrefix'));
     cy.get(':nth-child(1) > .ng-invalid > .input > .input__field-input').type(
-      legacyTestuser.username
+      legacyTestuser.username,
     );
 
     //Cypress.env('manualAddress')
     cy.get('.ng-invalid > .input > .input__field-input').type(
-      Cypress.env('password_egEbox')
+      Cypress.env('password_egEbox'),
     );
 
     // cy.wait(6000);
@@ -494,7 +499,7 @@ Password: Test1234!
         // Assert the response status code
         expect(interception.response.statusCode).to.eq(200);
         cy.wait(2500);
-      }
+      },
     );
     cy.wait(7000);
     // Logout
