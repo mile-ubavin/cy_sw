@@ -52,7 +52,7 @@ describe('HR2_Prepare-From_Delivery_To_Specific_User-Sign-Validate_HR', () => {
     //Click on Select users to deliver documents button
     cy.get('.button-wraper>button>.mdc-button__label')
       .contains(
-        /Select users to deliver documents|Benutzer für die Zustellung von Dokumenten auswählen/i
+        /Select users to deliver documents|Benutzer für die Zustellung von Dokumenten auswählen/i,
       )
       .should('be.visible') // Optional: Ensure the button is visible before interacting
       .click(); // Click the button
@@ -60,7 +60,7 @@ describe('HR2_Prepare-From_Delivery_To_Specific_User-Sign-Validate_HR', () => {
 
     // Search for the specific user by name
     cy.get('.dictionary-xml__search-container-input>input').type(
-      Cypress.env('username_egEbox')
+      Cypress.env('username_egEbox'),
     );
     cy.wait(3500);
 
@@ -68,13 +68,13 @@ describe('HR2_Prepare-From_Delivery_To_Specific_User-Sign-Validate_HR', () => {
     cy.get('input[type="checkbox"]').eq(1).click();
 
     cy.wait(2500);
-    //Click on Next buton
+    //Click on Next button
     cy.get('button>.title')
       .filter((index, el) => {
         const text = Cypress.$(el).text().trim();
         return text === 'Next' || text === 'Nächste';
       })
-      .click();
+      .click({ force: true }); // Click the matched "Next" button
     cy.wait(1500);
 
     //Click on Prepare Document For Signing
@@ -170,7 +170,7 @@ describe('HR2_Prepare-From_Delivery_To_Specific_User-Sign-Validate_HR', () => {
       })
       .trigger('mouseup', { force: true });
     cy.get(
-      '.placer-actions > .mat-accent > .mat-mdc-button-touch-target'
+      '.placer-actions > .mat-accent > .mat-mdc-button-touch-target',
     ).click({
       force: true,
     });
@@ -179,7 +179,7 @@ describe('HR2_Prepare-From_Delivery_To_Specific_User-Sign-Validate_HR', () => {
     //
     cy.intercept(
       'POST',
-      '**/deliveryHandler/checkDocumentProcessingStatus**'
+      '**/deliveryHandler/checkDocumentProcessingStatus**',
     ).as('checkDocumentProcessingStatus');
 
     //Click on Finalize button   Abschließen
@@ -196,7 +196,7 @@ describe('HR2_Prepare-From_Delivery_To_Specific_User-Sign-Validate_HR', () => {
 
         // Assert the response status code
         expect(interception.response.statusCode).to.eq(200);
-      }
+      },
     );
 
     cy.wait(6000);
@@ -210,7 +210,7 @@ describe('HR2_Prepare-From_Delivery_To_Specific_User-Sign-Validate_HR', () => {
     cy.wait(3000);
 
     cy.get(
-      '.mat-mdc-dialog-component-host>.dialog-container>.dialog-footer>.controls>button>.title'
+      '.mat-mdc-dialog-component-host>.dialog-container>.dialog-footer>.controls>button>.title',
     )
       .filter((index, el) => {
         const text = Cypress.$(el).text().trim();
@@ -244,7 +244,7 @@ describe('HR2_Prepare-From_Delivery_To_Specific_User-Sign-Validate_HR', () => {
       .then(($icon) => {
         cy.wrap($icon).invoke('css', 'border', '3px solid green');
         cy.log(
-          'Validation passed: Unsigned icon is visible and marked in green.'
+          'Validation passed: Unsigned icon is visible and marked in green.',
         );
       });
 
@@ -253,13 +253,15 @@ describe('HR2_Prepare-From_Delivery_To_Specific_User-Sign-Validate_HR', () => {
     // Open latest created delivery
     cy.intercept(
       'GET',
-      '**/hybridsign/backend_t/document/v1/getDocument/**'
+      '**/hybridsign/backend_t/document/v1/getDocument/**',
     ).as('getDocument');
     cy.intercept('GET', '**/getIdentifications?**').as('getIdentifications');
 
-    cy.get('.mdc-data-table__content>tr>.subject-sender-cell')
-      .eq(0)
-      .click({ force: true });
+    // Click on the first unsigned delivery
+    cy.get('button[aria-label="Unsigned"]').first().click({ force: true });
+    cy.wait(1000);
+    //Open latest created delivery in hybridsign
+    cy.get('button[aria-label="Unsigned"]').first().click({ force: true });
 
     cy.wait('@getIdentifications', { timeout: 57000 }).then((interception) => {
       cy.log('Intercepted response:', interception.response);
@@ -297,7 +299,7 @@ describe('HR2_Prepare-From_Delivery_To_Specific_User-Sign-Validate_HR', () => {
 
       // Confirm the signature
       cy.get(
-        '.mat-sign-actions-desktop > .mat-accent > .mat-mdc-button-touch-target'
+        '.mat-sign-actions-desktop > .mat-accent > .mat-mdc-button-touch-target',
       ).click({ force: true });
 
       cy.wait(7000);
@@ -344,7 +346,7 @@ describe('HR2_Prepare-From_Delivery_To_Specific_User-Sign-Validate_HR', () => {
       .then(($icon) => {
         cy.wrap($icon).invoke('css', 'border', '3px solid green');
         cy.log(
-          'Validation passed: Signed icon is visible and marked in green.'
+          'Validation passed: Signed icon is visible and marked in green.',
         );
       });
 
@@ -373,7 +375,7 @@ describe('HR2_Prepare-From_Delivery_To_Specific_User-Sign-Validate_HR', () => {
     // Step 3: Navigate to HR page (Received Shipments)
     cy.contains(
       '.side-menu>ul>navigation-item>.navigation-item>a',
-      /Erhaltene Sendungen|Received Shipments/
+      /Erhaltene Sendungen|Received Shipments/,
     )
       .should('be.visible') // HR page link must be visible
       .click(); // Open the page
@@ -385,7 +387,7 @@ describe('HR2_Prepare-From_Delivery_To_Specific_User-Sign-Validate_HR', () => {
 
     // Step 5: Enter Account Number of user who received HR delivery
     cy.get('input[name="accountNumber"]').type(
-      Cypress.env('accountNumber_egEbox')
+      Cypress.env('accountNumber_egEbox'),
     );
 
     // Step 6: Enter Company Name from config
@@ -431,18 +433,18 @@ describe('HR2_Prepare-From_Delivery_To_Specific_User-Sign-Validate_HR', () => {
         // Step 14: Assert SupportView time is >= E-Box upload time
         expect(
           extractedTime,
-          'Extracted SupportView time should be >= upload time'
+          'Extracted SupportView time should be >= upload time',
         ).to.be.at.least(minAllowedTime);
 
         // Step 15: Assert SupportView time is <= E-Box upload time + 1 min
         expect(
           extractedTime,
-          'Extracted SupportView time should be <= upload time + 1 min'
+          'Extracted SupportView time should be <= upload time + 1 min',
         ).to.be.at.most(maxAllowedTime);
 
         // Step 16: Log success validation
         cy.log(
-          `SupportView DateTime (${normalizedDoc}) is within 1 min of UploadDateTime (${normalizedUpload}).`
+          `SupportView DateTime (${normalizedDoc}) is within 1 min of UploadDateTime (${normalizedUpload}).`,
         );
 
         // // Step 17: Click on magic link button
@@ -505,10 +507,10 @@ describe('HR2_Prepare-From_Delivery_To_Specific_User-Sign-Validate_HR', () => {
 
         // Validate that the email body contains the expected text
         expect(normalizedText).to.include(
-          'Sie haben 1 Sendung(en) erfolgreich digital in das e-Gehaltszettel Portal Ihrer Benutzer*innen eingeliefert'
+          'Sie haben 1 Sendung(en) erfolgreich digital in das e-Gehaltszettel Portal Ihrer Benutzer*innen eingeliefert',
         );
         expect(normalizedText).to.include(
-          'Zusätzlich haben Sie 0 Sendung(en) erfolgreich über den postalischen Weg als Brief versendet. Das Dokument wird von uns über das „Einfach Brief“-Portal gedruckt, kurvertiert und an die Adresse des Benutzers versendet.'
+          'Zusätzlich haben Sie 0 Sendung(en) erfolgreich über den postalischen Weg als Brief versendet. Das Dokument wird von uns über das „Einfach Brief“-Portal gedruckt, kurvertiert und an die Adresse des Benutzers versendet.',
         );
         expect(normalizedText).to.include('Ihr e-Gehaltszettel Team');
       });

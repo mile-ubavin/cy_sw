@@ -16,7 +16,7 @@ describe('HR4_Create_HR_delivery_from_E-Box', () => {
   });
 
   //Crete HR delivery from E-Box
-  it('crete HR delivery from E-Box', () => {
+  it('Crete HR delivery from E-Box', () => {
     cy.loginToEgEbox();
     cy.wait(2500);
 
@@ -83,6 +83,14 @@ describe('HR4_Create_HR_delivery_from_E-Box', () => {
       .click({ force: true });
     cy.wait(3000);
 
+    // Validate Upload label
+    cy.get('.labels-list>.delivery-label>.label-wrap>.label-name-wrap')
+      .invoke('text')
+      .then((text) => {
+        const trimmedText = text.trim();
+        expect(trimmedText).to.match(/Upload|Hochgeladen /);
+      });
+
     // Logout
     cy.get('.user-title').click();
     cy.wait(1500);
@@ -105,7 +113,7 @@ describe('HR4_Create_HR_delivery_from_E-Box', () => {
     // Step 3: Navigate to HR page (Received Shipments)
     cy.contains(
       '.side-menu>ul>navigation-item>.navigation-item>a',
-      /Erhaltene Sendungen|Received Shipments/
+      /Erhaltene Sendungen|Received Shipments/,
     )
       .should('be.visible') // HR page link must be visible
       .click(); // Open the page
@@ -117,7 +125,7 @@ describe('HR4_Create_HR_delivery_from_E-Box', () => {
 
     // Step 5: Enter Account Number of user who received HR delivery
     cy.get('input[name="accountNumber"]').type(
-      Cypress.env('accountNumber_egEbox')
+      Cypress.env('accountNumber_egEbox'),
     );
 
     // Step 6: Enter Company Name from config
@@ -163,18 +171,18 @@ describe('HR4_Create_HR_delivery_from_E-Box', () => {
         // Step 14: Assert SupportView time is >= E-Box upload time
         expect(
           extractedTime,
-          'Extracted SupportView time should be >= upload time'
+          'Extracted SupportView time should be >= upload time',
         ).to.be.at.least(minAllowedTime);
 
         // Step 15: Assert SupportView time is <= E-Box upload time + 1 min
         expect(
           extractedTime,
-          'Extracted SupportView time should be <= upload time + 1 min'
+          'Extracted SupportView time should be <= upload time + 1 min',
         ).to.be.at.most(maxAllowedTime);
 
         // Step 16: Log success validation
         cy.log(
-          `SupportView DateTime (${normalizedDoc}) is within 1 min of UploadDateTime (${normalizedUpload}).`
+          `SupportView DateTime (${normalizedDoc}) is within 1 min of UploadDateTime (${normalizedUpload}).`,
         );
 
         // // Step 17: Click on magic link button
@@ -199,75 +207,5 @@ describe('HR4_Create_HR_delivery_from_E-Box', () => {
 
         cy.wait(4000);
       });
-  });
-
-  //Admin user check Reporting email and clear inbox
-  it.skip('Yopmail - Get Reporting email and clear inbox', () => {
-    // Visit Yopmail
-    cy.visit('https://yopmail.com/en/');
-
-    const user = Cypress.env('email_supportViewAdmin');
-
-    // Enter the support admin email
-    cy.get('#login').type(`${user}`);
-
-    // Click the refresh button
-    cy.get('#refreshbut > .md > .material-icons-outlined').click();
-    //Custom functions:
-    // Define email subject function
-    function emailSubject(index) {
-      cy.iframe('#ifinbox')
-        .find('.mctn > .m > button > .lms')
-        .eq(index)
-        .should('include.text', 'Versandreport e-Gehaltszettel Portal');
-    }
-
-    // Access the inbox iframe and validate the email subject
-    emailSubject(0); // Validate subject of Reporting email
-
-    cy.iframe('#ifmail')
-      .find('#mail > div')
-      .invoke('text') // Get the text content
-      .then((text) => {
-        // Log the email body text
-        cy.log('Email Body Text:', text);
-
-        // Normalize spaces for comparison
-        const normalizedText = text.trim().replace(/\s+/g, ' '); // Normalize extra spaces
-
-        // Validate that the email body contains the expected text
-        expect(normalizedText).to.include(
-          'Sie haben 1 Sendung(en) erfolgreich digital in das e-Gehaltszettel Portal Ihrer Benutzer*innen eingeliefert'
-        );
-        expect(normalizedText).to.include(
-          'Zusätzlich haben Sie 0 Sendung(en) erfolgreich über den postalischen Weg als Brief versendet. Das Dokument wird von uns über das „Einfach Brief“-Portal gedruckt, kurvertiert und an die Adresse des Benutzers versendet.'
-        );
-        expect(normalizedText).to.include('Ihr e-Gehaltszettel Team');
-      });
-
-    cy.wait(4500);
-
-    // Access the inbox iframe
-    cy.get('iframe#ifinbox').then(($iframe) => {
-      const $body = $iframe.contents().find('body');
-
-      // Wrap iframe body for Cypress commands
-      cy.wrap($body).then(($inbox) => {
-        if ($inbox.find('.mctn .lm').length === 0) {
-          // No emails → skip delete
-          cy.log(`Inbox for ${user} is empty. Skipping delete.`);
-        } else {
-          // Emails exist → check delete button in main page
-          cy.get('#delall').then(($btn) => {
-            if (!$btn.is(':disabled')) {
-              cy.wrap($btn).click({ force: true });
-              cy.log(`All emails deleted for ${user}`);
-            } else {
-              cy.log(`Delete button disabled for ${user}`);
-            }
-          });
-        }
-      });
-    });
   });
 }); //end describe

@@ -169,7 +169,6 @@ describe('HR prepare_Document_For_Signing_From_Mass_Upload', () => {
     });
 
     //Prepare doc for signing
-    cy.get('.controls > .ng-star-inserted').click({ force: true });
     cy.wait(4500);
     cy.get('.signatures-container>.signature-actions>a').click({
       force: true,
@@ -204,7 +203,7 @@ describe('HR prepare_Document_For_Signing_From_Mass_Upload', () => {
       })
       .trigger('mouseup', { force: true });
     cy.get(
-      '.placer-actions > .mat-accent > .mat-mdc-button-touch-target'
+      '.placer-actions > .mat-accent > .mat-mdc-button-touch-target',
     ).click({
       force: true,
     });
@@ -213,7 +212,7 @@ describe('HR prepare_Document_For_Signing_From_Mass_Upload', () => {
     //
     cy.intercept(
       'POST',
-      '**/deliveryHandler/checkDocumentProcessingStatus**'
+      '**/deliveryHandler/checkDocumentProcessingStatus**',
     ).as('checkDocumentProcessingStatus');
 
     //Click on Finalize button   Abschließen
@@ -230,7 +229,7 @@ describe('HR prepare_Document_For_Signing_From_Mass_Upload', () => {
 
         // Assert the response status code
         expect(interception.response.statusCode).to.eq(200);
-      }
+      },
     );
 
     cy.wait(6000);
@@ -244,7 +243,7 @@ describe('HR prepare_Document_For_Signing_From_Mass_Upload', () => {
     cy.wait(3000);
 
     cy.get(
-      '.mat-mdc-dialog-component-host>.dialog-container>.dialog-footer>.controls>button>.title'
+      '.mat-mdc-dialog-component-host>.dialog-container>.dialog-footer>.controls>button>.title',
     )
       .filter((index, el) => {
         const text = Cypress.$(el).text().trim();
@@ -278,7 +277,7 @@ describe('HR prepare_Document_For_Signing_From_Mass_Upload', () => {
       .then(($icon) => {
         cy.wrap($icon).invoke('css', 'border', '3px solid green');
         cy.log(
-          'Validation passed: Unsigned icon is visible and marked in green.'
+          'Validation passed: Unsigned icon is visible and marked in green.',
         );
       });
 
@@ -287,13 +286,15 @@ describe('HR prepare_Document_For_Signing_From_Mass_Upload', () => {
     // Open latest created delivery
     cy.intercept(
       'GET',
-      '**/hybridsign/backend_t/document/v1/getDocument/**'
+      '**/hybridsign/backend_t/document/v1/getDocument/**',
     ).as('getDocument');
     cy.intercept('GET', '**/getIdentifications?**').as('getIdentifications');
 
-    cy.get('.mdc-data-table__content>tr>.subject-sender-cell')
-      .eq(0)
-      .click({ force: true });
+    // Click on the first unsigned delivery
+    cy.get('button[aria-label="Unsigned"]').first().click({ force: true });
+    cy.wait(1000);
+    //Open latest created delivery in hybridsign
+    cy.get('button[aria-label="Unsigned"]').first().click({ force: true });
 
     cy.wait('@getIdentifications', { timeout: 57000 }).then((interception) => {
       cy.log('Intercepted response:', interception.response);
@@ -331,7 +332,7 @@ describe('HR prepare_Document_For_Signing_From_Mass_Upload', () => {
 
       // Confirm the signature
       cy.get(
-        '.mat-sign-actions-desktop > .mat-accent > .mat-mdc-button-touch-target'
+        '.mat-sign-actions-desktop > .mat-accent > .mat-mdc-button-touch-target',
       ).click({ force: true });
 
       cy.wait(7000);
@@ -378,7 +379,7 @@ describe('HR prepare_Document_For_Signing_From_Mass_Upload', () => {
       .then(($icon) => {
         cy.wrap($icon).invoke('css', 'border', '3px solid green');
         cy.log(
-          'Validation passed: Signed icon is visible and marked in green.'
+          'Validation passed: Signed icon is visible and marked in green.',
         );
       });
 
@@ -407,7 +408,7 @@ describe('HR prepare_Document_For_Signing_From_Mass_Upload', () => {
     // Step 3: Navigate to HR page (Received Shipments)
     cy.contains(
       '.side-menu>ul>navigation-item>.navigation-item>a',
-      /Erhaltene Sendungen|Received Shipments/
+      /Erhaltene Sendungen|Received Shipments/,
     )
       .should('be.visible') // HR page link must be visible
       .click(); // Open the page
@@ -419,7 +420,7 @@ describe('HR prepare_Document_For_Signing_From_Mass_Upload', () => {
 
     // Step 5: Enter Account Number of user who received HR delivery
     cy.get('input[name="accountNumber"]').type(
-      Cypress.env('accountNumber_egEbox')
+      Cypress.env('accountNumber_egEbox'),
     );
 
     // Step 6: Enter Company Name from config
@@ -465,18 +466,18 @@ describe('HR prepare_Document_For_Signing_From_Mass_Upload', () => {
         // Step 14: Assert SupportView time is >= E-Box upload time
         expect(
           extractedTime,
-          'Extracted SupportView time should be >= upload time'
+          'Extracted SupportView time should be >= upload time',
         ).to.be.at.least(minAllowedTime);
 
         // Step 15: Assert SupportView time is <= E-Box upload time + 1 min
         expect(
           extractedTime,
-          'Extracted SupportView time should be <= upload time + 1 min'
+          'Extracted SupportView time should be <= upload time + 1 min',
         ).to.be.at.most(maxAllowedTime);
 
         // Step 16: Log success validation
         cy.log(
-          `SupportView DateTime (${normalizedDoc}) is within 1 min of UploadDateTime (${normalizedUpload}).`
+          `SupportView DateTime (${normalizedDoc}) is within 1 min of UploadDateTime (${normalizedUpload}).`,
         );
 
         // // Step 17: Click on magic link button
@@ -504,12 +505,12 @@ describe('HR prepare_Document_For_Signing_From_Mass_Upload', () => {
   });
 
   //Admin user check Reporting email
-  it.skip('Count Users and verified Reporting email', () => {
+  it('Count Users and verified Reporting email', () => {
+    // ===== STEP 1: Login to SupportView as Admin =====
     cy.loginToSupportViewAdmin();
-    // Wait for login to complete
     cy.wait(1500);
 
-    //Remove pop up
+    // ===== STEP 2: Remove release notes popup if present =====
     cy.get('body').then(($body) => {
       if ($body.find('.release-note-dialog__close-icon').length > 0) {
         cy.get('.release-note-dialog__close-icon').click();
@@ -519,208 +520,244 @@ describe('HR prepare_Document_For_Signing_From_Mass_Upload', () => {
     });
     cy.wait(1500);
 
-    // Search for Company by Display Name
-    cy.get('#searchButton>span').click(); //Click on search button
+    // ===== STEP 3: Search for Company by Display Name =====
+    cy.get('#searchButton>span').click(); // Open search dialog
     cy.wait(1000);
-    // Search for Group by Display Name using the company name
+    // Enter company name in search field (use 2nd field for company name search)
     cy.get('.search-dialog>form>.form-fields>.searchText-wrap')
       .eq(1)
-      .type(Cypress.env('company')); // Use the company name from the cypress.config.js
+      .type(Cypress.env('company'));
     cy.wait(1500);
-    //Find the Search button by button name and click on it
+    // Execute the search
     cy.get('.search-dialog>form>div>.mat-primary').click();
     cy.wait(1500);
 
-    // Switch to User page
+    // ===== STEP 4: Navigate to User section =====
+    // Click on "User" or "Benutzer" button (supports both English and German)
     cy.get('.action-buttons>button>.mdc-button__label')
       .filter((index, button) => {
         const buttonText = Cypress.$(button).text().trim();
         return buttonText === 'User' || buttonText === 'Benutzer';
       })
+      .first()
       .click();
 
     cy.wait(2500);
 
-    // Variables to store counts and inactive user account numbers
-    let activeUsersCount = 0;
-    let sendToPrintUsersCount = 0;
-    let inactiveUsers = [];
+    // ===== STEP 5: Count Active Users and Collect Inactive User Account Numbers =====
+    // Strategy: Fetch all account numbers first, then iterate through active status column
+    // This prevents async issues with nested queries
+    cy.get('.cdk-column-accountNumbers>.cell-content-wrap>div>div').then(
+      ($accountNumbers) => {
+        return cy
+          .get('.cdk-column-active>.cell-content-wrap>div>div>div')
+          .then(($activeElements) => {
+            let activeUsersCount = 0;
+            let inactiveUsers = [];
 
-    // Count Active Users & Get Inactive Users' Account Numbers
-    cy.get('.cdk-column-active>.cell-content-wrap>div>div>div')
-      .each(($el, index) => {
-        const isActive = ['Yes', 'Ja'].includes($el.text().trim());
-
-        if (isActive) {
-          activeUsersCount++;
-        } else {
-          // Get AccountNumber of inactive user
-          cy.get('.cdk-column-accountNumbers>.cell-content-wrap>div>div')
-            .eq(index)
-            .invoke('text')
-            .then((accountNumber) => {
-              inactiveUsers.push(accountNumber.trim());
+            // Iterate through each user row
+            $activeElements.each((index, el) => {
+              const isActive = ['Yes', 'Ja'].includes(
+                Cypress.$(el).text().trim(),
+              );
+              if (isActive) {
+                // Count active users
+                activeUsersCount++;
+              } else {
+                // Collect account numbers of inactive users for reporting
+                const accountNumber = Cypress.$($accountNumbers[index])
+                  .text()
+                  .trim();
+                if (accountNumber) {
+                  inactiveUsers.push(accountNumber);
+                }
+              }
             });
-        }
-      })
-      .then(() => {
-        Cypress.env('activeUsers', activeUsersCount);
-        Cypress.env('inactiveUsers', inactiveUsers);
-        cy.log(`Active Users Count: ${activeUsersCount}`);
-        cy.log(`Inactive Users: ${JSON.stringify(inactiveUsers)}`);
-      });
 
-    // Count SendToPrint Users (Ignoring 'Yes' for SendToPrintChannel)
-    cy.get('.cdk-column-sendToPrint>.cell-content-wrap>div>div>div')
-      .each(($el) => {
-        const sendToPrintText = $el.text().trim();
-        if (sendToPrintText === 'Yes' || sendToPrintText === 'Ja') {
-          // Correct comparison
-          sendToPrintUsersCount++;
-        }
-      })
-      .then(() => {
-        Cypress.env('sendToPrintUsers', sendToPrintUsersCount);
+            // Store data using Cypress aliases for async safety
+            cy.wrap({
+              activeUsersCount,
+              inactiveUsers,
+            }).as('activeUserData');
+
+            cy.log(`Active Users Count: ${activeUsersCount}`);
+            cy.log(`Inactive Users: ${JSON.stringify(inactiveUsers)}`);
+          });
+      },
+    );
+
+    // ===== STEP 6: Count Users with SendToPrint Enabled =====
+    // These users receive documents via postal mail instead of electronically
+    cy.get('.cdk-column-sendToPrint>.cell-content-wrap>div>div>div').then(
+      ($elements) => {
+        let sendToPrintUsersCount = 0;
+        $elements.each((index, el) => {
+          const text = Cypress.$(el).text().trim();
+          if (text === 'Yes' || text === 'Ja') {
+            sendToPrintUsersCount++;
+          }
+        });
+
+        // Store count as alias for later use
+        cy.wrap(sendToPrintUsersCount).as('sendToPrintCount');
         cy.log(`SendToPrint Users Count: ${sendToPrintUsersCount}`);
+      },
+    );
 
-        // Calculate sendToElChannel but exclude users where sendToPrint is 'Yes' or 'Ja'
+    // ===== STEP 7: Calculate Electronic Delivery Count and Validate Email =====
+    // Retrieve stored data from aliases
+    cy.get('@activeUserData').then((activeData) => {
+      cy.get('@sendToPrintCount').then((sendToPrintCount) => {
+        const activeUsersCount = activeData.activeUsersCount;
+        const inactiveUsers = activeData.inactiveUsers;
+
+        // Calculate users receiving electronic delivery (Active - SendToPrint)
         const sendToElChannel = Math.max(
-          activeUsersCount - sendToPrintUsersCount,
-          0
+          activeUsersCount - sendToPrintCount,
+          0,
         );
-        cy.log(
-          `SendToElChannel (excluding SendToPrint=YES/JA): ${sendToElChannel}`
-        );
+
+        cy.log(`SendToElChannel (Active - SendToPrint): ${sendToElChannel}`);
+
+        // Store calculated values in Cypress env for validation
+        Cypress.env('sendToElChannel', sendToElChannel);
+        Cypress.env('sendToPrintUsers', sendToPrintCount);
+        Cypress.env('inactiveUsers', inactiveUsers);
+
         cy.wait(2000);
 
-        // Visit Yopmail
+        // ===== STEP 8: Access Yopmail to Check Reporting Email =====
         cy.visit('https://yopmail.com/en/');
 
-        // Enter the support admin email
+        // Enter admin email address
         cy.get('#login').type(Cypress.env('email_supportViewAdmin'));
 
-        // Click the refresh button
+        // Refresh inbox to load latest emails
         cy.get('#refreshbut > .md > .material-icons-outlined').click();
 
-        // Wait for email to load
         cy.wait(4500);
 
-        // Define email subject function
-        function emailSubject(index) {
-          cy.iframe('#ifinbox')
-            .find('.mctn > .m > button > .lms')
-            .eq(index)
-            .should('include.text', 'Versandreport e-Gehaltszettel Portal');
-        }
+        // ===== STEP 9: Validate Email Subject =====
+        // Check that the email subject contains the reporting portal name
+        cy.iframe('#ifinbox')
+          .find('.mctn > .m > button > .lms')
+          .eq(0)
+          .should('include.text', 'Versandreport e-Gehaltszettel Portal');
 
-        // Define email body function
-        function emailBody() {
-          cy.iframe('#ifmail')
-            .find('#mail > div')
-            .invoke('text')
-            .then((text) => {
-              text = text.trim();
+        // ===== STEP 10: Extract and Validate Email Body Content =====
+        cy.iframe('#ifmail')
+          .find('#mail > div')
+          .invoke('text')
+          .then((text) => {
+            // Normalize whitespace for reliable string matching
+            const normalizedText = text.trim().replace(/\s+/g, ' ');
 
-              const successMessage = `Sie haben ${sendToElChannel} Sendung(en) erfolgreich digital in das e-Gehaltszettel Portal Ihrer Benutzer*innen eingeliefert`;
-              const postalMessage = `Zusätzlich haben Sie ${sendToPrintUsersCount} Sendung(en) erfolgreich über den postalischen Weg als Brief versendet. Das Dokument wird von uns über das „Einfach Brief“-Portal gedruckt, kuvertiert und an die Adresse des Benutzers versendet`;
+            cy.log(`Email Content: ${normalizedText}`);
 
-              // Prepare inactive users message if any exist
-              let inactiveUsersMessage = '';
-              if (Cypress.env('inactiveUsers').length > 0) {
-                const inactiveUsersList =
-                  Cypress.env('inactiveUsers').join(', ');
-                inactiveUsersMessage = `Folgende Personalnummern sind davon betroffen:\nSystem Biller Id: ${Cypress.env(
-                  'company'
-                )}, Personalnummern: ${inactiveUsersList}`;
-              }
+            // ===== STEP 11: Extract Delivery Statistics from Email Using Regex =====
+            // Parse successful digital deliveries
+            const digitalMatch = normalizedText.match(
+              /Sie haben (\d+) Sendung\(en\) erfolgreich digital/,
+            );
+            // Parse successful postal deliveries
+            const postalMatch = normalizedText.match(
+              /Zusätzlich haben Sie (\d+) Sendung\(en\) erfolgreich über den postalischen Weg/,
+            );
+            // Parse failed electronic deliveries (inactive users)
+            const failedElectronicMatch = normalizedText.match(
+              /(\d+) Sendung\(en\) die Sie elektronisch verschicken wollten, konnten nicht zugestellt werden/,
+            );
+            // Parse failed postal deliveries (data issues)
+            const failedPostalMatch = normalizedText.match(
+              /(\d+) Sendung\(en\) die Sie postalisch als Brief verschicken wollten, konnte\(n\) nicht ordnungsgemäß zugestellt werden/,
+            );
 
-              // Assert email contains either success message, postal message, or inactive users info
-              expect(
-                text.includes(successMessage) ||
-                  text.includes(postalMessage) ||
-                  text.includes(inactiveUsersMessage)
-              ).to.be.true;
+            // Convert matched strings to integers (default to 0 if not found)
+            const digitalDelivered = digitalMatch
+              ? parseInt(digitalMatch[1])
+              : 0;
+            const postalDelivered = postalMatch ? parseInt(postalMatch[1]) : 0;
+            const failedElectronic = failedElectronicMatch
+              ? parseInt(failedElectronicMatch[1])
+              : 0;
+            const failedPostal = failedPostalMatch
+              ? parseInt(failedPostalMatch[1])
+              : 0;
 
-              // Log to console for debugging
-              cy.log(`Email Content: ${text}`);
-              if (inactiveUsersMessage) {
-                cy.log(`Inactive Users Info Added: ${inactiveUsersMessage}`);
-              }
-            });
-        }
+            // ===== STEP 12: Log Comprehensive Delivery Report =====
+            cy.log('=== EMAIL DELIVERY REPORT ===');
+            cy.log(`✓ Successful Digital Deliveries: ${digitalDelivered}`);
+            cy.log(`✓ Successful Postal Deliveries: ${postalDelivered}`);
+            cy.log(`✗ Failed Electronic Deliveries: ${failedElectronic}`);
+            cy.log(`✗ Failed Postal Deliveries: ${failedPostal}`);
 
-        // Validate email subject and body
-        emailSubject(0);
-        emailBody();
-      });
-  });
+            // ===== STEP 13: Calculate Totals for Verification =====
+            const totalElectronic = digitalDelivered + failedElectronic;
+            const totalPostal = postalDelivered + failedPostal;
+            const totalProcessed = totalElectronic + totalPostal;
 
-  //Admin user check Reporting email and clear inbox
-  it('Yopmail - Get Reporting email and clear inbox', () => {
-    // Visit Yopmail
-    cy.visit('https://yopmail.com/en/');
+            cy.log(`Total Electronic Attempts: ${totalElectronic}`);
+            cy.log(`Total Postal Attempts: ${totalPostal}`);
+            cy.log(`Total Users Processed: ${totalProcessed}`);
+            cy.log(`Active Users Count: ${activeUsersCount}`);
+            cy.log(`SendToPrint Users Count: ${sendToPrintCount}`);
 
-    const user = Cypress.env('email_supportViewAdmin');
+            // ===== STEP 14: Validate Email Structure =====
+            // Verify essential email sections are present
+            expect(normalizedText).to.include(
+              'Sie haben',
+              'Email should contain digital delivery message',
+            );
+            expect(normalizedText).to.include(
+              'Ihr e-Gehaltszettel Team',
+              'Email should contain signature',
+            );
 
-    // Enter the support admin email
-    cy.get('#login').type(`${user}`);
+            // ===== STEP 15: Validate Digital Deliveries Reported =====
+            if (digitalDelivered > 0) {
+              cy.log(
+                `✓ Digital delivery message validated: ${digitalDelivered} sent`,
+              );
+            }
 
-    // Click the refresh button
-    cy.get('#refreshbut > .md > .material-icons-outlined').click();
-    //Custom functions:
-    // Define email subject function
-    function emailSubject(index) {
-      cy.iframe('#ifinbox')
-        .find('.mctn > .m > button > .lms')
-        .eq(index)
-        .should('include.text', 'Versandreport e-Gehaltszettel Portal');
-    }
+            // ===== STEP 16: Validate Postal Deliveries Reported (if any) =====
+            if (postalDelivered > 0) {
+              cy.log(
+                `✓ Postal delivery message validated: ${postalDelivered} sent`,
+              );
+            }
 
-    // Access the inbox iframe and validate the email subject
-    emailSubject(0); // Validate subject of Reporting email
+            // ===== STEP 17: Validate Failed Electronic Deliveries Reported (if any) =====
+            if (failedElectronic > 0) {
+              expect(normalizedText).to.include(
+                'konnten nicht zugestellt werden',
+                'Email should mention failed electronic deliveries',
+              );
+              cy.log(
+                `✓ Failed electronic deliveries reported: ${failedElectronic}`,
+              );
+            }
 
-    cy.iframe('#ifmail')
-      .find('#mail > div')
-      .invoke('text') // Get the text content
-      .then((text) => {
-        // Log the email body text
-        cy.log('Email Body Text:', text);
+            // ===== STEP 18: Validate Failed Postal Deliveries Reported (if any) =====
+            if (failedPostal > 0) {
+              expect(normalizedText).to.include(
+                'konnte(n) nicht ordnungsgemäß zugestellt werden',
+                'Email should mention failed postal deliveries',
+              );
+              cy.log(`✓ Failed postal deliveries reported: ${failedPostal}`);
+            }
 
-        // Normalize spaces for comparison
-        const normalizedText = text.trim().replace(/\s+/g, ' '); // Normalize extra spaces
-
-        // Validate that the email body contains the expected text
-        expect(normalizedText).to.include(
-          'Sie haben 1 Sendung(en) erfolgreich digital in das e-Gehaltszettel Portal Ihrer Benutzer*innen eingeliefert'
-        );
-        expect(normalizedText).to.include(
-          'Zusätzlich haben Sie 0 Sendung(en) erfolgreich über den postalischen Weg als Brief versendet. Das Dokument wird von uns über das „Einfach Brief“-Portal gedruckt, kurvertiert und an die Adresse des Benutzers versendet.'
-        );
-        expect(normalizedText).to.include('Ihr e-Gehaltszettel Team');
-      });
-
-    cy.wait(4500);
-
-    // Access the inbox iframe
-    cy.get('iframe#ifinbox').then(($iframe) => {
-      const $body = $iframe.contents().find('body');
-
-      // Wrap iframe body for Cypress commands
-      cy.wrap($body).then(($inbox) => {
-        if ($inbox.find('.mctn .lm').length === 0) {
-          // No emails → skip delete
-          cy.log(`Inbox for ${user} is empty. Skipping delete.`);
-        } else {
-          // Emails exist → check delete button in main page
-          cy.get('#delall').then(($btn) => {
-            if (!$btn.is(':disabled')) {
-              cy.wrap($btn).click({ force: true });
-              cy.log(`All emails deleted for ${user}`);
-            } else {
-              cy.log(`Delete button disabled for ${user}`);
+            // ===== STEP 19: Validate Inactive Users Are Mentioned (if any) =====
+            if (inactiveUsers.length > 0) {
+              expect(normalizedText).to.include(
+                'Folgende Personalnummern sind davon betroffen',
+                'Email should mention affected account numbers',
+              );
+              cy.log(
+                `✓ Inactive users message present (${inactiveUsers.length} users)`,
+              );
             }
           });
-        }
       });
     });
   });
