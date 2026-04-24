@@ -6,8 +6,9 @@
   "author": "Mile",
   "license": "ISC",
   "devDependencies": {
+    "@testing-library/cypress": "^10.1.0",
     "7zip-bin": "^5.2.0",
-    "cypress": "^15.11.0",
+    "cypress": "^15.14.1",
     "cypress-drag-drop": "^1.1.1",
     "cypress-file-upload": "^5.0.8",
     "cypress-iframe": "^1.0.1",

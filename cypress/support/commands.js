@@ -85,6 +85,7 @@ import 'cypress-file-upload';
 import 'cypress-keycloak-commands';
 import 'cypress-iframe';
 import 'cypress-wait-until';
+import '@testing-library/cypress/add-commands';
 
 const path = require('path');
 
@@ -249,7 +250,7 @@ Cypress.Commands.add('upload_attachment1', function () {
     .then(Cypress.Blob.binaryStringToBlob)
     .then((fileContent) => {
       cy.get(
-        '.upload>app-upload-deliveries>.upload-section>.modal-upload-box>form>input'
+        '.upload>app-upload-deliveries>.upload-section>.modal-upload-box>form>input',
       ).attachFile({
         fileContent,
         filePath: 'Test.pdf',
@@ -270,9 +271,17 @@ Cypress.Commands.add('loginToSupportViewMaster', () => {
   cy.get('.username').type(Cypress.env('username_supportViewMaster'));
   cy.get('.password').type(Cypress.env('password_supportViewMaster'));
   cy.wait(1000);
+
+  cy.intercept('GET', '**/maintanance-config/**').as('maintananceConfig'); //Intercept backend call after login
   cy.get('.login-button').click(); //Trigger Login to SW
+
+  cy.wait('@maintananceConfig', { timeout: 45000 }).then((interception) => {
+    expect(interception.response.statusCode).to.eq(200);
+    cy.log('Login successful, maintananceConfig loaded');
+  });
+
   cy.url().should('include', '/dashboard/groups'); // => validate url
-  cy.wait(1000);
+  cy.wait(4000);
 }); //end
 
 //Login to EG SW as a Admin user
@@ -287,6 +296,49 @@ Cypress.Commands.add('loginToSupportViewAdmin', () => {
   cy.get('.login-button').click(); //Trigger Login to SW
   cy.url().should('include', '/dashboard/groups'); // => validate url
   // });
+  cy.wait(1000);
+}); //end
+
+//Login to DocumentHub (DH) using Keycloak
+Cypress.Commands.add('loginToDH_Keycloak', () => {
+  // Visit DH application
+  cy.visit(Cypress.env('dh_baseUrl'));
+  cy.url().should('include', Cypress.env('dh_baseUrl'));
+  cy.wait(1500);
+
+  // Remove Cookie dialog if present
+  cy.get('body').then(($body) => {
+    if ($body.find('#onetrust-policy-title').is(':visible')) {
+      cy.get('#onetrust-accept-btn-handler').click({ force: true });
+    } else {
+      cy.log('Cookie bar not visible');
+    }
+  });
+  cy.wait(1500);
+
+  // Click Login button (first page)
+  cy.get('button[id=":r0:"]').contains('Login').click();
+  cy.wait(2000);
+
+  // --- Keycloak Login ---
+  cy.get('input[id="username"]').type(Cypress.env('email_supportViewAdmin'));
+  cy.get('input[name="password"]').type(
+    Cypress.env('password_supportViewAdmin'),
+  );
+
+  // Intercept backend call after login
+  cy.intercept('GET', '**/generalInfo').as('generalInfo');
+
+  // Click Keycloak Login Button
+  cy.get('button#kc-login').contains('Jetzt einloggen').click();
+
+  // Wait & Assert response
+  cy.wait('@generalInfo', { timeout: 15000 }).then((interception) => {
+    expect(interception.response.statusCode).to.eq(200);
+    cy.log('Login successful, generalInfo loaded');
+  });
+
+  cy.url().should('include', `${Cypress.env('dh_baseUrl')}home/persons`);
   cy.wait(1000);
 }); //end
 
@@ -312,7 +364,7 @@ Cypress.Commands.add('loginToEgEbox', () => {
   cy.wait(1500);
   //Import credentials (un/pw) from 'cypress config' file
   cy.get('input[placeholder="Benutzername"]').type(
-    Cypress.env('username_egEbox')
+    Cypress.env('username_egEbox'),
   );
   cy.wait(1000);
   cy.get('input[type="password"]').type(Cypress.env('password_egEbox'));
@@ -421,7 +473,7 @@ Cypress.Commands.add('uploadServiceLine', function () {
 Cypress.Commands.add('uploadServiceLineFile_WithValidAndInvalidTid', () => {
   cy.fixture(
     'Serviceline- 2Receivers_VALID_AND_INVALID_TID_(tid=AQUA_gid=ABBA000100279311).pdf',
-    'binary'
+    'binary',
   )
     .then(Cypress.Blob.binaryStringToBlob)
     .then((fileContent) => {
@@ -550,7 +602,7 @@ Cypress.Commands.add('uploadDocument', function () {
           .invoke('text')
           .then((uploadAreaTxt) => {
             expect(uploadAreaTxt, 'upload Area Txt').to.include(
-              t['Drag documents to this area or click here to upload']
+              t['Drag documents to this area or click here to upload'],
             );
           }); //end
         cy.get('.dialog-actions>button>.title')
@@ -558,7 +610,7 @@ Cypress.Commands.add('uploadDocument', function () {
           .invoke('text')
           .then((cancelButton) => {
             expect(cancelButton, 'Cancel Upload document button').to.include(
-              t.Cancel
+              t.Cancel,
             );
           }); //end
         //Upload button
@@ -567,7 +619,7 @@ Cypress.Commands.add('uploadDocument', function () {
           .invoke('text')
           .then((cancelButton) => {
             expect(cancelButton, 'Upload document button').to.include(
-              t['Upload Documents']
+              t['Upload Documents'],
             );
           }); //end
       });
@@ -704,13 +756,15 @@ Cypress.Commands.add('getCredentialsFromYopmail', () => {
     .find('.mctn > .m > button > .lms')
     .then((emails) => {
       const emailSubjects = [...emails].map((email) =>
-        email.textContent.trim()
+        email.textContent.trim(),
       );
       let usernameEmailIndex = emailSubjects.findIndex((subject) =>
-        subject.includes('Neuer Benutzer e-Gehaltszettel Portal – Benutzername')
+        subject.includes(
+          'Neuer Benutzer e-Gehaltszettel Portal – Benutzername',
+        ),
       );
       let passwordEmailIndex = emailSubjects.findIndex((subject) =>
-        subject.includes('Neuer Benutzer e-Gehaltszettel Portal – Passwort')
+        subject.includes('Neuer Benutzer e-Gehaltszettel Portal – Passwort'),
       );
 
       if (usernameEmailIndex !== -1) {
@@ -722,7 +776,7 @@ Cypress.Commands.add('getCredentialsFromYopmail', () => {
 
         cy.iframe('#ifmail')
           .find(
-            '#mail>div>div:nth-child(2)>div:nth-child(3)>table>tbody>tr>td>p:nth-child(2)>span'
+            '#mail>div>div:nth-child(2)>div:nth-child(3)>table>tbody>tr>td>p:nth-child(2)>span',
           )
           .invoke('text')
           .then((innerText) => {
@@ -744,7 +798,7 @@ Cypress.Commands.add('getCredentialsFromYopmail', () => {
 
         cy.iframe('#ifmail')
           .find(
-            '#mail>div>div:nth-child(2)>div:nth-child(3)>table>tbody>tr>td>p:nth-child(2)>span'
+            '#mail>div>div:nth-child(2)>div:nth-child(3)>table>tbody>tr>td>p:nth-child(2)>span',
           )
           .invoke('text')
           .then((innerText) => {
@@ -876,7 +930,7 @@ Cypress.Commands.add('uploadMultipleDocuments', function (fileNames) {
         .then(Cypress.Blob.binaryStringToBlob)
         .then((fileContent) => {
           cy.get(
-            '.mat-mdc-dialog-content>.upload-section>div>form>input'
+            '.mat-mdc-dialog-content>.upload-section>div>form>input',
           ).attachFile({
             fileContent,
             filePath: fileName,
@@ -889,7 +943,7 @@ Cypress.Commands.add('uploadMultipleDocuments', function (fileNames) {
       .invoke('text')
       .then((uploadAreaTxt) => {
         expect(uploadAreaTxt, 'upload Area Txt').to.include(
-          t['Drag documents to this area or click here to upload']
+          t['Drag documents to this area or click here to upload'],
         );
       });
 
@@ -898,7 +952,7 @@ Cypress.Commands.add('uploadMultipleDocuments', function (fileNames) {
       .invoke('text')
       .then((cancelButton) => {
         expect(cancelButton, 'Cancel Upload document button').to.include(
-          t.Cancel
+          t.Cancel,
         );
       });
 
@@ -907,7 +961,7 @@ Cypress.Commands.add('uploadMultipleDocuments', function (fileNames) {
       .invoke('text')
       .then((uploadButton) => {
         expect(uploadButton, 'Upload document button').to.include(
-          t['Upload Documents']
+          t['Upload Documents'],
         );
       });
 
@@ -917,7 +971,7 @@ Cypress.Commands.add('uploadMultipleDocuments', function (fileNames) {
       .invoke('text')
       .then((errorStatus) => {
         expect(errorStatus, 'Error').to.include(
-          t['The fileformat will not be supported']
+          t['The fileformat will not be supported'],
         );
       });
     cy.wait(1500);
@@ -950,7 +1004,7 @@ Cypress.Commands.add('uploadValidMultipleDocuments', function (fileNames) {
       .invoke('text')
       .then((uploadAreaTxt) => {
         expect(uploadAreaTxt, 'upload Area Txt').to.include(
-          t['Drag documents to this area or click here to upload']
+          t['Drag documents to this area or click here to upload'],
         );
       });
 
@@ -959,7 +1013,7 @@ Cypress.Commands.add('uploadValidMultipleDocuments', function (fileNames) {
       .invoke('text')
       .then((cancelButton) => {
         expect(cancelButton, 'Cancel Upload document button').to.include(
-          t.Cancel
+          t.Cancel,
         );
       });
 
@@ -987,7 +1041,7 @@ Cypress.Commands.add('deleteAllEmails', () => {
   cy.get('#login').type('aqua.admin@yopmail.com');
   cy.get('#refreshbut > .md > .material-icons-outlined').click();
   cy.get(
-    '.wminboxheader > :nth-child(1) > .textu > .material-icons-outlined'
+    '.wminboxheader > :nth-child(1) > .textu > .material-icons-outlined',
   ).click();
 
   // Check if the "Delete all" button is enabled
@@ -1178,12 +1232,36 @@ Cypress.Commands.add('downloadZipFromYopmail', () => {
 
   // Optional: wait for download or log downloaded files
   const downloadsDir = `${Cypress.config(
-    'fileServerFolder'
+    'fileServerFolder',
   )}/cypress/downloads/`;
   cy.log('Download directory:', downloadsDir);
 });
 
 //********************************DH******************************* */
+
+//DH Login to Document Hub using valid credentials
+Cypress.Commands.add('loginToDH', () => {
+  //Fill the login form with valid credentials
+  cy.get('#login-username').type(Cypress.env('username_supportViewAdmin'));
+  cy.get('#login-password').type(Cypress.env('password_supportViewAdmin'));
+  cy.wait(1000);
+
+  cy.intercept('GET', '**/supportView/v1/group/getGroupData').as(
+    'getGroupData',
+  );
+
+  //Click on Login button
+  cy.get('#login-button').click();
+
+  cy.wait('@getGroupData', { timeout: 35000 }).then((interception) => {
+    expect(interception.response.statusCode).to.eq(200);
+    cy.log('Login successful - navigated to home page');
+  });
+
+  //Validate url after login
+  cy.url().should('include', `${Cypress.env('dh_baseUrl')}home`);
+  cy.wait(1000);
+}); //end
 
 //DH Upload 305 Dictionary PDF - For AQUA ABBA000100279311
 Cypress.Commands.add('DHupload305Dictionary', function () {
@@ -1251,6 +1329,38 @@ Cypress.Commands.add('DHupdateExistingUser_viaCSV', function () {
     });
 });
 
+//DH Update 2 Non-Existing Users via CSV (for negative testing)
+Cypress.Commands.add('DHupdateTwoNonExistingUsers_viaCSV', function () {
+  cy.fixture('3_updateTwoNonExistingUsers.csv', 'binary')
+    .then(Cypress.Blob.binaryStringToBlob)
+    .then((fileContent) => {
+      cy.get('input[type="file"]', { timeout: 5000 })
+        .should('exist')
+        .attachFile({
+          fileContent,
+          filePath: '3_updateTwoNonExistingUsers.csv',
+          fileName: '3_updateTwoNonExistingUsers.csv',
+          mimeType: 'text/csv',
+        });
+    });
+});
+
+//DH Upload Duplicate Users via CSV (for negative testing)
+Cypress.Commands.add('DHuploadDuplicateUsers_viaCSV', function () {
+  cy.fixture('4_duplicateUsers.csv', 'binary')
+    .then(Cypress.Blob.binaryStringToBlob)
+    .then((fileContent) => {
+      cy.get('input[type="file"]', { timeout: 5000 })
+        .should('exist')
+        .attachFile({
+          fileContent,
+          filePath: '4_duplicateUsers.csv',
+          fileName: '4_duplicateUsers.csv',
+          mimeType: 'text/csv',
+        });
+    });
+});
+
 //DH Upload Structured XML file
 Cypress.Commands.add('DHuploadStructuredXMLfile', function () {
   cy.fixture('XML_Structured(ABBA000100279311_L103-ISS).xml', 'binary')
@@ -1284,7 +1394,7 @@ Cypress.Commands.add('createNewUserFromXMLfile', function () {
 });
 
 // Upload TXT file
-Cypress.Commands.add('uploadTXTfile', function () {
+Cypress.Commands.add('DHuploadTXTfile', function () {
   cy.fixture('TXT_1receiver__(AQUA_ABBA000100279311_ISS BBcare).txt', 'binary')
     .then(Cypress.Blob.binaryStringToBlob)
     .then((fileContent) => {

@@ -87,6 +87,7 @@ describe('Login to DH using keycloak and upload-send PDF dictionary', () => {
 
     cy.wait(500);
 
+    cy.pause();
     //Validate labels on form 1
     // cy.get('form>div:nth-of-type(2)')
 
@@ -114,6 +115,7 @@ describe('Login to DH using keycloak and upload-send PDF dictionary', () => {
         }
       });
 
+    cy.pause();
     cy.get('#create-user-accountNumber').type(user.username);
     cy.wait(1000);
 
