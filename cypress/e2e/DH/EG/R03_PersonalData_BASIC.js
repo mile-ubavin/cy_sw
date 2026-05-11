@@ -2,7 +2,7 @@
 
 describe('Login to DH using keycloak and upload-send PDF dictionary', () => {
   //Try to Create New User when User already exist
-  it.only('DH - Try to Create New User when accountNumber already exist', () => {
+  it('DH - Try to Create New User when accountNumber already exist', () => {
     cy.visit(Cypress.env('dh_baseUrl'));
     cy.url().should('include', Cypress.env('dh_baseUrl'));
 
@@ -137,7 +137,7 @@ describe('Login to DH using keycloak and upload-send PDF dictionary', () => {
   });
 
   // Precondition: Search for the user and if user exists, proceed with deletion
-  it.only('Search for the user and if user(s) exists, proceed with deletion', () => {
+  it('Search for the user and if user(s) exists, proceed with deletion', () => {
     cy.loginToSupportViewMaster();
     cy.wait(3500);
 
@@ -231,7 +231,7 @@ describe('Login to DH using keycloak and upload-send PDF dictionary', () => {
   }); //end it
 
   //Create New User when SentToPint:true
-  it.only('DH - Create New User when SentToPint:true', () => {
+  it('DH - Create New User when SentToPint:true', () => {
     // Visit DH
     cy.visit(Cypress.env('dh_baseUrl'));
     cy.url().should('include', Cypress.env('dh_baseUrl'));
@@ -666,63 +666,91 @@ describe('Login to DH using keycloak and upload-send PDF dictionary', () => {
   }); //End IT
 
   //Edit E-Box user`s data, from Persons table
-  it('DH - Edit E-Box user`s data, from Persons table', () => {
-    // Visit AUT
+  it.only('DH - Edit E-Box user`s data, from Persons table', () => {
+    // Visit DH
     cy.visit(Cypress.env('dh_baseUrl'));
     cy.url().should('include', Cypress.env('dh_baseUrl'));
-    cy.wait(1500);
 
     // Remove Cookie dialog if present
     cy.get('body').then(($body) => {
-      if ($body.find('#onetrust-policy-title').length) {
+      if ($body.find('#onetrust-policy-title').is(':visible')) {
         cy.get('#onetrust-accept-btn-handler').click({ force: true });
       } else {
         cy.log('Cookie bar not visible');
       }
     });
-    cy.wait(1500);
 
-    // Intercept backend call after login
-    cy.intercept('GET', '**/generalInfo').as('generalInfo');
+    // Login to SupportView using custom command
+    cy.loginToDH();
 
-    // Login Dummy button
-    cy.get('button[id=":r2:"]').contains('Login Dummy').click();
+    // Wait for generalInfo to confirm login success
     cy.wait(2000);
 
-    // Wait & Assert response
-    cy.wait('@generalInfo', { timeout: 15000 }).then((interception) => {
+    cy.url().should('include', `${Cypress.env('dh_baseUrl')}home`);
+
+    //Sclroll to top to ensure visibility of sidebar navigation menu
+    cy.scrollTo('top', { duration: 200 });
+
+    // Click on Employees button (from sidebar navigation menu)
+    cy.intercept('GET', '**/person/fromGroup/**').as('getEmployees');
+    cy.get('#nav-employees')
+      .should('be.visible')
+      .invoke('attr', 'style', 'border: 2px solid black; padding: 2px;')
+      .wait(1500)
+      .click();
+
+    cy.wait('@getEmployees', { timeout: 35000 }).then((interception) => {
       expect(interception.response.statusCode).to.eq(200);
-      cy.log('Login successful, generalInfo loaded');
     });
 
-    cy.url().should('include', `${Cypress.env('dh_baseUrl')}home/persons`);
-    cy.wait(1000);
+    cy.wait(1500);
 
-    //Select Company
+    //Select Company from dropdown
     const companyName = Cypress.env('company').toLowerCase();
 
     // Open the dropdown
-    cy.get('div[role="combobox"]').click({ force: true });
+    cy.get('#employee-select-company').click({ force: true });
+    cy.wait(1000);
 
-    // Find and click the matching option (ignore case)
-    cy.get('ul[aria-labelledby=":r5:-label"] > li > span')
+    // Find and click the matching option (ignore case, use contains for partial match)
+    cy.get('ul[role="listbox"] > li > span')
       .should('be.visible')
-      .each(($el) => {
-        const text = $el.text().trim().toLowerCase();
-
-        if (text === companyName) {
-          cy.wrap($el).click({ force: true });
+      .then(($options) => {
+        const match = [...$options].find((el) =>
+          el.textContent.trim().toLowerCase().includes(companyName),
+        );
+        if (match) {
+          cy.wrap(match).click({ force: true });
+        } else {
+          throw new Error(`No dropdown option contains: ${companyName}`);
         }
       });
+    cy.wait(500);
+
+    //Scroll to top to ensure "Create new Admin" button is visible
+    cy.scrollTo('top', { duration: 500 });
+
+    cy.wait(500);
 
     // Get user test data from cypress.config.js
     const user = Cypress.env('createUser')[0];
     cy.wait(1500);
 
+    //Click on filter button to open filters bar
+    cy.get('button[aria-label="persons.toggleFilters"]')
+      .invoke('attr', 'style', 'border: 2px solid black; padding: 2px;') // highlight element
+      .wait(1500)
+      .click()
+      .wait(1500);
+
     // Search for user by username
-    cy.get('input[placeholder="Benutzername"]').type(user.username);
-    cy.get('input[placeholder="Name"]').type(user.lastName);
-    //cy.get('input[placeholder="Telefonnummer"]').type(user.email);
+    cy.get(
+      'input[placeholder*="Username"], input[placeholder*="Benutzername"]',
+    ).type(user.username);
+    cy.get('input[placeholder*="Name"], input[placeholder*="Name"]').type(
+      user.lastName,
+    );
+    //cy.get('input[placeholder*="Telefonnummer"], input[placeholder*="Phone Number"]').type(user.email);
     cy.wait(1000);
 
     // //Move filers to right
@@ -755,30 +783,32 @@ describe('Login to DH using keycloak and upload-send PDF dictionary', () => {
     // cy.wait(1000);
 
     //Togle Filters Bar HIDE
-    cy.get('#toggle-filters')
+    cy.get('button[aria-label="persons.toggleFilters"]')
+      .next('button')
+      .should('be.visible')
       .invoke('attr', 'style', 'border: 2px solid black; padding: 2px;') // highlight element
       .wait(2000)
 
       .click();
 
     //Togle Filters Bar SHOW
-    cy.get('#toggle-filters')
-      .invoke('attr', 'style', 'border: 2px solid black; padding: 2px;') // highlight element
-      .wait(1000)
-      .click();
+    // cy.get('button[aria-label="persons.toggleFilters"]')
+    //   .invoke('attr', 'style', 'border: 2px solid black; padding: 2px;') // highlight element
+    //   .wait(1000)
+    //   .click();
 
     //Custom Filer view
 
-    // // 1. Open the column settings
-    // cy.get('.iconbtn').eq(1).click({ force: true });
+    // 1. Open the column settings
+    cy.get('.iconbtn').eq(1).click({ force: true });
 
-    // // 2. Wait for the MUI menu to appear (MuiPaper-root)
-    // cy.get('.MuiPaper-root', { timeout: 5000 }).should('be.visible');
+    // 2. Wait for the MUI menu to appear (MuiPaper-root)
+    cy.get('.MuiPaper-root', { timeout: 5000 }).should('be.visible');
 
-    // // 3. Click the desired item inside the menu
-    // cy.contains('.MuiPaper-root li div', 'E-Mail Aktiv')
-    //   .should('be.visible')
-    //   .click({ force: true });
+    // 3. Click the desired item inside the menu
+    cy.contains('.MuiPaper-root li div', 'E-Mail Aktiv')
+      .should('be.visible')
+      .click({ force: true });
 
     // 1. Open the column settings
     cy.get('.iconbtn').eq(1).click({ force: true });
@@ -827,43 +857,35 @@ describe('Login to DH using keycloak and upload-send PDF dictionary', () => {
     cy.get('button[aria-label="More Row actions"]').click({ force: true });
     cy.wait(1000);
 
-    // Target the "Edit" button
-    // Target all visible span elements inside the menu
-    cy.get('ul[role="menu"] span')
-      .should('be.visible') // Ensure the elements are visible
-      .each(($el) => {
-        // Iterate through each of the elements
-        // Check if the text matches either "Edit" or "Bearbeiten"
-        if ($el.text().match(/Bearbeiten|Edit/i)) {
-          // Highlight the element for debugging (optional)
-          cy.wrap($el).invoke(
-            'attr',
-            'style',
-            'border: 2px solid black; padding: 2px;',
-          );
-          cy.wait(2000);
-          // Click the element
-          cy.wrap($el).click();
-        }
-      });
+    // Open edit form for the selected employee
+    cy.contains('ul[role="menu"] span', /Bearbeiten|Edit/i)
+      .should('be.visible')
+      .invoke('attr', 'style', 'border: 2px solid black; padding: 2px;')
+      .wait(2000)
+      .click({ force: true });
 
     cy.wait(3000);
 
-    //Click on reset password
-    cy.contains('.linkbtn--secondary', /Passwort zurücksetzen/i)
-      .should('be.enabled')
-      .invoke('attr', 'style', 'border: 2px solid black; padding: 2px;') // highlight element
-      .wait(2500)
-      .click({ force: true });
-
-    cy.wait(3500);
+    // Reset password is covered by its own IT. For edit-user flow, only verify the action is present.
+    cy.contains('button, a, .linkbtn--secondary', /Reset password|Passwort zurücksetzen/i)
+      .filter(':visible')
+      .first()
+      .should('exist');
 
     //Edit user's data
 
-    cy.get('input[placeholder="z.B. Dr., Mag."]').type(' - EDIT');
-    cy.get('input[placeholder="Vorname"').type(' - EDIT');
-    cy.get('input[placeholder="Nachname"]').type(' - EDIT');
-    cy.get('input[placeholder="z.B. PhD, MBA"]').type(' - EDIT');
+    cy.get('input[placeholder="z.B. Dr., Mag."], input[placeholder="e.g. Dr., Mag."]')
+      .first()
+      .type(' - EDIT');
+    cy.get('input[placeholder="Vorname"], input[placeholder="First name"]')
+      .first()
+      .type(' - EDIT');
+    cy.get('input[placeholder="Nachname"], input[placeholder="Last name"]')
+      .first()
+      .type(' - EDIT');
+    cy.get('input[placeholder="z.B. PhD, MBA"], input[placeholder="e.g. PhD, MBA"]')
+      .first()
+      .type(' - EDIT');
     //Enter invalid email
     cy.get('input[placeholder="email@example.com"]')
       .clear()
@@ -877,7 +899,7 @@ describe('Login to DH using keycloak and upload-send PDF dictionary', () => {
         // Trim the text and validate it
         const trimmedText = text.trim();
         expect(trimmedText).to.match(
-          /E-Mail-Format ist ungültig|E-Mail-Format ist ungültig/,
+          /Invalid email format|E-Mail-Format ist ungültig/i,
         );
       });
     cy.wait(2500);
@@ -890,9 +912,14 @@ describe('Login to DH using keycloak and upload-send PDF dictionary', () => {
     cy.wait(3500);
 
     //Save chanages
-    cy.get('.linkbtn--primary>div:nth-of-type(1)')
-      .contains(/Änderungen speichern|Änderungen speichern/i) // DE + EN
+    cy.intercept('POST', '**/editPerson').as('editPerson');
+    cy.contains('button, .linkbtn--primary, .linkbtn--primary > div', /Änderungen speichern|Save changes/i)
+      .should('be.visible')
       .click({ force: true });
+
+    cy.wait('@editPerson', { timeout: 15000 }).then((interception) => {
+      expect(interception.response.statusCode).to.be.oneOf([200, 201]);
+    });
 
     cy.wait(3000);
   }); //End IT

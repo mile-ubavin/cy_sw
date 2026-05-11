@@ -13,6 +13,8 @@
 // https://on.cypress.io/configuration
 // ***********************************************************
 require('cypress-xpath');
+// Import @testing-library/cypress to enable cy.findByRole, cy.findByText, etc.
+import '@testing-library/cypress/add-commands';
 // Import commands.js using ES2015 syntax:
 import './commands';
 

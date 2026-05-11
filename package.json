@@ -8,7 +8,7 @@
   "devDependencies": {
     "@testing-library/cypress": "^10.1.0",
     "7zip-bin": "^5.2.0",
-    "cypress": "^15.14.1",
+    "cypress": "^15.14.2",
     "cypress-drag-drop": "^1.1.1",
     "cypress-file-upload": "^5.0.8",
     "cypress-iframe": "^1.0.1",
@@ -26,7 +26,7 @@
     "axios": "^1.7.7",
     "cypress-commands": "^3.0.0",
     "cypress-downloadfile": "^1.2.4",
-    "cypress-real-events": "^1.13.0",
+    "cypress-real-events": "^1.15.0",
     "dayjs": "^1.11.10",
     "papaparse": "^5.5.3",
     "pdfjs-dist": "^5.2.133",

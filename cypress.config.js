@@ -4,6 +4,13 @@
 // const https = require('https');
 // const storedValues = {};
 
+import {
+  credentialsLogin,
+  credentialsLoginEdeja,
+  credentialsLoginProd,
+  credentialsLoginServices,
+} from './credentials';
+
 // Top-level Node imports
 const { defineConfig } = require('cypress');
 const fs = require('fs');
@@ -279,21 +286,8 @@ const environments = {
     dh_baseUrl: 'https://documenthub.edeja.com/',
     baseUrl: 'https://supportviewpayslip.edeja.com/fe',
 
-    username_supportViewMaster: 'e-gehaltszettelMaster',
-    password_supportViewMaster: 'Test1234!',
-
-    company: 'Aqua',
-    companyPrefix: 'aqua',
-    companyEmail: 'aqua.gmbh@yopmail.com',
-
-    search: 'Android',
-    username_supportViewAdmin: 'aquaAdmin',
-    password_supportViewAdmin: 'Test1234!',
     email_supportViewAdmin: 'aqua.admin@yopmail.com',
     baseUrl_egEbox: 'https://eboxpayslip.edeja.com/fe.e-box_t/',
-    username_egEbox: 'aquaABBA000100279311',
-    password_egEbox: 'Test1234!',
-    accountNumber_egEbox: 'ABBA000100279311',
     tagesBaseUrl: 'https://tages-post.edeja.com/',
     downloadsFolder:
       'C:/Users/mubavin/Cypress/EG/cypress-automatison-framework/cypress/downloads/',
@@ -393,6 +387,7 @@ const environments = {
         username: 'CYLegacyTestuser',
       },
     ],
+    ...credentialsLoginEdeja,
   },
   eg_test: {
     dh_baseUrl:
@@ -517,6 +512,7 @@ const environments = {
         username: 'CYLegacyTestuser',
       },
     ],
+    ...credentialsLoginServices,
   },
   eg_prod: {
     baseUrl:
@@ -638,6 +634,7 @@ const environments = {
         username: 'CYLegacyTestuser',
       },
     ],
+    ...credentialsLoginProd,
   },
   dp_dev: {
     baseUrl: 'https://datapart.edeja.com/ebox',
@@ -1374,7 +1371,7 @@ module.exports = defineConfig({
         /*********************************** */
       });
       //  Set executing tests on various environments, targeting appropriate json from const=environments
-      const envConfig = environments['eg_dev'];
+      const envConfig = environments['eg_test'];
       return { ...config, env: { ...config.env, ...envConfig } };
     }, //end
     specPattern: 'cypress/e2e/**/*.{js,jsx,ts,tsx}', // Ensure this matches your structure

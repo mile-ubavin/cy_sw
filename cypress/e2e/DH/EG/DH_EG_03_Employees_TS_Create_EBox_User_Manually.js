@@ -121,7 +121,7 @@ describe('Create e-Box user manually', () => {
     //Sclroll to top to ensure visibility of sidebar navigation menu
     cy.scrollTo('top', { duration: 200 });
 
-    // Click on Admin User button (from sidebar navigation menu)
+    // Click on Employees button (from sidebar navigation menu)
     cy.intercept('GET', '**/person/fromGroup/**').as('getEmployees');
     cy.get('#nav-employees')
       .should('be.visible')
