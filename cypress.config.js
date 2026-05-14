@@ -1265,6 +1265,20 @@ module.exports = defineConfig({
     chromeWebSecurity: false,
     experimentalSessionAndOrigin: true,
     setupNodeEvents(on, config) {
+      // Hide Cypress automation flags from the browser so fingerprinting-based
+      // captchas (e.g. FriendlyCaptcha v2) do not detect the automated browser.
+      on('before:browser:launch', (browser, launchOptions) => {
+        if (browser.name === 'chrome' || browser.name === 'chromium') {
+          launchOptions.args.push(
+            '--disable-blink-features=AutomationControlled',
+          );
+          launchOptions.args = launchOptions.args.filter(
+            (arg) => arg !== '--enable-automation',
+          );
+        }
+        return launchOptions;
+      });
+
       // Register the downloadFile task
       on('task', {
         extractPasswordProtectedZip,
@@ -1369,6 +1383,103 @@ module.exports = defineConfig({
         },
 
         /*********************************** */
+
+        // FriendlyCaptcha proof-of-work solver (v1 protocol)
+        // Puzzle format after base64 decode:
+        //   buffer[0]      = n          : number of sub-puzzles to solve
+        //   buffer[1]      = threshold  : leading zero bits required per solution
+        //   buffer.slice(2) = puzzleHash : seed used in each hash
+        // Solution format sent to server:
+        //   {accountId}.{base64( concat of n × 8-byte nonces )}
+        async solveFriendlyCaptcha(sitekey) {
+          try {
+            const https = require('https');
+            const crypto = require('crypto');
+
+            // Fetch puzzle via https (works in all Node versions)
+            const puzzleData = await new Promise((resolve, reject) => {
+              const url = `https://api.friendlycaptcha.com/api/v1/puzzle?sitekey=${sitekey}`;
+              const req = https.get(url, (res) => {
+                let raw = '';
+                res.on('data', (chunk) => (raw += chunk));
+                res.on('end', () => {
+                  try {
+                    resolve(JSON.parse(raw));
+                  } catch (e) {
+                    reject(new Error(`API parse error: ${raw}`));
+                  }
+                });
+              });
+              req.on('error', (e) =>
+                reject(new Error(`API request error: ${e.message}`)),
+              );
+              req.setTimeout(15000, () => {
+                req.destroy();
+                reject(new Error('API request timed out after 15s'));
+              });
+            });
+
+            if (!puzzleData.data || !puzzleData.data.puzzle) {
+              throw new Error(
+                `Unexpected API response: ${JSON.stringify(puzzleData)}`,
+              );
+            }
+
+            const puzzleString = puzzleData.data.puzzle;
+            const [accountId, puzzleBase64] = puzzleString.split('.');
+            const buffer = Buffer.from(puzzleBase64, 'base64');
+
+            const n = buffer[0]; // number of sub-puzzles
+            const threshold = buffer[1]; // bits of leading zeros required
+            const puzzleHash = buffer.slice(2); // seed for hashing
+
+            console.log(
+              `FriendlyCaptcha: n=${n} sub-puzzles, threshold=${threshold} bits`,
+            );
+
+            // Helper: count leading zero bits in a hash buffer
+            function countLeadingZeros(buf) {
+              let zeroBits = 0;
+              for (const byte of buf) {
+                if (byte === 0) {
+                  zeroBits += 8;
+                } else {
+                  zeroBits += Math.clz32(byte) - 24;
+                  break;
+                }
+              }
+              return zeroBits;
+            }
+
+            // Solve each of the n sub-puzzles
+            const nonces = [];
+            for (let i = 0; i < n; i++) {
+              const indexBuf = Buffer.from([i]);
+              let nonce = 0;
+              while (true) {
+                const nonceBuf = Buffer.alloc(8);
+                nonceBuf.writeBigUInt64LE(BigInt(nonce));
+                const hash = crypto
+                  .createHash('sha256')
+                  .update(Buffer.concat([puzzleHash, indexBuf, nonceBuf]))
+                  .digest();
+                if (countLeadingZeros(hash) >= threshold) {
+                  nonces.push(nonceBuf);
+                  break;
+                }
+                nonce++;
+              }
+            }
+
+            const solution = `${accountId}.${Buffer.concat(nonces).toString('base64')}`;
+            console.log(
+              `FriendlyCaptcha solved: ${n} puzzles × threshold ${threshold}`,
+            );
+            return solution;
+          } catch (err) {
+            throw new Error(`solveFriendlyCaptcha failed: ${err.message}`);
+          }
+        },
       });
       //  Set executing tests on various environments, targeting appropriate json from const=environments
       const envConfig = environments['eg_test'];

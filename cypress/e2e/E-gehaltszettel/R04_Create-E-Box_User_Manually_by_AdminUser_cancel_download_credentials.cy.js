@@ -41,7 +41,7 @@ describe('R04_Admn user - Create E-Box User - Manually', () => {
     cy.get('.search').click({ force: true });
     //Search for Admin using username
     cy.get('input[formcontrolname="userName"]').type(
-      Cypress.env('username_supportViewAdmin')
+      Cypress.env('username_supportViewAdmin'),
     );
     // Click on Search for Admin User button
     cy.get('button[type="submit"]').click();
@@ -79,7 +79,7 @@ describe('R04_Admn user - Create E-Box User - Manually', () => {
                     // Enable the role if it's not already checked
                     cy.wrap($checkboxInput).click({ force: true });
                     cy.log(
-                      `Checkbox for "${text}" was not enabled; now enabled.`
+                      `Checkbox for "${text}" was not enabled; now enabled.`,
                     );
                   } else {
                     cy.log(`Checkbox for "${text}" is already enabled.`);
@@ -284,7 +284,7 @@ describe('R04_Admn user - Create E-Box User - Manually', () => {
 
       // Select phone number prefix
       cy.get(
-        ':nth-child(4) > .mat-mdc-form-field-type-mat-select > .mat-mdc-text-field-wrapper > .mat-mdc-form-field-flex > .mat-mdc-form-field-infix'
+        ':nth-child(4) > .mat-mdc-form-field-type-mat-select > .mat-mdc-text-field-wrapper > .mat-mdc-form-field-flex > .mat-mdc-form-field-infix',
       ).click();
       cy.wait(500);
       cy.get('.mdc-list-item').eq(0).click();
@@ -294,10 +294,10 @@ describe('R04_Admn user - Create E-Box User - Manually', () => {
         .click({ force: true })
         .type(user.countryCodePhoneNum);
       cy.get('input[formcontrolname="netNumberPhoneNum"]').type(
-        user.netNumberPhoneNum
+        user.netNumberPhoneNum,
       );
       cy.get('input[formcontrolname="subscriberNumberPhoneNum"]').type(
-        user.subscriberNumberPhoneNum
+        user.subscriberNumberPhoneNum,
       );
 
       // Fill in address if available
@@ -404,7 +404,7 @@ describe('R04_Admn user - Create E-Box User - Manually', () => {
 
     cy.iframe('#ifmail')
       .find(
-        '#mail>div>div:nth-child(2)>div:nth-child(3)>table>tbody>tr>td>p:nth-child(2)>span'
+        '#mail>div>div:nth-child(2)>div:nth-child(3)>table>tbody>tr>td>p:nth-child(2)>span',
       )
       .invoke('text')
       .then((innerText) => {
@@ -424,7 +424,7 @@ describe('R04_Admn user - Create E-Box User - Manually', () => {
         let initialUrl;
         cy.iframe('#ifmail')
           .find(
-            '#mail>div>div:nth-child(2)>div:nth-child(3)>table>tbody>tr>td>p:nth-child(2)>span>a'
+            '#mail>div>div:nth-child(2)>div:nth-child(3)>table>tbody>tr>td>p:nth-child(2)>span>a',
           )
           .should('include.text', 'Jetzt E-Mail Adresse bestätigen')
           .invoke('attr', 'href')
@@ -435,7 +435,7 @@ describe('R04_Admn user - Create E-Box User - Manually', () => {
 
         cy.iframe('#ifmail')
           .find(
-            '#mail>div>div:nth-child(2)>div:nth-child(3)>table>tbody>tr>td>p:nth-child(2)>span>a'
+            '#mail>div>div:nth-child(2)>div:nth-child(3)>table>tbody>tr>td>p:nth-child(2)>span>a',
           )
           .invoke('attr', 'target', '_self') //prevent opening in new tab
           .click();
@@ -500,12 +500,12 @@ describe('R04_Admn user - Create E-Box User - Manually', () => {
 
           .should(
             'include.text',
-            'Passwort zurücksetzen e-Gehaltszettel Portal'
+            'Passwort zurücksetzen e-Gehaltszettel Portal',
           ); //Validate subject of Verification email
         let initialUrl_pass;
         cy.iframe('#ifmail')
           .find(
-            '#mail>div>div:nth-child(2)>div:nth-child(3)>table>tbody>tr>td>p:nth-child(4)>span>a'
+            '#mail>div>div:nth-child(2)>div:nth-child(3)>table>tbody>tr>td>p:nth-child(4)>span>a',
           )
           .should('include.text', 'Neues Passwort erstellen ')
           .invoke('attr', 'href')
@@ -515,7 +515,7 @@ describe('R04_Admn user - Create E-Box User - Manually', () => {
           });
         cy.iframe('#ifmail')
           .find(
-            '#mail>div>div:nth-child(2)>div:nth-child(3)>table>tbody>tr>td>p:nth-child(4)>span>a'
+            '#mail>div>div:nth-child(2)>div:nth-child(3)>table>tbody>tr>td>p:nth-child(4)>span>a',
           )
           .invoke('attr', 'target', '_self') //prevent opening in new tab
           .click();
@@ -566,12 +566,12 @@ describe('R04_Admn user - Create E-Box User - Manually', () => {
     // Continue with Login
     cy.log(Cypress.env('companyPrefix'));
     cy.get(':nth-child(1) > .ng-invalid > .input > .input__field-input').type(
-      Cypress.env('companyPrefix') + user.username
+      Cypress.env('companyPrefix') + user.username,
     );
 
     //Cypress.env('manualAddress')
     cy.get('.ng-invalid > .input > .input__field-input').type(
-      Cypress.env('password_egEbox')
+      Cypress.env('password_egEbox'),
     );
 
     // cy.wait(6000);
@@ -593,7 +593,7 @@ describe('R04_Admn user - Create E-Box User - Manually', () => {
         // Assert the response status code
         expect(interception.response.statusCode).to.eq(200);
         cy.wait(2500);
-      }
+      },
     );
     cy.wait(7000);
     // Logout
@@ -849,9 +849,9 @@ describe('R04_Admn user - Create E-Box User - Manually', () => {
   // });
 
   // it.skip('getCookie and Store it as a global variabile', () => {
-  //   cy.intercept('POST', '**/login/user').as('getToken'); // Intercept login request
-  //   cy.loginToSupportViewAdmin(); // Perform login
-  //   cy.wait(1500);
+  // cy.intercept('POST', '**/login/user').as('getToken'); // Intercept login request
+  // cy.loginToSupportViewAdmin(); // Perform login
+  // cy.wait(1500);
 
   //   cy.wait('@getToken', { timeout: 37000 }).then((interception) => {
   //     expect(interception.response.statusCode).to.eq(200);

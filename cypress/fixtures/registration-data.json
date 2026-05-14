@@ -1,0 +1,84 @@
+{
+  "testUser1": {
+    "company": {
+      "companyName": "KLM GmbH",
+      "uidNumber": "ATU-KLM-CO-001"
+    },
+    "address": {
+      "street": "Main Strasse",
+      "doorNumber": "17",
+      "postalCode": "8010",
+      "city": "Graz",
+      "state": "Österreich"
+    },
+    "personal": {
+      "firstName": "Klm",
+      "lastName": "Testuser"
+    },
+    "user": {
+      "email": "klm.gmbh@yopmail.com",
+      "username": "klmAdmin"
+    },
+    "password": "Test1234!",
+    "metadata": {
+      "createdDate": "2026-05-11",
+      "testScenario": "Happy Path - Full Registration",
+      "expectedResult": "User created and confirmation email sent"
+    }
+  },
+  "testUser2": {
+    "company": {
+      "companyName": "TestCompany GmbH",
+      "uidNumber": "ATU12345678"
+    },
+    "address": {
+      "street": "Teststrasse",
+      "doorNumber": "42",
+      "postalCode": "1060",
+      "city": "Wien",
+      "state": "Österreich"
+    },
+    "personal": {
+      "firstName": "Max",
+      "lastName": "Mustermann"
+    },
+    "user": {
+      "email": "max.mustermann@yopmail.com",
+      "username": "maxMuster"
+    },
+    "password": "SecurePass123!",
+    "metadata": {
+      "createdDate": "2026-05-11",
+      "testScenario": "Alternative User Registration",
+      "expectedResult": "User created successfully"
+    }
+  },
+  "invalidData": {
+    "weakPasswords": [
+      "test",
+      "12345678",
+      "password",
+      "Test1234"
+    ],
+    "invalidEmails": [
+      "notanemail",
+      "@nodomain.com",
+      "missing@",
+      "spaces in@email.com"
+    ],
+    "invalidPostalCodes": [
+      "ABC",
+      "12",
+      "999999",
+      "1A2B"
+    ]
+  },
+  "yopmailConfig": {
+    "baseUrl": "https://yopmail.com/en/",
+    "emailDomain": "@yopmail.com",
+    "expectedSubject": "Neuer Benutzer DocuHub Portal",
+    "confirmationLinkPattern": "/activate",
+    "usernamePattern": "Benutzername:\\s*([\\S]+)",
+    "passwordPattern": "Passwort:\\s*([\\S]+)"
+  }
+}

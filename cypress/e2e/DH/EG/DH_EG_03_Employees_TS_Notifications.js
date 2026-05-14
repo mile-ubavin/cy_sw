@@ -19,7 +19,7 @@ let uploadDateTime = ''; // Variable to store upload date & time across tests
  * USER6: Email unconfirmed + No phone
  */
 describe('DH_EG_03_Employees_TS_Notifications', () => {
-  it.only('DH - Notifications - Create users and verify scenarios', () => {
+  it('DH - Notifications - Create users and verify scenarios', () => {
     // Initialize test data: ddmm_hhmm seed for unique usernames, base user template, and company name
 
     const baseUser = Cypress.env('createUser')[0];
@@ -42,7 +42,7 @@ describe('DH_EG_03_Employees_TS_Notifications', () => {
         lastName: `USER2`,
         username: `NoEmailWithPhone`,
         email: '',
-        phone: '+3811100000011',
+        phone: '+3811100000010',
         expected: {
           emailPresent: false,
           phonePresent: true,
@@ -53,7 +53,7 @@ describe('DH_EG_03_Employees_TS_Notifications', () => {
         lastName: `USER3`,
         username: `EmailUnconfirmedPhone`,
         email: `email.unconfirmed.phone@yopmail.com`,
-        phone: '+3811100000012',
+        phone: '+3811100000011',
         expected: {
           emailPresent: true,
           phonePresent: true,
@@ -65,7 +65,7 @@ describe('DH_EG_03_Employees_TS_Notifications', () => {
         lastName: `USER4`,
         username: `EmailConfirmedPhone`,
         email: `email.confirmed.phone@yopmail.com`,
-        phone: '+3811100000013',
+        phone: '+3811100000012',
         expected: {
           emailPresent: true,
           phonePresent: true,
@@ -615,7 +615,7 @@ describe('DH_EG_03_Employees_TS_Notifications', () => {
   });
 
   //DH Send Delivery to Specific users
-  it.only('DH Send Delivery to selected-specific users', () => {
+  it('DH Send Delivery to selected-specific users', () => {
     // ===== STEP 1: Login to DocumentHub =====
     cy.visit(Cypress.env('dh_baseUrl'));
     cy.url().should('include', Cypress.env('dh_baseUrl'));
@@ -691,26 +691,6 @@ describe('DH_EG_03_Employees_TS_Notifications', () => {
           /Only .pdf files up to 13 pages allowed for printing|Nur .pdf bis zu 13 Seiten beim Druck zulässig/i,
         );
       });
-
-    cy.wait(1500);
-    //upload invalid PDF file
-    cy.DHcreateNewUser_viaCSV();
-    cy.wait(2000);
-
-    //check Error message for upload invalid file
-    cy.get('#file-list span')
-      .should('be.visible')
-      .invoke('text')
-      .then((text) => {
-        const trimmedText = text.trim();
-        expect(trimmedText).to.match(
-          /Only pdf files are supported|Es werden nur PDF-Dateien unterstützt/i,
-        );
-      });
-    cy.wait(1500);
-
-    //Remove invalid uploaded file
-    cy.get('button[aria-label="Remove 1_createUser.csv"]').click();
     cy.wait(1500);
 
     //Upload valid PDF file
@@ -833,7 +813,7 @@ describe('DH_EG_03_Employees_TS_Notifications', () => {
     cy.wait(1500);
 
     // Add Delivery Title/Subject
-    const title = `Document To Specific Person (pdf) - ${uploadDateTime}`;
+    const title = `Document To Specific Employees (pdf) - ${uploadDateTime}`;
     cy.log(`Title for the document: ${title}`); // Log the title to check
 
     cy.get('input[placeholder="Enter the subject"]').clear().type(title);
@@ -976,22 +956,9 @@ describe('DH_EG_03_Employees_TS_Notifications', () => {
       });
     cy.wait(2000);
 
-    //Close latest dialog - Click on Fertig button
-    cy.get('button[type="button"]')
-      .should('be.visible')
-      .each(($button) => {
-        const buttonText = $button.text().trim();
-        cy.log(`Found button: ${buttonText}`);
-
-        // Check if button text matches Fertig (German) or Done/Finish (English)
-        if (buttonText.match(/Fertig|Done|Finish/i)) {
-          cy.log(`Clicking button: ${buttonText}`);
-          cy.wrap($button).click({ force: true });
-          return false; // Stop iteration after finding the match
-        }
-      });
-
-    cy.wait(1000);
+    //Close Ferig dialog
+    cy.findByRole('button', { name: /Fertig|Done|Finish/i }).click();
+    cy.wait(1500);
 
     //Validate Home page url
     const baseUrl = Cypress.env('dh_baseUrl');

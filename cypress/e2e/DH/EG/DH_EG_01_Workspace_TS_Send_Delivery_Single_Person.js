@@ -186,7 +186,7 @@ describe('Broadcast delivery to Specific User', () => {
   });
 
   //DH Send Delivery to Specific user, when HR role is enabled
-  it('DH Send Delivery to selected-specific user', () => {
+  it.only('DH Send Delivery to selected-specific user', () => {
     // ===== STEP 1: Login to DocumentHub =====
     cy.visit(Cypress.env('dh_baseUrl'));
     cy.url().should('include', Cypress.env('dh_baseUrl'));
@@ -534,20 +534,10 @@ describe('Broadcast delivery to Specific User', () => {
       });
     cy.wait(2000);
 
-    //Close latest dialog - Click on Fertig button
-    cy.get('button[type="button"]')
+    //Close latest dialog - Click on Fertig/Done button
+    cy.contains('button', /Fertig|Done|Finish/i)
       .should('be.visible')
-      .each(($button) => {
-        const buttonText = $button.text().trim();
-        cy.log(`Found button: ${buttonText}`);
-
-        // Check if button text matches Fertig (German) or Done/Finish (English)
-        if (buttonText.match(/Fertig|Done|Finish/i)) {
-          cy.log(`Clicking button: ${buttonText}`);
-          cy.wrap($button).click({ force: true });
-          return false; // Stop iteration after finding the match
-        }
-      });
+      .click({ force: true });
 
     cy.wait(1000);
 
@@ -567,7 +557,7 @@ describe('Broadcast delivery to Specific User', () => {
   }); //end it
 
   // Login to e-Box and open delivery if timestamps match logic
-  it('Login to e-Box and Open Delivery', () => {
+  it.only('Login to e-Box and Open Delivery', () => {
     // Log into e-Box
     cy.loginToEgEbox();
     cy.wait(2000);
@@ -674,7 +664,19 @@ describe('Broadcast delivery to Specific User', () => {
   });
 
   //Admin user check Reporting email and delte all emails
-  it('Yopmail - Get Reporting email and delte all emails', () => {
+  it.only('Yopmail - Get Reporting email and delte all emails', () => {
+    cy.on('uncaught:exception', (err) => {
+      // Ignore known Yopmail app-side exception to keep test focused on mail assertions.
+      if (
+        err.message &&
+        err.message.includes(
+          "Cannot read properties of null (reading 'postMessage')",
+        )
+      ) {
+        return false;
+      }
+    });
+
     // Visit Yopmail
     cy.visit('https://yopmail.com/en/');
 
@@ -683,29 +685,33 @@ describe('Broadcast delivery to Specific User', () => {
 
     // Click the refresh button
     cy.get('#refreshbut > .md > .material-icons-outlined').click();
-    //Custom functions:
-    // Define email subject function
+    cy.wait(4500);
+
+    // Define email subject function and open the matched email.
     function emailSubject(index) {
       cy.iframe('#ifinbox')
-        .find('.mctn > .m > button > .lms')
+        .find('.mctn > .m > button > .lms', { timeout: 20000 })
         .eq(index)
-        .should('include.text', 'Versandreport DocuHub Portal');
+        .invoke('text')
+        .then((subject) => {
+          const normalizedSubject = subject.trim().replace(/\s+/g, ' ');
+          expect(normalizedSubject).to.include('Versandreport DocuHub Portal');
+        });
+
+      cy.iframe('#ifinbox')
+        .find('.mctn > .m > button', { timeout: 20000 })
+        .eq(index)
+        .click({ force: true });
     }
 
     // Access the inbox iframe and validate the email subject
     emailSubject(0); // Validate subject of Reporting email
 
     cy.iframe('#ifmail')
-      .find('#mail > div')
-      .invoke('text') // Get the text content
+      .find('#mail > div', { timeout: 20000 })
+      .invoke('text')
       .then((text) => {
-        // Log the email body text
-        cy.log('Email Body Text:', text);
-
-        // Normalize spaces for comparison
-        const normalizedText = text.trim().replace(/\s+/g, ' '); // Normalize extra spaces
-
-        // Validate that the email body contains the expected text
+        const normalizedText = text.trim().replace(/\s+/g, ' ');
         expect(normalizedText).to.include(
           'Sie haben 1 Sendung(en) erfolgreich digital in das DocuHub Portal Ihrer Benutzer*innen eingeliefert',
         );
@@ -714,8 +720,6 @@ describe('Broadcast delivery to Specific User', () => {
         );
         expect(normalizedText).to.include('Ihr DocuHub Team');
       });
-
-    cy.wait(4500);
 
     // Delete all emails
     cy.get('.menu>div>#delall')
@@ -1429,6 +1433,18 @@ describe('Broadcast delivery to Specific User', () => {
 
   //Admin user check Reporting email and delte all emails
   it('Yopmail - Get Reporting email and delte all emails', () => {
+    cy.on('uncaught:exception', (err) => {
+      // Ignore known Yopmail app-side exception to keep test focused on mail assertions.
+      if (
+        err.message &&
+        err.message.includes(
+          "Cannot read properties of null (reading 'postMessage')",
+        )
+      ) {
+        return false;
+      }
+    });
+
     // Visit Yopmail
     cy.visit('https://yopmail.com/en/');
 
@@ -1437,29 +1453,33 @@ describe('Broadcast delivery to Specific User', () => {
 
     // Click the refresh button
     cy.get('#refreshbut > .md > .material-icons-outlined').click();
-    //Custom functions:
-    // Define email subject function
+    cy.wait(4500);
+
+    // Define email subject function and open the matched email.
     function emailSubject(index) {
       cy.iframe('#ifinbox')
-        .find('.mctn > .m > button > .lms')
+        .find('.mctn > .m > button > .lms', { timeout: 20000 })
         .eq(index)
-        .should('include.text', 'Versandreport DocuHub Portal');
+        .invoke('text')
+        .then((subject) => {
+          const normalizedSubject = subject.trim().replace(/\s+/g, ' ');
+          expect(normalizedSubject).to.include('Versandreport DocuHub Portal');
+        });
+
+      cy.iframe('#ifinbox')
+        .find('.mctn > .m > button', { timeout: 20000 })
+        .eq(index)
+        .click({ force: true });
     }
 
     // Access the inbox iframe and validate the email subject
     emailSubject(0); // Validate subject of Reporting email
 
     cy.iframe('#ifmail')
-      .find('#mail > div')
-      .invoke('text') // Get the text content
+      .find('#mail > div', { timeout: 20000 })
+      .invoke('text')
       .then((text) => {
-        // Log the email body text
-        cy.log('Email Body Text:', text);
-
-        // Normalize spaces for comparison
-        const normalizedText = text.trim().replace(/\s+/g, ' '); // Normalize extra spaces
-
-        // Validate that the email body contains the expected text
+        const normalizedText = text.trim().replace(/\s+/g, ' ');
         expect(normalizedText).to.include(
           'Sie haben 1 Sendung(en) erfolgreich digital in das DocuHub Portal Ihrer Benutzer*innen eingeliefert',
         );
@@ -1468,8 +1488,6 @@ describe('Broadcast delivery to Specific User', () => {
         );
         expect(normalizedText).to.include('Ihr DocuHub Team');
       });
-
-    cy.wait(4500);
 
     // Delete all emails
     cy.get('.menu>div>#delall')

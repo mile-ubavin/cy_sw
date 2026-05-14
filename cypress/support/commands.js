@@ -1442,3 +1442,41 @@ Cypress.Commands.add('uploadFiles', (fileNames) => {
     cy.get('input[type="file"]').attachFile(uploads);
   });
 });
+
+// ── FriendlyCaptcha solver ────────────────────────────────────────────────────
+// Reads the sitekey directly from the page's captcha widget (works for any
+// environment), solves the proof-of-work puzzle via a Node task, and injects
+// the solution into the hidden input so the form can be submitted.
+Cypress.Commands.add('solveFriendlyCaptcha', () => {
+  // Read the sitekey from the widget on the current page
+  cy.get('.frc-captcha[data-sitekey], [data-sitekey]')
+    .first()
+    .invoke('attr', 'data-sitekey')
+    .then((sitekey) => {
+      cy.log(`FriendlyCaptcha sitekey from page: ${sitekey}`);
+      cy.task('solveFriendlyCaptcha', sitekey, { timeout: 60000 }).then(
+        (solution) => {
+          // Inject the solution into the hidden input and notify React
+          cy.get('input[name="frc-captcha-solution"]')
+            .invoke('val', solution)
+            .trigger('input', { force: true })
+            .trigger('change', { force: true });
+
+          // Patch widget DOM state only if elements still exist
+          // (they may already be gone if the widget auto-verified)
+          cy.get('.frc-captcha').invoke('attr', 'data-solution', solution);
+          cy.get('body').then(($body) => {
+            if ($body.find('.frc-button').length > 0) {
+              cy.get('.frc-button').invoke('attr', 'disabled', 'true');
+            }
+            if ($body.find('.frc-text').length > 0) {
+              cy.get('.frc-text').invoke(
+                'text',
+                'Anti-Robot Verification passed',
+              );
+            }
+          });
+        },
+      );
+    });
+});

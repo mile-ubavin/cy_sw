@@ -1,0 +1,71 @@
+<!-- DocuHub Self-Registration Page HTML -->
+<!-- Extracted: 2026-05-11 -->
+<!-- Purpose: AI context for test automation -->
+
+<form novalidate="" aria-label="registration form">
+  <!-- Company Data Section -->
+  <section aria-label="user company data section">
+    <h4>Firmendaten</h4>
+    <input id=":rb:" name="companyName" placeholder="z.B. Post AG" required type="text" />
+    <input id=":rc:" name="uidNumber" placeholder="z.B. ATU12345678" required type="text" />
+  </section>
+
+  <!-- Address Section -->
+  <section aria-label="user address section">
+    <h4>Adresse</h4>
+    <input id=":rd:" name="street" placeholder="z.B. Mariahilferstraße" required type="text" />
+    <input id=":re:" name="doorNumber" placeholder="z.B. 101/4/5" required type="text" />
+    <input id=":rf:" name="state" required type="text" value="Österreich" disabled />
+    <input id=":rg:" name="postalCode" placeholder="z.B. 1060" required type="text" inputmode="numeric" />
+    <input id=":rh:" name="city" placeholder="z.B Wien" required type="text" />
+  </section>
+
+  <!-- Personal Data Section -->
+  <section aria-label="user data section">
+    <h4>Persönliche Daten</h4>
+    <input id=":ri:" name="firstName" placeholder="z.B Georg" required type="text" />
+    <input id=":rj:" name="lastName" placeholder="z.B. Mustermann" required type="text" />
+  </section>
+
+  <!-- User Data / Email Section -->
+  <section aria-label="email section">
+    <h4>Benutzerdaten</h4>
+    <input id=":rk:" name="email" placeholder="z.B. Georg.Mustermann@email.at" required type="email" />
+    <input id=":rl:" name="confirmEmail" placeholder="z.B. Georg.Mustermann@email.at" required type="email" />
+    <input id=":rm:" name="username" placeholder="Benutzername" required type="text" />
+  </section>
+
+  <!-- Password Section -->
+  <section aria-label="password section">
+    <h4>Passwort</h4>
+    <input id=":rn:" name="password" placeholder="********" required type="password" />
+    <input id=":rp:" name="confirmPassword" placeholder="********" required type="password" />
+    
+    <!-- Password Strength Indicators -->
+    <section aria-label="password strength indicator section">
+      <strong>Passwortsicherheit</strong>
+      <div>
+        <span>8–64 Zeichen</span>
+        <span>1 Großbuchstabe</span>
+        <span>1 Kleinbuchstabe</span>
+        <span>1 Sonderzeichen</span>
+        <span>1 Zahl</span>
+      </div>
+    </section>
+
+    <!-- Terms Checkbox -->
+    <input name="agbTerms" type="checkbox" aria-describedby="agbTerms-helper" />
+    <span>Ich habe die <a href="https://www.post.at/co/c/agb-brief" target="_blank">Allgemeinen Geschäftsbedingungen</a> gelesen und akzeptiert</span>
+
+    <!-- Captcha -->
+    <div class="frc-captcha" data-sitekey="FCMURNNP42EE0QOF">
+      <button type="button" class="frc-button">Restart</button>
+      <input name="frc-captcha-solution" class="frc-captcha-solution" type="hidden" />
+    </div>
+
+    <!-- Submit Button -->
+    <button type="submit" id=":rr:">
+      <div>Registrieren</div>
+    </button>
+  </section>
+</form>
