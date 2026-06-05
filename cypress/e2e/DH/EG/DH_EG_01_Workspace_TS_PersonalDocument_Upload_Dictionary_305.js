@@ -9,7 +9,7 @@ describe('DH Upload Dictionary (305)', () => {
     return new Date(year, month - 1, day, hour, minute);
   }
 
-  it.skip('Enable pdfDictionary by Masteruser', () => {
+  it('Enable pdfDictionary by Masteruser', () => {
     cy.loginToSupportViewMaster(); // Login as a master user
 
     // Remove pop-up if present
@@ -106,7 +106,7 @@ describe('DH Upload Dictionary (305)', () => {
   });
 
   //Enable All Roles
-  it.skip('Enable All Roles', () => {
+  it('Enable All Roles', () => {
     // Login as a Master-User using custom command
     cy.loginToSupportViewMaster();
     cy.wait(3500);

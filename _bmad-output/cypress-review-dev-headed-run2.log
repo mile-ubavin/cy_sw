@@ -1,0 +1,93 @@
+
+The experimentalSessionAndOrigin configuration option was removed in Cypress version 12.0.0.
+
+You can safely remove this option from your config.
+
+https://on.cypress.io/session
+https://on.cypress.io/origin
+Warning: The allowCypressEnv configuration option is enabled. This allows any browser code to read values from Cypress.env(). This is insecure and will be removed in a future major version.
+
+1. Replace Cypress.env() calls with cy.env() (for sensitive values) or Cypress.expose() (for public configuration)
+2. Set allowCypressEnv: false in your Cypress configuration to disable Cypress.env()
+
+Learn more: https://on.cypress.io/cypress-env-migration
+
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:        15.16.0                                                                        │
+  │ Browser:        Chrome 148                                                                     │
+  │ Node Version:   v24.15.0 (C:\Program Files\nodejs\node.exe)                                    │
+  │ Specs:          1 found (DH_EG_04_Self_Registration_TS_REVIEW.js)                              │
+  │ Searched:       C:\Users\mubavin\Cypress\EG\cypress-automatison-framework\cypress\e2e\DH\EG\DH │
+  │                 _EG_04_Self_Registration_TS_REVIEW.js                                          │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  DH_EG_04_Self_Registration_TS_REVIEW.js                                         (1 of 1)
+
+
+  DH_EG_04_Self_Registration_TS [REVIEW]
+    Page load
+      √ displays registration form with title (992ms)
+      √ shows all required form sections (234ms)
+      √ Register button is disabled on load (204ms)
+      √ Country is pre-filled with Austria and is read-only (206ms)
+      √ UID number field pre-fills with ATU prefix (195ms)
+    UID number validation
+      √ shows format error: 5 digits — ATU12345 (672ms)
+      √ no error: ATU+9digits silently capped to ATU+8digits by input maxlength (693ms)
+      √ shows format error: 7 digits — ATU1234567 (743ms)
+      √ shows format error: non-digit chars in middle — ATU12AB5678 (877ms)
+      √ shows format error: non-digit char at end — ATU1234567X (937ms)
+      √ shows format error: only ATU prefix, no digits (642ms)
+      √ shows NO error for valid UID — ATU12345678 (8 digits) (803ms)
+      √ Register button stays disabled for all invalid UID formats (5503ms)
+    Other field validation
+      √ shows error when emails do not match (1474ms)
+      √ shows error when passwords do not match (1320ms)
+      √ password strength indicators update as user types (803ms)
+    Register button enable conditions
+      √ stays disabled without terms checkbox (4825ms)
+      √ stays disabled without captcha (form + terms checked) (4698ms)
+      √ stays disabled without valid form data (312ms)
+      √ enables when all conditions met: valid form + terms + captcha (58989ms)
+    Happy path
+      √ registers with sequential email, confirms via Yopmail, logs into Ebox (114893ms)
+
+
+  21 passing (3m)
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        21                                                                               │
+  │ Passing:      21                                                                               │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        false                                                                            │
+  │ Duration:     3 minutes, 23 seconds                                                            │
+  │ Spec Ran:     DH_EG_04_Self_Registration_TS_REVIEW.js                                          │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+====================================================================================================
+
+  (Run Finished)
+
+
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔  DH_EG_04_Self_Registration_TS_REVIE      03:23       21       21        -        -        - │
+  │    W.js                                                                                        │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    ✔  All specs passed!                        03:23       21       21        -        -        -  
+

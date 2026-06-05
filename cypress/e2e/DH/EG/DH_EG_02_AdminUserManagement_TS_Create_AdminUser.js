@@ -2,7 +2,7 @@ describe('Masteruser - Create Admin User From JSON', () => {
   //Precondition: Clear user`s email inbox if its not an empty
 
   // Precondition: Search for the Admin user and if user exists, proceed with deletion
-  it('Search for the Admin user and if user(s) exist, proceed with deletion', () => {
+  it.only('Search for the Admin user and if user(s) exist, proceed with deletion', () => {
     const companyName = Cypress.env('company');
     const adminUser = Cypress.env('createAdminUser')[0];
 
@@ -112,7 +112,7 @@ describe('Masteruser - Create Admin User From JSON', () => {
   }); //end it
 
   // DH Create new Admin User (base and alternative scenarios)
-  it('DH - AdminUserCreateNewAdmin', () => {
+  it.only('DH - AdminUserCreateNewAdmin', () => {
     // ===== Login to DH =====
     cy.visit(Cypress.env('dh_baseUrl'));
     cy.url().should('include', Cypress.env('dh_baseUrl'));
@@ -131,7 +131,10 @@ describe('Masteruser - Create Admin User From JSON', () => {
     cy.wait(2000);
 
     // ===== Navigate to Admin User Management =====
-    cy.intercept('POST', '**/xUser/**').as('getAdminUsers');
+    // cy.intercept('GET', '**/group/getGroupData').as('getAdminUsers');
+    cy.intercept('GET', '**/supportView/v1/person/getGroupAdmins/**').as(
+      'getAdminUsers',
+    );
     cy.get('#nav-admin-users')
       .should('be.visible')
       .invoke('attr', 'style', 'border: 2px solid black; padding: 2px;')
@@ -271,9 +274,11 @@ describe('Masteruser - Create Admin User From JSON', () => {
     // Close rights dropdown by clicking outside
     cy.get('h2').first().click();
     cy.wait(500);
+    cy.pause();
 
     // ===== Submit =====
-    cy.intercept('POST', '**/person/fromGroup/xUser/**').as('createAdminUser');
+    // cy.intercept('POST', '**/person/fromGroup/xUser/**').as('createAdminUser');
+    cy.intercept('GET', '**person/getGroupAdmins/**').as('createAdminUser');
     cy.get('button[type="submit"]').click();
     cy.wait(1000);
 

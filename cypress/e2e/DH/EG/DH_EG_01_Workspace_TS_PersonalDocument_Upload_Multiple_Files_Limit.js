@@ -395,6 +395,8 @@ describe('DH Upload Multiple files exceeding the maximum limit', () => {
         );
       });
 
+    cy.pause(); // Pause here to allow manual verification of uploaded files before sending to users
+
     // ===== STEP 11: Send Documents to Users =====
     cy.intercept('POST', '**/deliveryHandler/sendDocuments').as(
       'sendDocuments',
@@ -414,6 +416,17 @@ describe('DH Upload Multiple files exceeding the maximum limit', () => {
 
     cy.url().should('include', `${Cypress.env('dh_baseUrl')}home`);
     cy.log('Test completed successfully');
+    cy.wait(2000);
+
+    // Logout from DH
+    cy.get('.MuiButton-text').click();
+    cy.wait(1000);
+    cy.get('li[role="menuitem"]')
+      .contains(/Abmelden|Logout/i)
+      .click();
+    cy.url().should('include', Cypress.env('dh_baseUrl'));
+    cy.log('Upload finished successfully.');
+    cy.wait(2500);
   }); //end it
 
   it('Login to EBox, verify delivery count and open random delivery in HybridSign', () => {
@@ -604,7 +617,7 @@ describe('DH Upload Multiple files exceeding the maximum limit', () => {
     cy.iframe('#ifinbox')
       .find('.mctn > .m > button > .lms')
       .eq(0)
-      .should('include.text', 'Versandreport e-Gehaltszettel Portal');
+      .should('include.text', 'Versandreport DocuHub Portal');
     cy.log('Reporting email subject validated');
 
     // ===== STEP 3: Read Expected Count and Validate Email Body =====
@@ -624,12 +637,12 @@ describe('DH Upload Multiple files exceeding the maximum limit', () => {
           expect(normalizedText).to.include(
             `Sie haben ${
               expectedCount - 1
-            } Sendung(en) erfolgreich digital in das e-Gehaltszettel Portal Ihrer Benutzer*innen eingeliefert`,
+            } Sendung(en) erfolgreich digital in das DocuHub Portal Ihrer Benutzer*innen eingeliefert`,
           );
           expect(normalizedText).to.include(
             'Zusätzlich haben Sie 0 Sendung(en) erfolgreich über den postalischen Weg als Brief versendet. Das Dokument wird von uns über das „Einfach Brief“-Portal gedruckt, kurvertiert und an die Adresse des Benutzers versendet.',
           );
-          expect(normalizedText).to.include('Ihr e-Gehaltszettel Team');
+          expect(normalizedText).to.include('Ihr DocuHub Team');
 
           cy.log('Email body content validated successfully');
         });

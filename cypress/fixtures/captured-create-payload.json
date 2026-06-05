@@ -1,0 +1,71 @@
+{
+  "url": "https://supportviewpayslip.edeja.com/be/supportView/v1/person/editPerson",
+  "body": {
+    "accountDataDto": {
+      "firstName": "Address Data",
+      "lastName": "Manual",
+      "email": "manual.addres-data@yopmail.com",
+      "prefixedTitle": "Address Data - Title 1",
+      "salutation": "MALE",
+      "addresses": [
+        {
+          "city": "Graz",
+          "country": "AT",
+          "doorNumber": "7",
+          "streetName": "Test Strasse",
+          "streetNumber": "17",
+          "zipCode": "8010",
+          "foreignId": null,
+          "isNewAddressConfirmed": null,
+          "pac": null,
+          "remark": null,
+          "state": "UNCONFIRMED",
+          "streetAdditional": null,
+          "addressType": "MAIN"
+        }
+      ],
+      "phoneNumber": {
+        "countryCode": "+43",
+        "netCode": "",
+        "subscriberNumber": "",
+        "type": "0"
+      },
+      "mobileNumber": "+43 1234567890",
+      "trailingTitle": "Address Data - Title 2",
+      "legalPerson": null,
+      "authSecurityLevel": "SecClass1",
+      "birthday": null,
+      "allowsNewsletter": null,
+      "language": "de",
+      "lastLogin": null,
+      "senderCategoryAllowed": true,
+      "mandatorDto": [],
+      "representativeDto": null,
+      "authSecurityLevelFlag": true,
+      "additionalData": {},
+      "role": "BERT_USER",
+      "showMobileAppNotification": true,
+      "enabledChatbot": null,
+      "showSepaButton": false,
+      "showSwitchButton": false
+    },
+    "accountNumber": "cap_1780317143086",
+    "accountNumbers": [
+      {
+        "accountNumber": "cap_1780317143086",
+        "prefix": {
+          "prefixID": null,
+          "userPrefix": "aqua",
+          "subCompanyPrefix": "",
+          "subCompanyName": "aqua",
+          "identPrefixLength": 2,
+          "keepZeros": false
+        }
+      }
+    ],
+    "groupId": "654cb8556d84491d20c20525",
+    "sendToPrint": false,
+    "sendCredentialToPrint": false
+  },
+  "timestamp": "2026-06-01T12:32:42.510Z"
+}

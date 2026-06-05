@@ -1,0 +1,58 @@
+{
+  "capturedApiBase": "https://e-gehaltszettel-t.post-business-solutions.at/be.e-gehaltszettel_t/supportView/v1/",
+  "capturedPersonFromGroupUrl": "https://e-gehaltszettel-t.post-business-solutions.at/be.e-gehaltszettel_t/supportView/v1/person/fromGroup/669f98e76a98e62764b5f1ea",
+  "timestamp": "2026-06-01T08:54:02.170Z",
+  "probeResults": {
+    "GET_person_fromGroup": {
+      "status": 200
+    },
+    "POST_editPerson": {
+      "status": 404,
+      "body": ""
+    },
+    "POST_person_editPerson": {
+      "status": 500,
+      "body": "{\"statusCode\":500,\"reason\":\"UNHANDLED_ERROR\",\"message\":null,\"fieldErrors\":[],\"globalErrors\":[]}"
+    },
+    "POST_person": {
+      "status": 500,
+      "body": "{\"statusCode\":500,\"reason\":\"UNHANDLED_ERROR\",\"message\":null,\"fieldErrors\":[],\"globalErrors\":[]}"
+    },
+    "PUT_editPerson": {
+      "status": 404,
+      "body": "\"<!doctype html><html lang=\\\"de\\\"><head><title>HTTP Status 404 – nicht gefunden</title><style type=\\\"text/css\\\">body {font-family:Tahoma,Arial,sans-serif;} h1, h2, h3, b {color:white;background-color:"
+    },
+    "p1_camelCase": {
+      "status": 400,
+      "body": "{\"statusCode\":400,\"reason\":\"VALIDATION_FAILED\",\"message\":\"The request did not pass validation because of one or more error(s).\",\"fieldErrors\":[{\"field\":\"FIRSTNAME\",\"reason\":\"INVALID.USERDATADTO.FIRSTNAME\",\"message\":\"Unknown field or invalid value for field provided\"}],\"globalErrors\":[]}"
+    },
+    "p2_simple_name": {
+      "status": 400,
+      "body": "{\"statusCode\":400,\"reason\":\"VALIDATION_FAILED\",\"message\":\"The request did not pass validation because of one or more error(s).\",\"fieldErrors\":[{\"field\":\"FIRSTNAME\",\"reason\":\"INVALID.USERDATADTO.FIRSTNAME\",\"message\":\"Unknown field or invalid value for field provided\"}],\"globalErrors\":[]}"
+    },
+    "p3_no_firstName": {
+      "status": 400,
+      "body": "{\"statusCode\":400,\"reason\":\"VALIDATION_FAILED\",\"message\":\"The request did not pass validation because of one or more error(s).\",\"fieldErrors\":[{\"field\":\"LASTNAME\",\"reason\":\"INVALID.USERDATADTO.LASTNAME\",\"message\":\"Unknown field or invalid value for field provided\"}],\"globalErrors\":[]}"
+    },
+    "p4_uppercase": {
+      "status": 400,
+      "body": "{\"statusCode\":400,\"reason\":\"VALIDATION_FAILED\",\"message\":\"The request did not pass validation because of one or more error(s).\",\"fieldErrors\":[{\"field\":\"FIRSTNAME\",\"reason\":\"INVALID.USERDATADTO.FIRSTNAME\",\"message\":\"Unknown field or invalid value for field provided\"}],\"globalErrors\":[]}"
+    },
+    "p5_groupId": {
+      "status": 400,
+      "body": "{\"statusCode\":400,\"reason\":\"VALIDATION_FAILED\",\"message\":\"The request did not pass validation because of one or more error(s).\",\"fieldErrors\":[{\"field\":\"FIRSTNAME\",\"reason\":\"INVALID.USERDATADTO.FIRSTNAME\",\"message\":\"Unknown field or invalid value for field provided\"}],\"globalErrors\":[]}"
+    },
+    "p6_existing_user": {
+      "status": 400,
+      "body": "{\"statusCode\":400,\"reason\":\"VALIDATION_FAILED\",\"message\":\"The request did not pass validation because of one or more error(s).\",\"fieldErrors\":[{\"field\":\"FIRSTNAME\",\"reason\":\"INVALID.USERDATADTO.FIRSTNAME\",\"message\":\"Unknown field or invalid value for field provided\"}],\"globalErrors\":[]}"
+    },
+    "p7_dh_editPerson": {
+      "status": 404,
+      "body": "\"<!DOCTYPE HTML PUBLIC \\\"-//IETF//DTD HTML 2.0//EN\\\">\\n<html><head>\\n<title>404 Not Found</title>\\n</head><body>\\n<h1>Not Found</h1>\\n<p>The requested URL was not found on this server.</p>\\n<p>Additionally, a 404 Not Found\\nerror was encountered while trying to use an ErrorDocument to handle the request.</p>\\n</body></html>\\n\""
+    },
+    "p8_group_editPerson": {
+      "status": 404,
+      "body": "\"<!doctype html><html lang=\\\"de\\\"><head><title>HTTP Status 404 – nicht gefunden</title><style type=\\\"text/css\\\">body {font-family:Tahoma,Arial,sans-serif;} h1, h2, h3, b {color:white;background-color:#525D76;} h1 {font-size:22px;} h2 {font-size:16px;} h3 {font-size:14px;} p {font-size:12px;} a {color:black;} .line {height:1px;background-color:#525D76;border:none;}</style></head><body><h1>HTTP Stat"
+    }
+  }
+}

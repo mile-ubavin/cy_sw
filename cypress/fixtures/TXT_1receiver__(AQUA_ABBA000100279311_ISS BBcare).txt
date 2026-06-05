@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="iso-8859-1" ?>
 <!DOCTYPE PBInvoice_2_5_at PUBLIC "" "https://business.ebpp.at/xml/DTD/PBInvoice_2_5_at.dtd">
 <PBInvoice_2_5_at>
-  <InvoiceNumber>0003000820777771117</InvoiceNumber>
-  <InvoiceDate>20231028</InvoiceDate>
+  <InvoiceNumber>000300082077777111777</InvoiceNumber>
+  <InvoiceDate>20231028111</InvoiceDate>
   <DueDate>20230728</DueDate>
   <URL>http://www.brueder.cc</URL>
-  <LogoURL>https://business.ebpp.at/resources/4AL8OZ/logo.jpg</LogoURL>
+  <LogoURL>https://e-gehaltszettel.post-business-solutions.at/be.e-gehaltszettel/resources/branding/AQUA/AQUA_1.JPG</LogoURL>
   <LayoutID>T101</LayoutID>
   <Language>GER</Language>
   <Biller>
@@ -13,8 +13,8 @@
     <Address>
       <Salutation>Firma</Salutation>
       <Name>QA Solutions GmbH</Name>
-      <Street>Strass Straße 777</Street>
-      <Town>City</Town>
+      <Street>Straße 777</Street>
+      <Town>Wien</Town>
       <ZIP>1020</ZIP>
       <Country>Österreich</Country>
     </Address>
@@ -24,7 +24,7 @@
   <Address>
     <Name>Testuser</Name>
     <Street>Main street</Street>
-    <Town>City</Town>
+    <Town>Wien</Town>
     <ZIP>8020</ZIP>
   </Address>
   </InvoiceRecipient>
@@ -35,12 +35,12 @@
 
 
                                                            QA Solutions GmbH
-       Personalnummer Test
+       Personalnummer billy
                                                            Mai 2023         Seite  1
           Herrn                                            Alleinverd./Erz.:
-          QA Testuser                                      Freibetrag:          0,00
-          TestStrasse 777 	                               Pendlerpauschale   000,00
-          8011 City                                        Gruppe:               QA1
+          QA Billy                                         Freibetrag:          0,00
+          Strass Weidengasse 777                           Pendlerpauschale   000,00
+          8011 Wien                                        Gruppe:               ST2
                                                            Stufe:                 03
                                                            Vorrückung:    00.00.0000
                                                            Besch.grad:         00,00

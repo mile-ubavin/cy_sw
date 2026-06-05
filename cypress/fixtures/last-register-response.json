@@ -1,0 +1,41 @@
+{
+  "status": 201,
+  "body": "",
+  "headers": {
+    "date": "Fri, 05 Jun 2026 15:42:44 GMT",
+    "server": "Apache/2.4.53 (Debian)",
+    "set-cookie": [
+      "JSESSIONID=B50406E18110634C98A45B5C24B2DC72; Path=/be.e-gehaltszettel_t; Secure; HttpOnly"
+    ],
+    "cache-control": "private, max-age=0, no-cache",
+    "access-control-allow-origin": "*",
+    "access-control-allow-methods": "GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS, TRACE",
+    "access-control-allow-headers": "Content-Type, Authorization, X-Post-Api-AT, X-Post-Api-AP, Pragma, Expires, cacheSeconds, useExpiresHeader, useCacheControlHeader, useCacheControlNoStore, Cache-Control, Content-Disposition, Origin, Access-Control-Request-Method, Access-Control-Request-Headers, Accept, Authorization, Credentials, Id-Token-Hint",
+    "access-control-max-age": "86400",
+    "access-control-expose-headers": "X-Auth-Token-Update, Refresh-Token, Pragma, Expires, cacheSeconds, useExpiresHeader, useCacheControlHeader, useCacheControlNoStore, Cache-Control, Content-Disposition, Origin, Access-Control-Allow-Origin, Access-Control-Allow-Credentials, Content-Type, Access-Control-Request-Headers, Credentials, Id-Token-Hint",
+    "access-control-allow-credentials": "true",
+    "x-frame-options": "SAMEORIGIN",
+    "x-xss-protection": "1",
+    "x-content-type-options": "nosniff",
+    "content-security-policy": "default-src 'self'",
+    "content-length": "0",
+    "keep-alive": "timeout=5, max=100",
+    "connection": "Keep-Alive"
+  },
+  "requestBody": {
+    "companyName": "CY SelfReg cy-self_register_122 1780674159284",
+    "uidNumber": "ATU12345678",
+    "street": "Test - Mariahilferstraße",
+    "doorNumber": "101",
+    "postalCode": "1060",
+    "city": "Vienna",
+    "firstName": "Max",
+    "lastName": "Mustermann",
+    "email": "cy-self_register_122@yopmail.com",
+    "password": "Test1234!",
+    "state": "at",
+    "username": "cy-self_register_122"
+  },
+  "email": "cy-self_register_122@yopmail.com",
+  "timestamp": "2026-06-05T15:42:49.923Z"
+}

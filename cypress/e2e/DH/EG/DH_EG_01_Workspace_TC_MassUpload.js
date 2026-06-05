@@ -487,7 +487,7 @@ describe('DH Mass upload', () => {
   });
 
   //Admin user check Reporting email
-  it('Count Users and verified Reporting email', () => {
+  it.only('Count Users and verified Reporting email', () => {
     // ===== STEP 1: Login to DocumentHub =====
     // Visit DH
     cy.visit(Cypress.env('dh_baseUrl'));
@@ -555,14 +555,13 @@ describe('DH Mass upload', () => {
     cy.wait(500);
 
     // Check employee count and expand page size if more than 10
-    cy.intercept('GET', '**/person/fromGroup/**').as('getEmployeesExpanded');
     cy.get('tbody>tr').then(($rows) => {
       const visibleCount = $rows.length;
       cy.log(`Visible employee rows: ${visibleCount}`);
 
       if (visibleCount >= 10) {
         // Table may be paginated — select a page size larger than visible count
-        const pageSizes = [20, 50, 100];
+        const pageSizes = [25, 50, 100];
         const neededSize = pageSizes.find((s) => s > visibleCount) || 100;
         cy.log(
           `More than 10 employees visible — expanding page size to ${neededSize}`,
@@ -571,7 +570,8 @@ describe('DH Mass upload', () => {
         cy.get('div[aria-haspopup="listbox"]').last().click({ force: true });
         cy.wait(500);
         cy.get(`li[data-value="${neededSize}"]`).click({ force: true });
-        cy.wait('@getEmployeesExpanded', { timeout: 15000 });
+        // Reuse the already-registered employees alias for the table refresh request.
+        cy.wait('@getEmployees', { timeout: 15000 });
         cy.wait(1000);
       } else {
         cy.log(

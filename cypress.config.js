@@ -183,31 +183,55 @@ function openPasswordProtectedPdf({ pdfPath, password }) {
 // }
 
 // Task: Get the latest downloaded PDF file
-const getDownloadedPdf = (downloadsDir) => {
-  try {
-    console.log(`Searching for PDFs in: ${downloadsDir}`);
-    const files = fs.readdirSync(downloadsDir);
-    const pdfFiles = files
-      .filter((file) => file.endsWith('.pdf'))
-      .map((file) => {
-        const fullPath = path.join(downloadsDir, file);
-        const fileStats = fs.statSync(fullPath);
-        return { file, fullPath, time: fileStats.mtime };
-      });
+const getDownloadedPdf = async (input) => {
+  const options =
+    typeof input === 'string'
+      ? { downloadsDir: input }
+      : {
+          downloadsDir: input?.downloadsDir,
+          timeoutMs: input?.timeoutMs,
+          pollIntervalMs: input?.pollIntervalMs,
+          minSizeBytes: input?.minSizeBytes,
+        };
 
-    pdfFiles.sort((a, b) => b.time - a.time);
+  const downloadsDir = options.downloadsDir;
+  const timeoutMs = options.timeoutMs ?? 15000;
+  const pollIntervalMs = options.pollIntervalMs ?? 500;
+  const minSizeBytes = options.minSizeBytes ?? 1;
 
-    if (pdfFiles.length > 0) {
-      console.log(`Found PDF: ${pdfFiles[0].fullPath}`);
-    } else {
-      console.log('No PDF files found');
-    }
-
-    return pdfFiles.length > 0 ? pdfFiles[0].fullPath : null;
-  } catch (err) {
-    console.error(`Error reading directory: ${err.message}`);
+  if (!downloadsDir) {
+    console.error('getDownloadedPdf: downloadsDir is required');
     return null;
   }
+
+  const endTime = Date.now() + timeoutMs;
+
+  while (Date.now() <= endTime) {
+    try {
+      const files = fs.readdirSync(downloadsDir);
+      const pdfFiles = files
+        .filter((file) => file.toLowerCase().endsWith('.pdf'))
+        .map((file) => {
+          const fullPath = path.join(downloadsDir, file);
+          const fileStats = fs.statSync(fullPath);
+          return { fullPath, time: fileStats.mtimeMs, size: fileStats.size };
+        })
+        .filter((file) => file.size >= minSizeBytes)
+        .sort((a, b) => b.time - a.time);
+
+      if (pdfFiles.length > 0) {
+        console.log(`Found PDF: ${pdfFiles[0].fullPath}`);
+        return pdfFiles[0].fullPath;
+      }
+    } catch (err) {
+      console.error(`Error reading directory ${downloadsDir}: ${err.message}`);
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, pollIntervalMs));
+  }
+
+  console.log(`No PDF files found in ${downloadsDir} within ${timeoutMs}ms`);
+  return null;
 };
 
 // Task: Get the latest downloaded CSV file
@@ -1264,6 +1288,7 @@ module.exports = defineConfig({
   e2e: {
     chromeWebSecurity: false,
     experimentalSessionAndOrigin: true,
+    taskTimeout: 300000,
     setupNodeEvents(on, config) {
       // Hide Cypress automation flags from the browser so fingerprinting-based
       // captchas (e.g. FriendlyCaptcha v2) do not detect the automated browser.
@@ -1382,103 +1407,21 @@ module.exports = defineConfig({
           return {}; // Return empty if not found
         },
 
-        /*********************************** */
-
-        // FriendlyCaptcha proof-of-work solver (v1 protocol)
-        // Puzzle format after base64 decode:
-        //   buffer[0]      = n          : number of sub-puzzles to solve
-        //   buffer[1]      = threshold  : leading zero bits required per solution
-        //   buffer.slice(2) = puzzleHash : seed used in each hash
-        // Solution format sent to server:
-        //   {accountId}.{base64( concat of n × 8-byte nonces )}
-        async solveFriendlyCaptcha(sitekey) {
+        getNextSelfRegEmail() {
+          const counterPath = path.join(
+            __dirname,
+            'cypress',
+            'fixtures',
+            'selfRegCounter.json',
+          );
+          let data = { count: 0 };
           try {
-            const https = require('https');
-            const crypto = require('crypto');
-
-            // Fetch puzzle via https (works in all Node versions)
-            const puzzleData = await new Promise((resolve, reject) => {
-              const url = `https://api.friendlycaptcha.com/api/v1/puzzle?sitekey=${sitekey}`;
-              const req = https.get(url, (res) => {
-                let raw = '';
-                res.on('data', (chunk) => (raw += chunk));
-                res.on('end', () => {
-                  try {
-                    resolve(JSON.parse(raw));
-                  } catch (e) {
-                    reject(new Error(`API parse error: ${raw}`));
-                  }
-                });
-              });
-              req.on('error', (e) =>
-                reject(new Error(`API request error: ${e.message}`)),
-              );
-              req.setTimeout(15000, () => {
-                req.destroy();
-                reject(new Error('API request timed out after 15s'));
-              });
-            });
-
-            if (!puzzleData.data || !puzzleData.data.puzzle) {
-              throw new Error(
-                `Unexpected API response: ${JSON.stringify(puzzleData)}`,
-              );
-            }
-
-            const puzzleString = puzzleData.data.puzzle;
-            const [accountId, puzzleBase64] = puzzleString.split('.');
-            const buffer = Buffer.from(puzzleBase64, 'base64');
-
-            const n = buffer[0]; // number of sub-puzzles
-            const threshold = buffer[1]; // bits of leading zeros required
-            const puzzleHash = buffer.slice(2); // seed for hashing
-
-            console.log(
-              `FriendlyCaptcha: n=${n} sub-puzzles, threshold=${threshold} bits`,
-            );
-
-            // Helper: count leading zero bits in a hash buffer
-            function countLeadingZeros(buf) {
-              let zeroBits = 0;
-              for (const byte of buf) {
-                if (byte === 0) {
-                  zeroBits += 8;
-                } else {
-                  zeroBits += Math.clz32(byte) - 24;
-                  break;
-                }
-              }
-              return zeroBits;
-            }
-
-            // Solve each of the n sub-puzzles
-            const nonces = [];
-            for (let i = 0; i < n; i++) {
-              const indexBuf = Buffer.from([i]);
-              let nonce = 0;
-              while (true) {
-                const nonceBuf = Buffer.alloc(8);
-                nonceBuf.writeBigUInt64LE(BigInt(nonce));
-                const hash = crypto
-                  .createHash('sha256')
-                  .update(Buffer.concat([puzzleHash, indexBuf, nonceBuf]))
-                  .digest();
-                if (countLeadingZeros(hash) >= threshold) {
-                  nonces.push(nonceBuf);
-                  break;
-                }
-                nonce++;
-              }
-            }
-
-            const solution = `${accountId}.${Buffer.concat(nonces).toString('base64')}`;
-            console.log(
-              `FriendlyCaptcha solved: ${n} puzzles × threshold ${threshold}`,
-            );
-            return solution;
-          } catch (err) {
-            throw new Error(`solveFriendlyCaptcha failed: ${err.message}`);
-          }
+            data = JSON.parse(fs.readFileSync(counterPath, 'utf-8'));
+          } catch (_) {}
+          const num = data.count % 1000;
+          data.count = num + 1;
+          fs.writeFileSync(counterPath, JSON.stringify(data));
+          return `cy-self_register_${String(num).padStart(3, '0')}@yopmail.com`;
         },
       });
       //  Set executing tests on various environments, targeting appropriate json from const=environments
@@ -1488,6 +1431,6 @@ module.exports = defineConfig({
     specPattern: 'cypress/e2e/**/*.{js,jsx,ts,tsx}', // Ensure this matches your structure
     chromeWebSecurity: false,
     headless: false, // Turn off headless mode for debugging
-    baseUrl: 'https://www.e-brief.at/fe_t',
+    // baseUrl: 'https://www.e-brief.at/fe_t', // Commented out - not needed for DH/EG tests
   },
 });

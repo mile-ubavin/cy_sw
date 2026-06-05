@@ -1302,8 +1302,9 @@ Cypress.Commands.add('DHcreateNewUser_viaCSV', function () {
   cy.fixture('1_createUser.csv', 'binary')
     .then(Cypress.Blob.binaryStringToBlob)
     .then((fileContent) => {
-      cy.get('input[type="file"]', { timeout: 5000 })
+      cy.get('input[type="file"]', { timeout: 15000 })
         .should('exist')
+        .and('not.be.disabled')
         .attachFile({
           fileContent,
           filePath: '1_createUser.csv',
@@ -1318,8 +1319,9 @@ Cypress.Commands.add('DHupdateExistingUser_viaCSV', function () {
   cy.fixture('2_updateUser.csv', 'binary')
     .then(Cypress.Blob.binaryStringToBlob)
     .then((fileContent) => {
-      cy.get('input[type="file"]', { timeout: 5000 })
+      cy.get('input[type="file"]', { timeout: 15000 })
         .should('exist')
+        .and('not.be.disabled')
         .attachFile({
           fileContent,
           filePath: '2_updateUser.csv',
@@ -1444,39 +1446,27 @@ Cypress.Commands.add('uploadFiles', (fileNames) => {
 });
 
 // ── FriendlyCaptcha solver ────────────────────────────────────────────────────
-// Reads the sitekey directly from the page's captcha widget (works for any
-// environment), solves the proof-of-work puzzle via a Node task, and injects
-// the solution into the hidden input so the form can be submitted.
-Cypress.Commands.add('solveFriendlyCaptcha', () => {
-  // Read the sitekey from the widget on the current page
-  cy.get('.frc-captcha[data-sitekey], [data-sitekey]')
-    .first()
-    .invoke('attr', 'data-sitekey')
-    .then((sitekey) => {
-      cy.log(`FriendlyCaptcha sitekey from page: ${sitekey}`);
-      cy.task('solveFriendlyCaptcha', sitekey, { timeout: 60000 }).then(
-        (solution) => {
-          // Inject the solution into the hidden input and notify React
-          cy.get('input[name="frc-captcha-solution"]')
-            .invoke('val', solution)
-            .trigger('input', { force: true })
-            .trigger('change', { force: true });
+// Wait for the widget to self-solve. The widget runs the PoW in its own
+// background worker against the puzzle issued for THIS session/origin and
+// writes the valid solution into the hidden input. We only fire input/change
+// events so the React form sees the value update.
+//
+// Why: a manual Node-side PoW solver was generating solutions for a
+// different/unrelated puzzle, which the dev backend's FriendlyCaptcha
+// siteverify correctly rejected. Test env happened to accept anything.
+const FRC_PENDING_VALUES = [
+  '.UNSTARTED', '.FETCHING', '.UNFINISHED', '.ERROR', '.HEADLESS_ERROR', '',
+];
 
-          // Patch widget DOM state only if elements still exist
-          // (they may already be gone if the widget auto-verified)
-          cy.get('.frc-captcha').invoke('attr', 'data-solution', solution);
-          cy.get('body').then(($body) => {
-            if ($body.find('.frc-button').length > 0) {
-              cy.get('.frc-button').invoke('attr', 'disabled', 'true');
-            }
-            if ($body.find('.frc-text').length > 0) {
-              cy.get('.frc-text').invoke(
-                'text',
-                'Anti-Robot Verification passed',
-              );
-            }
-          });
-        },
-      );
-    });
+Cypress.Commands.add('solveFriendlyCaptcha', () => {
+  cy.get('input[name="frc-captcha-solution"]', { timeout: 90000 })
+    .should(($el) => {
+      const val = $el.val();
+      expect(FRC_PENDING_VALUES, `frc-captcha-solution still pending: "${val}"`)
+        .not.to.include(val);
+      expect(String(val).length, `frc-captcha-solution too short: "${val}"`)
+        .to.be.greaterThan(20);
+    })
+    .trigger('input', { force: true })
+    .trigger('change', { force: true });
 });

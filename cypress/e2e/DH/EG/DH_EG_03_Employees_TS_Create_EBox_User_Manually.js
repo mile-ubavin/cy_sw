@@ -382,7 +382,7 @@ describe('Create e-Box user manually', () => {
           /Download user data.|Benutzersdaten herunterladen./,
         );
       });
-
+    // cy.pause(); // debug only
     //Download PDF with Credentials
     cy.get('#download-user-account-pdf').click();
     cy.wait(1000);
@@ -391,7 +391,12 @@ describe('Create e-Box user manually', () => {
     const downloadsDir = `${Cypress.config(
       'fileServerFolder',
     )}/cypress/downloads/`;
-    cy.task('getDownloadedPdf', downloadsDir).then((filePath) => {
+    cy.task('getDownloadedPdf', {
+      downloadsDir,
+      timeoutMs: 20000,
+      pollIntervalMs: 500,
+      minSizeBytes: 100,
+    }).then((filePath) => {
       expect(filePath).to.not.be.null; // Assert the file exists
       cy.log(`Latest PDF File Path: ${filePath}`);
       cy.wait(3000);
@@ -767,16 +772,19 @@ describe('Create e-Box user manually', () => {
       .click({ force: true });
     cy.wait(1000);
 
+    // cy.pause(); // debug only
+
     //Validate Error message
-    cy.get('div[role="alert"]>div')
+    cy.get('#accountNumber-helper')
       .should('be.visible')
       .invoke('text')
       .then((text) => {
         expect(text.trim()).to.match(
-          /Invalid person account number|Benutzer konnte nicht erstellt werden/,
+          /Invalid person account number|Ungultige Personalnummer|Ungültige Personalnummer/i,
         );
       });
 
+    // cy.pause(); // debug only
     cy.wait(3500);
   });
 
