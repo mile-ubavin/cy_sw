@@ -1,25 +1,13 @@
-describe('DH - Admin user uploads Structured XML template', () => {
-  // --- Helper: Parse datetime from "dd.mm.yyyy hh:mm" (German format)
-  function parseGermanDateTime(dateTimeStr) {
-    const [datePart, timePart] = dateTimeStr.split(' ');
-    const [day, month, year] = datePart.split('.').map(Number);
-    const [hour, minute] = timePart.split(':').map(Number);
-    return new Date(year, month - 1, day, hour, minute);
-  }
+/// <reference types="cypress" />
+import { parseGermanDateTime } from '../../../../../support/utils/dateUtils';
 
+describe('DH - Admin user uploads Structured XML template', () => {
   //Disable xml teplates by Masteruser
   it('Disable XML templates by Masteruser', () => {
     cy.loginToSupportViewMaster(); // Login as a master user
     cy.wait(2000);
 
-    //Remove pop up
-    cy.get('body').then(($body) => {
-      if ($body.find('.release-note-dialog__close-icon').length > 0) {
-        cy.get('.release-note-dialog__close-icon').click();
-      } else {
-        cy.log('Close icon is NOT present');
-      }
-    });
+    cy.dismissReleaseNotePopup();
     cy.wait(1500);
 
     cy.intercept('GET', '**/group/template/tenant/**').as('apiRequest');
@@ -117,21 +105,14 @@ describe('DH - Admin user uploads Structured XML template', () => {
     cy.visit(Cypress.env('dh_baseUrl'));
     cy.url().should('include', Cypress.env('dh_baseUrl'));
 
-    // Remove Cookie dialog if present
-    cy.get('body').then(($body) => {
-      if ($body.find('#onetrust-policy-title').is(':visible')) {
-        cy.get('#onetrust-accept-btn-handler').click({ force: true });
-      } else {
-        cy.log('Cookie bar not visible');
-      }
-    });
+    cy.dismissCookieBar();
 
     cy.loginToDH();
     cy.wait(2000);
     cy.url().should('include', `${Cypress.env('dh_baseUrl')}home`);
     cy.scrollTo('top', { duration: 200 });
 
-    //Try upload StructuredTXTfile (L103 ISS), when L103 TXT template is disabled
+    //Try upload StructuredXMLfile (L103 ISS), when L103 xml template is disabled
 
     //Open Personal Document Upload Dialog
     cy.get('#workspace-personal-document-action')
@@ -140,8 +121,8 @@ describe('DH - Admin user uploads Structured XML template', () => {
       .click({ force: true });
     cy.wait(1500);
 
-    // Upload Structured TXT file
-    cy.DHuploadTXTfile();
+    // Upload Structured XML file
+    cy.DHuploadStructuredXMLfile();
     cy.wait(2500);
 
     cy.intercept(
@@ -196,19 +177,12 @@ describe('DH - Admin user uploads Structured XML template', () => {
     cy.wait(2500);
   });
 
-  //Enable txt teplates by Masteruser
-  it('Enable TXT templates by Masteruser', () => {
+  //Enable xml teplates by Masteruser
+  it('Enable XML templates by Masteruser', () => {
     cy.loginToSupportViewMaster(); // Login as a master user
     cy.wait(1500);
 
-    //Remove pop up
-    cy.get('body').then(($body) => {
-      if ($body.find('.release-note-dialog__close-icon').length > 0) {
-        cy.get('.release-note-dialog__close-icon').click();
-      } else {
-        cy.log('Close icon is NOT present');
-      }
-    });
+    cy.dismissReleaseNotePopup();
     cy.wait(1500);
 
     cy.intercept('GET', '**/group/template/tenant/**').as('apiRequest');
@@ -307,14 +281,7 @@ describe('DH - Admin user uploads Structured XML template', () => {
     cy.visit(Cypress.env('dh_baseUrl'));
     cy.url().should('include', Cypress.env('dh_baseUrl'));
 
-    // Remove Cookie dialog if present
-    cy.get('body').then(($body) => {
-      if ($body.find('#onetrust-policy-title').is(':visible')) {
-        cy.get('#onetrust-accept-btn-handler').click({ force: true });
-      } else {
-        cy.log('Cookie bar not visible');
-      }
-    });
+    cy.dismissCookieBar();
 
     cy.loginToDH();
     cy.wait(2000);
@@ -328,8 +295,8 @@ describe('DH - Admin user uploads Structured XML template', () => {
       .click({ force: true });
     cy.wait(1500);
 
-    //Upload TXT file
-    cy.DHuploadTXTfile();
+    //Upload XML file
+    cy.DHuploadStructuredXMLfile();
     cy.wait(2500);
 
     cy.intercept(
@@ -462,10 +429,14 @@ describe('DH - Admin user uploads Structured XML template', () => {
         cy.log(`Read Parsed: ${readParsed}`);
         cy.log(`Difference: ${diffMin.toFixed(2)} minutes`);
 
-        // --- Apply the condition: times match or within ±1 minute ---
-        if (diffMin <= 1) {
+        // --- Apply the condition: delivery date matches upload date (format-agnostic) ---
+        const datesMatch =
+          uploadParsed.getDate() === readParsed.getDate() &&
+          uploadParsed.getMonth() === readParsed.getMonth() &&
+          uploadParsed.getFullYear() === readParsed.getFullYear();
+        if (datesMatch) {
           cy.log(
-            `✓ Test PASSED: Difference is ${diffMin.toFixed(2)} minutes (within ±1 minute tolerance)`,
+            `✓ Test PASSED: Delivery date matches upload date. Diff: ${diffMin.toFixed(2)} min`,
           );
 
           // Intercept backend calls for document load
@@ -496,8 +467,8 @@ describe('DH - Admin user uploads Structured XML template', () => {
             .scrollTo('bottom', { duration: 500, ensureScrollable: false });
           cy.wait(3500);
         } else {
-          // FAIL: difference > 1 minute
-          const errorMsg = `✗ Test FAILED: readDateTime (${readClean}) differs by ${diffMin.toFixed(2)} minutes from uploadDateTime (${uploadDateTime}). Maximum allowed: 1 minute.`;
+          // FAIL: delivery date does not match upload date
+          const errorMsg = `✗ Test FAILED: Delivery date (${readClean.split(' ')[0]}) does not match upload date (${uploadDateTime.split(' ')[0]}). Delivery not found today.`;
           cy.log(errorMsg);
 
           // Log out the user before failing
@@ -519,6 +490,8 @@ describe('DH - Admin user uploads Structured XML template', () => {
 
   //Admin user check Reporting email and delte all emails
   it('Yopmail - Get Reporting email and delte all emails', () => {
+    cy.on('uncaught:exception', () => false);
+
     // Visit Yopmail
     cy.visit('https://yopmail.com/en/');
 

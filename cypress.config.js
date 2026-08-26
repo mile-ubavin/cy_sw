@@ -1290,16 +1290,55 @@ module.exports = defineConfig({
     experimentalSessionAndOrigin: true,
     taskTimeout: 300000,
     setupNodeEvents(on, config) {
+      // Register Chrome for Testing as a custom browser so --load-extension works.
+      // Regular Chrome 137+ blocks --load-extension; Chrome for Testing does not.
+      const cftPath = path.join(
+        __dirname,
+        'chrome',
+        'win64-150.0.7871.124',
+        'chrome-win64',
+        'chrome.exe',
+      );
+      if (fs.existsSync(cftPath)) {
+        config.browsers = (config.browsers || []).concat({
+          name: 'chrome-for-testing',
+          family: 'chromium',
+          channel: 'stable',
+          displayName: 'Chrome for Testing (Selocity)',
+          version: '150.0.7871.124',
+          path: cftPath,
+          majorVersion: 150,
+        });
+      }
+
       // Hide Cypress automation flags from the browser so fingerprinting-based
       // captchas (e.g. FriendlyCaptcha v2) do not detect the automated browser.
       on('before:browser:launch', (browser, launchOptions) => {
-        if (browser.name === 'chrome' || browser.name === 'chromium') {
+        if (
+          browser.name === 'chrome' ||
+          browser.name === 'chromium' ||
+          browser.name === 'chrome-for-testing'
+        ) {
           launchOptions.args.push(
             '--disable-blink-features=AutomationControlled',
           );
           launchOptions.args = launchOptions.args.filter(
             (arg) => arg !== '--enable-automation',
           );
+          // Load Ranorex Selocity extension (only works in Chrome for Testing / Chromium)
+          if (
+            browser.name === 'chrome-for-testing' ||
+            browser.name === 'chromium'
+          ) {
+            const selocityPath =
+              'C:\\Users\\mubavin\\AppData\\Local\\Google\\Chrome\\User Data\\Default\\Extensions\\ocgghcnnjekfpbmafindjmijdpopafoe\\1.5.2_0';
+            if (fs.existsSync(selocityPath)) {
+              launchOptions.args.push(`--load-extension=${selocityPath}`);
+              launchOptions.args.push(
+                `--disable-extensions-except=${selocityPath}`,
+              );
+            }
+          }
         }
         return launchOptions;
       });
@@ -1418,14 +1457,20 @@ module.exports = defineConfig({
           try {
             data = JSON.parse(fs.readFileSync(counterPath, 'utf-8'));
           } catch (_) {}
-          const num = data.count % 1000;
+          const num = data.count;
           data.count = num + 1;
           fs.writeFileSync(counterPath, JSON.stringify(data));
-          return `cy-self_register_${String(num).padStart(3, '0')}@yopmail.com`;
+          return `cy-selfregister${num}@yopmail.com`;
+        },
+
+        resetSelfRegEmailCounter() {
+          selfRegEmailCounter = 0;
+          console.log('Self-registration email counter reset.');
+          return null;
         },
       });
       //  Set executing tests on various environments, targeting appropriate json from const=environments
-      const envConfig = environments['eg_test'];
+      const envConfig = environments['eg_dev'];
       return { ...config, env: { ...config.env, ...envConfig } };
     }, //end
     specPattern: 'cypress/e2e/**/*.{js,jsx,ts,tsx}', // Ensure this matches your structure

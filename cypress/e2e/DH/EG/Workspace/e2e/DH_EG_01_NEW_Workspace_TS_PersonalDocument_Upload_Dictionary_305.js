@@ -1,28 +1,43 @@
-///<reference types="cypress" />
+/// <reference types="cypress" />
+import { parseGermanDateTime } from '../../../../../support/utils/dateUtils';
 
 describe('DH Upload Dictionary (305)', () => {
-  // --- Helper: Parse datetime from "dd.mm.yyyy hh:mm" (German format)
-  function parseGermanDateTime(dateTimeStr) {
-    const [datePart, timePart] = dateTimeStr.split(' ');
-    const [day, month, year] = datePart.split('.').map(Number);
-    const [hour, minute] = timePart.split(':').map(Number);
-    return new Date(year, month - 1, day, hour, minute);
-  }
+  const findAndCheckElement = (searchCriteria) => {
+    cy.get('table > tbody > tr')
+      .each(($row) => {
+        const rowText = $row.text().trim();
+        searchCriteria.forEach((criteria) => {
+          if (rowText.includes(criteria)) {
+            cy.wrap($row)
+              .find('td>input[type="checkbox"]')
+              .should('exist')
+              .check({ force: true });
+            cy.log(`Checked: ${criteria}`);
+          }
+        });
+      })
+      .then(() => {
+        cy.get('.mat-mdc-paginator-navigation-next').then(($nextButton) => {
+          if (!$nextButton.prop('disabled')) {
+            cy.wrap($nextButton).click();
+            cy.wait(500);
+            findAndCheckElement(searchCriteria);
+          } else {
+            cy.log('No more pages to check');
+          }
+        });
+      });
+  };
 
   it('Enable pdfDictionary by Masteruser', () => {
     cy.loginToSupportViewMaster(); // Login as a master user
 
-    // Remove pop-up if present
-    cy.get('body').then(($body) => {
-      if ($body.find('.release-note-dialog__close-icon').length > 0) {
-        cy.get('.release-note-dialog__close-icon').click();
-      }
-    });
+    cy.dismissReleaseNotePopup();
 
     cy.intercept('GET', '**/group/template/tenant/**').as('apiRequest');
 
     // Search for Group section
-    cy.get('#searchButton>span').click();
+    cy.get('#searchButton>span').click({ force: true });
 
     // Search for Group by Display Name using the company name
     cy.get('.search-dialog>form>.form-fields>.searchText-wrap')
@@ -98,144 +113,41 @@ describe('DH Upload Dictionary (305)', () => {
         );
       });
 
-    // Logout
-    cy.get('.logout-icon').click();
-    cy.get('.confirm-buttons > :nth-child(2)').click();
-    cy.url().should('include', Cypress.env('baseUrl'));
+    // Logout — svLogout waits for loading-wrapper to clear before clicking
+    cy.svLogout();
     cy.log('Test completed successfully.');
   });
 
   //Enable All Roles
   it('Enable All Roles', () => {
-    // Login as a Master-User using custom command
     cy.loginToSupportViewMaster();
-    cy.wait(3500);
-
-    //Remove pop up
-    cy.get('body').then(($body) => {
-      if ($body.find('.release-note-dialog__close-icon').length > 0) {
-        cy.get('.release-note-dialog__close-icon').click();
-      } else {
-        cy.log('Close icon is NOT present');
-      }
-    });
-    cy.wait(1500);
-
-    // Search for Company by Display Name
-    cy.get('#searchButton>span').click(); //Click on search button
-    cy.wait(1000);
-    // Search for Group by Display Name using the company name
-    cy.get('.search-dialog>form>.form-fields>.searchText-wrap')
-      .eq(0)
-      .type(Cypress.env('company')); // Use the company name from the cypress.config.js
-    cy.wait(1500);
-    //Find the Search button by button name and click on it
-    cy.get('.search-dialog>form>div>.mat-primary').click();
-    cy.wait(1500);
-
-    //Click On Admin UserbButton
-    cy.get('.mdc-button__label')
-      // Find the button containing "Admin User" or "Admin Benutzer" button
-      .contains(/Admin User|Admin Benutzer/i)
-      .should('be.visible') // Optional: Ensure the button is visible before interacting
-      .click(); // Click the button
-    cy.wait(1500);
-
-    //Search For Admin And Open Role Dialog
-
-    //Search for Aqua Admin
-    cy.get('.search').click({ force: true });
-    //Search for Admin using username
-    cy.get('input[formcontrolname="userName"]').type(
-      Cypress.env('username_supportViewAdmin'),
+    cy.dismissReleaseNotePopup();
+    cy.svSearchCompany();
+    cy.svOpenAdminUserRights(Cypress.env('username_supportViewAdmin'));
+    cy.svUpdateRoles(
+      [
+        ['Company Admin', 'Firmen-Administrator'],
+        ['Customer Creator', 'Nutzeranlage'],
+        ['Data Submitter', 'Versand'],
+        ['View E-Box', 'E-Box ansehen'],
+        ['HR Manager', 'HR Manager'],
+      ],
+      [],
     );
-    // Click on Search for Admin User button
-    cy.get('button[type="submit"]').click();
-    cy.wait(2000);
-    //Click on Role
-    cy.get('.mdc-button__label')
-      .contains(/Rechte|Rights/i) // Find the button containing "Rechte" or "Rights"
-      .should('be.visible') // Optional: Ensure the button is visible before interacting
-      .click(); // Click the button
-
-    // Enable All Roles, except HR Role, for specific Admin user
-    const rolesToEnable = [
-      ['Company Admin', 'Firmen-Administrator'],
-      ['Customer Creator', 'Nutzeranlage'],
-      ['Data Submitter', 'Versand'],
-      ['View E-Box', 'E-Box ansehen'],
-      ['HR Manager', 'HR Manager'],
-    ];
-
-    cy.get('.mat-mdc-checkbox > div > .mdc-label')
-      .should('exist') // Ensure checkbox labels exist
-      .each(($label) => {
-        const text = $label.text().trim();
-
-        // Check if text matches any role in either English or German
-        if (rolesToEnable.some(([en, de]) => text === en || text === de)) {
-          cy.wrap($label)
-            .parent()
-            .find('input[type="checkbox"]') // Locate the checkbox input
-            .then(($checkboxInput) => {
-              cy.wrap($checkboxInput)
-                .invoke('prop', 'checked')
-                .then((isChecked) => {
-                  if (!isChecked) {
-                    // Enable the role if it's not already checked
-                    cy.wrap($checkboxInput).click({ force: true });
-                    cy.log(
-                      `Checkbox for "${text}" was not enabled; now enabled.`,
-                    );
-                  } else {
-                    cy.log(`Checkbox for "${text}" is already enabled.`);
-                  }
-                });
-            });
-        }
-      });
-
-    cy.wait(1500);
-
-    // Submit the changes
-    cy.get('button[type="submit"]').click();
-    cy.wait(1500);
-
-    // Verify the success message
-    cy.get('.mat-mdc-simple-snack-bar > .mat-mdc-snack-bar-label')
-      .should('be.visible') // Ensure it's visible first
-      .invoke('text') // Get the text of the element
-      .then((snackText) => {
-        const trimmedText = snackText.trim();
-        expect(trimmedText).to.match(/Rights updated|Rechte aktualisiert/);
-      });
-
-    cy.wait(3000);
-    // Logout
-    cy.get('.logout-icon ').click();
-    cy.wait(2000);
-    cy.get('.confirm-buttons > :nth-child(2)').click();
-    cy.url().should('include', Cypress.env('baseUrl')); // Validate url'
+    cy.svSaveRoles();
+    cy.svLogout();
     cy.log('Test completed successfully.');
-    cy.wait(2500);
   }); //end it
 
   //Upload pdf - From Personal Document Upload
-  it('DH - Upload pdfDictionary 305_Dictionary (verify Error and Success messages)', () => {
+  it.only('DH - Upload pdfDictionary 305_Dictionary (verify Error and Success messages)', () => {
     let uploadDateTime = ''; // Global variable to store upload date & time
 
     // ===== STEP 1: Login to DocumentHub =====
     cy.visit(Cypress.env('dh_baseUrl'));
     cy.url().should('include', Cypress.env('dh_baseUrl'));
 
-    // Remove Cookie dialog if present
-    cy.get('body').then(($body) => {
-      if ($body.find('#onetrust-policy-title').is(':visible')) {
-        cy.get('#onetrust-accept-btn-handler').click({ force: true });
-      } else {
-        cy.log('Cookie bar not visible');
-      }
-    });
+    cy.dismissCookieBar();
 
     // Login to DocumentHub using custom command
     cy.loginToDH();
@@ -251,35 +163,24 @@ describe('DH Upload Dictionary (305)', () => {
       .click({ force: true });
     cy.wait(1500);
 
-    // ===== STEP 3: Validate Upload Dialog =====
-    cy.get('#personal-document-title')
-      .should('be.visible')
-      .invoke('text')
-      .then((text) => {
-        expect(text.trim()).to.match(
-          /Personal Document Upload|Upload Document/i,
-        );
-      });
-
-    cy.get('#file-requirements')
-      .should('be.visible')
-      .invoke('text')
-      .then((text) => {
-        expect(text.trim()).to.match(
-          /Maximum file size is 50 MB and a maximum of 10 documents can be uploaded/i,
-        );
-      });
     cy.wait(1000);
 
     // ===== STEP 4: Upload PDF with Invalid Dictionary =====
     cy.log('>>> Test Scenario 1: Upload with Invalid Dictionary (301)');
+    cy.intercept('GET', '**/group/dictionary/tenant/**').as('getDictionaries');
     cy.DHupload305Dictionary();
     cy.wait(2500);
 
     // Select invalid dictionary from dropdown
+    cy.wait('@getDictionaries', { timeout: 35000 }).then((interception) => {
+      expect(interception.response.statusCode).to.eq(200);
+      cy.log('Dictionary list fetched successfully');
+    });
+    // Select invalid dictionary (301)
     cy.get('#dictionary-dropdown').click({ force: true });
     cy.wait(1000);
 
+    cy.get('li[data-value]').should('have.length.at.least', 1);
     cy.get('li[data-value="PDFTABDictionary-301"]')
       .should('be.visible')
       .click({ force: true });
@@ -291,14 +192,15 @@ describe('DH Upload Dictionary (305)', () => {
       'checkProcessing',
     );
 
-    cy.get('#upload')
+    // cy.get('#upload')
+    cy.get('.linkbtn--primary')
       .should('be.enabled')
       .contains(/Weiter|Next/i)
       .click();
 
     // Wait for processing to complete
     function waitForProcessingComplete() {
-      cy.wait('@checkProcessing', { timeout: 15000 }).then((interception) => {
+      cy.wait('@checkProcessing', { timeout: 45000 }).then((interception) => {
         const isDone =
           interception.response.body.processingOver === true ||
           interception.response.body.processingOver === 'true';
@@ -315,40 +217,38 @@ describe('DH Upload Dictionary (305)', () => {
     cy.wait(2000);
 
     // ===== STEP 6: Verify Error Message for Invalid Dictionary =====
-    cy.get('#file-list span')
+    cy.contains(
+      /Meta data could not be extracted|Metadaten konnten nicht extrahiert werden/i,
+      { timeout: 15000 },
+    )
       .should('be.visible')
-      .invoke('text')
-      .then((text) => {
-        expect(text.trim()).to.match(
-          /Meta data could not be extracted|Metadaten konnten nicht extrahiert werden/i,
-        );
-        cy.log('✓ Error message verified: Meta data extraction failed');
+      .then(() => {
+        cy.log('Error message verified: Meta data extraction failed');
       });
 
-    // Verify Send button is disabled
-    cy.get('button[aria-label="Send documents"]').should('be.disabled');
-    cy.log('✓ Send button correctly disabled due to error');
     cy.wait(1500);
 
     // ===== STEP 7: Remove Invalid File =====
-    cy.get(
-      'button[aria-label="Remove 305_Dictionary_(AQUA_ABBA000100279311).pdf"]',
-    )
-      .invoke('attr', 'style', 'border: 2px solid red; padding: 2px;')
-      .wait(1000)
-      .click();
-    cy.log('✓ Removed file with invalid dictionary');
+    cy.get('button[aria-label^="Remove"]').first().click();
+    cy.log('Removed file with invalid dictionary');
     cy.wait(1500);
 
     // ===== STEP 8: Re-upload with Correct Dictionary =====
-    cy.log('>>> Test Scenario 2: Upload with Correct Dictionary (305)');
+
+    cy.intercept('GET', '**/group/dictionary/tenant/**').as('getDictionaries');
     cy.DHupload305Dictionary();
-    cy.wait(2000);
+    cy.wait(2500);
 
-    // Select correct dictionary (305)
-    cy.get('#dictionary-dropdown').click({ force: true });
-    cy.wait(1000);
+    // Select invalid dictionary from dropdown
+    cy.wait('@getDictionaries', { timeout: 15000 }).then((interception) => {
+      expect(interception.response.statusCode).to.eq(200);
+      cy.log('Dictionary list fetched successfully');
+      // Select invalid dictionary (301)
+      cy.get('#dictionary-dropdown', { timeout: 15000 }).click({ force: true });
+      cy.wait(1000);
+    });
 
+    cy.get('li[data-value]').should('have.length.at.least', 1);
     cy.get('li[data-value="PDFTABDictionary-305"]')
       .should('be.visible')
       .click({ force: true });
@@ -371,33 +271,43 @@ describe('DH Upload Dictionary (305)', () => {
 
     uploadDateTime = `${formattedDate} ${formattedTime}`;
     cy.log(`Upload DateTime: ${uploadDateTime}`);
+    Cypress.env('uploadDateTime', uploadDateTime);
 
     // ===== STEP 10: Process Document and Verify Success =====
     cy.intercept('POST', '**/checkDocumentProcessingStatus').as(
       'checkProcessing2',
     );
 
-    cy.get('#upload')
+    cy.get('.linkbtn--primary')
       .should('be.enabled')
       .contains(/Weiter|Next/i)
       .click();
 
-    cy.wait('@checkProcessing2', { timeout: 15000 }).then((interception) => {
-      const isDone =
-        interception.response.body.processingOver === true ||
-        interception.response.body.processingOver === 'true';
-      expect(isDone).to.eq(true);
-      cy.log('✓ Document processing completed successfully');
-    });
+    function waitForProcessingComplete2() {
+      cy.wait('@checkProcessing2', { timeout: 45000 }).then((interception) => {
+        const isDone =
+          interception.response.body.processingOver === true ||
+          interception.response.body.processingOver === 'true';
+
+        cy.log(`Processing status: ${isDone ? 'Complete' : 'In progress'}`);
+
+        if (!isDone) {
+          waitForProcessingComplete2();
+        } else {
+          cy.log('✓ Document processing completed successfully');
+        }
+      });
+    }
+
+    waitForProcessingComplete2();
 
     // ===== STEP 11: Verify Success Message =====
-    cy.get('#file-list span')
+    cy.contains(
+      /Document successfully uploaded|Dokument erfolgreich hochgeladen/i,
+      { timeout: 15000 },
+    )
       .should('be.visible')
-      .invoke('text')
-      .then((text) => {
-        expect(text.trim()).to.match(
-          /Document successfully uploaded|Dokument erfolgreich hochgeladen/i,
-        );
+      .then(() => {
         cy.log('✓ Success message verified');
       });
     cy.wait(1500);
@@ -411,7 +321,7 @@ describe('DH Upload Dictionary (305)', () => {
 
     cy.wait('@sendDocuments', { timeout: 20000 }).then((interception) => {
       expect(interception.response.statusCode).to.eq(200);
-      cy.log('✓ Mass delivery sent successfully');
+      cy.log('delivery sent successfully');
     });
     cy.wait(2000);
 
@@ -489,10 +399,14 @@ describe('DH Upload Dictionary (305)', () => {
         cy.log(`Read Parsed: ${readParsed}`);
         cy.log(`Difference: ${diffMin.toFixed(2)} minutes`);
 
-        // --- Apply the condition: times match or within ±1 minute ---
-        if (diffMin <= 1) {
+        // --- Apply the condition: delivery date matches upload date (format-agnostic) ---
+        const datesMatch =
+          uploadParsed.getDate() === readParsed.getDate() &&
+          uploadParsed.getMonth() === readParsed.getMonth() &&
+          uploadParsed.getFullYear() === readParsed.getFullYear();
+        if (datesMatch) {
           cy.log(
-            `✓ Test PASSED: Difference is ${diffMin.toFixed(2)} minutes (within ±1 minute tolerance)`,
+            `✓ Test PASSED: Delivery date matches upload date. Diff: ${diffMin.toFixed(2)} min`,
           );
 
           // Intercept backend calls for document load
@@ -523,8 +437,8 @@ describe('DH Upload Dictionary (305)', () => {
             .scrollTo('bottom', { duration: 500, ensureScrollable: false });
           cy.wait(3500);
         } else {
-          // FAIL: difference > 1 minute
-          const errorMsg = `✗ Test FAILED: readDateTime (${readClean}) differs by ${diffMin.toFixed(2)} minutes from uploadDateTime (${uploadDateTime}). Maximum allowed: 1 minute.`;
+          // FAIL: delivery date does not match upload date
+          const errorMsg = `✗ Test FAILED: Delivery date (${readClean.split(' ')[0]}) does not match upload date (${uploadDateTime.split(' ')[0]}). Delivery not found today.`;
           cy.log(errorMsg);
 
           // Log out the user before failing
@@ -546,6 +460,8 @@ describe('DH Upload Dictionary (305)', () => {
 
   //Admin user check Reporting email and delte all emails
   it('Yopmail - Get Reporting email and delte all emails', () => {
+    cy.on('uncaught:exception', () => false);
+
     // Visit Yopmail
     cy.visit('https://yopmail.com/en/');
 

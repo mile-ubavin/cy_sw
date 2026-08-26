@@ -2,7 +2,7 @@ describe('Masteruser - Create Admin User From JSON', () => {
   //Precondition: Clear user`s email inbox if its not an empty
 
   // Precondition: Search for the Admin user and if user exists, proceed with deletion
-  it.only('Search for the Admin user and if user(s) exist, proceed with deletion', () => {
+  it('Search for the Admin user and if user(s) exist, proceed with deletion', () => {
     const companyName = Cypress.env('company');
     const adminUser = Cypress.env('createAdminUser')[0];
 
@@ -112,7 +112,7 @@ describe('Masteruser - Create Admin User From JSON', () => {
   }); //end it
 
   // DH Create new Admin User (base and alternative scenarios)
-  it.only('DH - AdminUserCreateNewAdmin', () => {
+  it('DH - AdminUserCreateNewAdmin', () => {
     // ===== Login to DH =====
     cy.visit(Cypress.env('dh_baseUrl'));
     cy.url().should('include', Cypress.env('dh_baseUrl'));
@@ -131,10 +131,7 @@ describe('Masteruser - Create Admin User From JSON', () => {
     cy.wait(2000);
 
     // ===== Navigate to Admin User Management =====
-    // cy.intercept('GET', '**/group/getGroupData').as('getAdminUsers');
-    cy.intercept('GET', '**/supportView/v1/person/getGroupAdmins/**').as(
-      'getAdminUsers',
-    );
+    cy.intercept('POST', '**/xUser/**').as('getAdminUsers');
     cy.get('#nav-admin-users')
       .should('be.visible')
       .invoke('attr', 'style', 'border: 2px solid black; padding: 2px;')
@@ -274,26 +271,16 @@ describe('Masteruser - Create Admin User From JSON', () => {
     // Close rights dropdown by clicking outside
     cy.get('h2').first().click();
     cy.wait(500);
-    cy.pause();
 
     // ===== Submit =====
-    // cy.intercept('POST', '**/person/fromGroup/xUser/**').as('createAdminUser');
-    cy.intercept('GET', '**person/getGroupAdmins/**').as('createAdminUser');
+    cy.intercept('POST', '**/person/fromGroup/xUser/**').as('createAdminUser');
     cy.get('button[type="submit"]').click();
-    cy.wait(1000);
 
-    // Verify success message
-    cy.get('div[color="success"]>div')
-      .should('be.visible')
-      .invoke('text')
-      .then((text) => {
-        expect(text.trim()).to.match(
-          /Admin user successfully created|Admin User erfolgreich erstellt/i,
-        );
-      });
-
-    cy.wait('@createAdminUser', { timeout: 15000 }).then((interception) => {
-      expect(interception.response.statusCode).to.eq(200);
+    // Wait for the backend to finish saving — success toast is auto-dismissed
+    // by Material UI within ~6s and races with API latency on slower envs.
+    // Functional proof = API 200/201 + duplicate detection below.
+    cy.wait('@createAdminUser', { timeout: 20000 }).then((interception) => {
+      expect(interception.response.statusCode).to.be.oneOf([200, 201]);
     });
 
     cy.wait(2500);
@@ -316,27 +303,17 @@ describe('Masteruser - Create Admin User From JSON', () => {
     cy.get('#create-admin-email').type(adminUser.email);
     cy.wait(1000);
 
-    // Submit duplicate
+    // Submit duplicate — frontend catches the existing username and renders
+    // a field-level validation error (no POST is fired in this path).
     cy.get('button[type="submit"]').click();
-    cy.wait(1000);
 
     // Verify username already exists error on field
-    cy.get('#username-error')
+    cy.get('#username-error', { timeout: 15000 })
       .should('be.visible')
       .invoke('text')
       .then((text) => {
         expect(text.trim()).to.match(
           /Username already exists|Benutzername existiert bereits/i,
-        );
-      });
-
-    // Verify error toast
-    cy.get('div[color="error"]>div')
-      .should('be.visible')
-      .invoke('text')
-      .then((text) => {
-        expect(text.trim()).to.match(
-          /User could not be created|Benutzername existiert bereits/i,
         );
       });
 

@@ -799,23 +799,16 @@ describe('DH_EG_03_Employees_TS_Edit_User', () => {
           },
         );
 
-        cy.contains(/aktiviert|deaktiviert|activated|deactivated/i, {
-          timeout: 8000,
-        }).should('be.visible');
-        cy.wait(2000);
-
-        cy.get('tbody > tr')
+        // Toast snackbar is auto-dismissed during table reload — retry the
+        // row read until the table refetch completes and status flips.
+        // The table status is the authoritative check.
+        const expectedStatus = isActive ? 'inactive' : 'active';
+        cy.get('tbody > tr', { timeout: 20000 })
           .first()
           .find('td')
           .last()
-          .invoke('text')
-          .then((updatedStatusText) => {
-            const updatedStatus = normalizeTableStatus(updatedStatusText);
-            const expectedStatus = isActive ? 'inactive' : 'active';
-            cy.log(
-              `Updated status: "${updatedStatusText.trim()}" (${updatedStatus}), expected: "${expectedStatus}"`,
-            );
-            expect(updatedStatus).to.eq(expectedStatus);
+          .should(($td) => {
+            expect(normalizeTableStatus($td.text())).to.eq(expectedStatus);
           });
         cy.wait(2000);
       });

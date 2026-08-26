@@ -1,0 +1,37 @@
+[
+  {
+    "tag": "BUTTON",
+    "id": "btn-applepay",
+    "text": "",
+    "visible": false,
+    "display": "block"
+  },
+  {
+    "tag": "BUTTON",
+    "id": "gpay-button-online-api-id",
+    "text": "",
+    "visible": true,
+    "display": ""
+  },
+  {
+    "tag": "BUTTON",
+    "id": "togglePaymentMethods",
+    "text": "Weitere Zahlungsarten anzeigen",
+    "visible": true,
+    "display": ""
+  },
+  {
+    "tag": "BUTTON",
+    "id": "proceed-btn",
+    "text": "Bezahlen",
+    "visible": true,
+    "display": ""
+  },
+  {
+    "tag": "BUTTON",
+    "id": "cancel_btn",
+    "text": "Zahlung abbrechen",
+    "visible": true,
+    "display": ""
+  }
+]

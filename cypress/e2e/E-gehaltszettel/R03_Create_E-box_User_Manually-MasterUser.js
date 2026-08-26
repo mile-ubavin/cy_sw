@@ -169,7 +169,7 @@ describe('R03_Create User -Manual.js', () => {
 
       // Select phone number prefix
       cy.get(
-        ':nth-child(4) > .mat-mdc-form-field-type-mat-select > .mat-mdc-text-field-wrapper > .mat-mdc-form-field-flex > .mat-mdc-form-field-infix'
+        ':nth-child(4) > .mat-mdc-form-field-type-mat-select > .mat-mdc-text-field-wrapper > .mat-mdc-form-field-flex > .mat-mdc-form-field-infix',
       ).click();
       cy.wait(500);
       cy.get('.mdc-list-item').eq(0).click();
@@ -179,10 +179,10 @@ describe('R03_Create User -Manual.js', () => {
         .click({ force: true })
         .type(user.countryCodePhoneNum);
       cy.get('input[formcontrolname="netNumberPhoneNum"]').type(
-        user.netNumberPhoneNum
+        user.netNumberPhoneNum,
       );
       cy.get('input[formcontrolname="subscriberNumberPhoneNum"]').type(
-        user.subscriberNumberPhoneNum
+        user.subscriberNumberPhoneNum,
       );
 
       // Fill in address if available
@@ -235,7 +235,7 @@ describe('R03_Create User -Manual.js', () => {
 
         // Get the latest downloaded PDF file
         const downloadsDir = `${Cypress.config(
-          'fileServerFolder'
+          'fileServerFolder',
         )}/cypress/downloads/`;
         cy.task('getDownloadedPdf', downloadsDir).then((filePath) => {
           expect(filePath).to.not.be.null; // Assert the file exists
@@ -245,7 +245,7 @@ describe('R03_Create User -Manual.js', () => {
           cy.readFile(filePath, 'binary').then((pdfBinary) => {
             const pdfBlob = Cypress.Blob.binaryStringToBlob(
               pdfBinary,
-              'application/pdf'
+              'application/pdf',
             );
             const pdfUrl = URL.createObjectURL(pdfBlob);
 
@@ -272,11 +272,11 @@ describe('R03_Create User -Manual.js', () => {
     cy.iframe('#ifinbox')
       .find('.mctn > .m > button > .lms')
       .eq(0)
-      .should('include.text', 'Ihr neuer Benutzer im e-Gehaltszettel Portal'); //Validate subject of Verification email
-
+      //.should('include.text', 'Ihr neuer Benutzer im e-Gehaltszettel Portal'); //Validate subject of Verification email
+      .should('include.text', 'Ihr neuer Benutzer im DocuHub Portal'); //Validate subject of Verification email
     cy.iframe('#ifmail')
       .find(
-        '#mail>div>div:nth-child(2)>div:nth-child(3)>table>tbody>tr>td>p:nth-child(2)>span'
+        '#mail>div>div:nth-child(2)>div:nth-child(3)>table>tbody>tr>td>p:nth-child(2)>span',
       )
       .invoke('text')
       .then((innerText) => {
@@ -296,7 +296,7 @@ describe('R03_Create User -Manual.js', () => {
         let initialUrl;
         cy.iframe('#ifmail')
           .find(
-            '#mail>div>div:nth-child(2)>div:nth-child(3)>table>tbody>tr>td>p:nth-child(2)>span>a'
+            '#mail>div>div:nth-child(2)>div:nth-child(3)>table>tbody>tr>td>p:nth-child(2)>span>a',
           )
           .should('include.text', 'Jetzt E-Mail Adresse bestätigen')
           .invoke('attr', 'href')
@@ -307,7 +307,7 @@ describe('R03_Create User -Manual.js', () => {
 
         cy.iframe('#ifmail')
           .find(
-            '#mail>div>div:nth-child(2)>div:nth-child(3)>table>tbody>tr>td>p:nth-child(2)>span>a'
+            '#mail>div>div:nth-child(2)>div:nth-child(3)>table>tbody>tr>td>p:nth-child(2)>span>a',
           )
           .invoke('attr', 'target', '_self') //prevent opening in new tab
           .click();
@@ -364,15 +364,16 @@ describe('R03_Create User -Manual.js', () => {
           .find('.mctn > .m > button > .lms')
           .eq(0)
 
-          .should(
-            'include.text',
-            'Passwort zurücksetzen e-Gehaltszettel Portal'
-          ); //Validate subject of Verification email
+          // //.should(
+          //   'include.text',
+          //   'Passwort zurücksetzen e-Gehaltszettel Portal',
+
+          .should('include.text', 'Passwort zurücksetzen DocuHub Portal'); //Validate subject of Verification email
         let initialUrl_pass;
         cy.wait(3500);
         cy.iframe('#ifmail')
           .find(
-            '#mail>div>div:nth-child(2)>div:nth-child(3)>table>tbody>tr>td>p:nth-child(4)>span>a'
+            '#mail>div>div:nth-child(2)>div:nth-child(3)>table>tbody>tr>td>p:nth-child(4)>span>a',
           )
           .should('include.text', 'Neues Passwort erstellen ')
           .invoke('attr', 'href')
@@ -382,7 +383,7 @@ describe('R03_Create User -Manual.js', () => {
           });
         cy.iframe('#ifmail')
           .find(
-            '#mail>div>div:nth-child(2)>div:nth-child(3)>table>tbody>tr>td>p:nth-child(4)>span>a'
+            '#mail>div>div:nth-child(2)>div:nth-child(3)>table>tbody>tr>td>p:nth-child(4)>span>a',
           )
           .invoke('attr', 'target', '_self') //prevent opening in new tab
           .click();
@@ -433,12 +434,12 @@ describe('R03_Create User -Manual.js', () => {
     // Continue with Login
     cy.log(Cypress.env('companyPrefix'));
     cy.get(':nth-child(1) > .ng-invalid > .input > .input__field-input').type(
-      Cypress.env('companyPrefix') + user.username
+      Cypress.env('companyPrefix') + user.username,
     );
 
     //Cypress.env('manualAddress')
     cy.get('.ng-invalid > .input > .input__field-input').type(
-      Cypress.env('password_egEbox')
+      Cypress.env('password_egEbox'),
     );
 
     // cy.wait(6000);
@@ -460,7 +461,7 @@ describe('R03_Create User -Manual.js', () => {
         // Assert the response status code
         expect(interception.response.statusCode).to.eq(200);
         cy.wait(2500);
-      }
+      },
     );
     cy.wait(7000);
     // Logout
@@ -531,7 +532,7 @@ describe('R03_Create User -Manual.js', () => {
             // Proceed with the next search criteria
             if (index < usersToDelete.length - 1) {
               cy.log(
-                `Proceeding with the next user: ${usersToDelete[index + 1]}`
+                `Proceeding with the next user: ${usersToDelete[index + 1]}`,
               );
             }
           } else {
@@ -566,7 +567,7 @@ describe('R03_Create User -Manual.js', () => {
             //Already deleted Admin user is not founded
 
             cy.get(
-              '.mat-mdc-paginator-range-actions>.mat-mdc-paginator-range-label'
+              '.mat-mdc-paginator-range-actions>.mat-mdc-paginator-range-label',
             )
               .invoke('css', 'border', '1px solid blue')
               .invoke('text') // Get the text of the element

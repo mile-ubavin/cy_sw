@@ -603,7 +603,7 @@ describe('Create e-Box user manually [REVIEW]', () => {
       .invoke('text')
       .then((text) => {
         expect(text.trim()).to.match(
-          /Invalid person account number|Ungultige Personalnummer|Ungültige Personalnummer/i,
+          /Invalid person account number|Account number already exit[s]?|Ungultige Personalnummer|Ungültige Personalnummer|Personalnummer existiert bereits/i,
         );
       });
 

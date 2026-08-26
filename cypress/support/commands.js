@@ -1239,6 +1239,35 @@ Cypress.Commands.add('downloadZipFromYopmail', () => {
 
 //********************************DH******************************* */
 
+// ── DH — Transient UI overlay helpers ────────────────────────────────────────
+// These commands handle optional overlays that appear non-deterministically
+// during DocumentHub sessions. Each checks for the element before acting so
+// the test does not fail when the overlay is absent.
+
+// Accepts the OneTrust cookie consent banner.
+// Triggered on first visit to any DH page; subsequent visits skip it.
+Cypress.Commands.add('dismissCookieBar', () => {
+  cy.get('body').then(($body) => {
+    if ($body.find('#onetrust-policy-title').is(':visible')) {
+      cy.get('#onetrust-accept-btn-handler').click({ force: true });
+    } else {
+      cy.log('Cookie bar not visible');
+    }
+  });
+});
+
+// Closes the DH release-note dialog shown after login.
+// The dialog is session-dependent and may not appear on every run.
+Cypress.Commands.add('dismissReleaseNotePopup', () => {
+  cy.get('body').then(($body) => {
+    if ($body.find('.release-note-dialog__close-icon').length > 0) {
+      cy.get('.release-note-dialog__close-icon').click();
+    } else {
+      cy.log('Release note popup not present');
+    }
+  });
+});
+
 //DH Login to Document Hub using valid credentials
 Cypress.Commands.add('loginToDH', () => {
   //Fill the login form with valid credentials
@@ -1262,6 +1291,22 @@ Cypress.Commands.add('loginToDH', () => {
   cy.url().should('include', `${Cypress.env('dh_baseUrl')}home`);
   cy.wait(1000);
 }); //end
+
+//DH Upload ServiceLine PDF - For AQUA ABBA000100279311
+Cypress.Commands.add('DHuploadServiceLine', function () {
+  cy.fixture('Serviceline-tid=AQUA_gid=ABBA000100279311.pdf', 'binary')
+    .then(Cypress.Blob.binaryStringToBlob)
+    .then((fileContent) => {
+      cy.get('input[type="file"]', { timeout: 5000 })
+        .should('exist')
+        .attachFile({
+          fileContent,
+          fileName: 'Serviceline-tid=AQUA_gid=ABBA000100279311.pdf',
+          mimeType: 'application/pdf',
+          encoding: 'utf8',
+        });
+    });
+});
 
 //DH Upload 305 Dictionary PDF - For AQUA ABBA000100279311
 Cypress.Commands.add('DHupload305Dictionary', function () {
@@ -1379,6 +1424,42 @@ Cypress.Commands.add('DHuploadStructuredXMLfile', function () {
     });
 });
 
+//DH Upload ZIP file (ServiceLine + XML inside)
+Cypress.Commands.add('DHuploadZipFile', function () {
+  const fileName =
+    'ZIP__ServiceLine_and_XML_inside_(tid=AQUA_gid=ABBA000100279311).zip';
+  cy.fixture(fileName, 'binary')
+    .then(Cypress.Blob.binaryStringToBlob)
+    .then((fileContent) => {
+      cy.get('input[type="file"]', { timeout: 5000 })
+        .should('exist')
+        .attachFile({
+          fileContent,
+          fileName,
+          mimeType: 'application/zip',
+          encoding: 'utf-8',
+        });
+    });
+});
+
+//DH Upload 7z file (ServiceLine + XML inside)
+Cypress.Commands.add('DHupload7zFile', function () {
+  const fileName =
+    '7z__ServiceLine_and_XML_inside_(tid=AQUA_gid=ABBA000100279311).7z';
+  cy.fixture(fileName, 'binary')
+    .then(Cypress.Blob.binaryStringToBlob)
+    .then((fileContent) => {
+      cy.get('input[type="file"]', { timeout: 5000 })
+        .should('exist')
+        .attachFile({
+          mimeType: 'application/x-7z-compressed',
+          fileContent,
+          filePath: fileName,
+          fileName,
+        });
+    });
+});
+
 // Create new user from XML file
 Cypress.Commands.add('createNewUserFromXMLfile', function () {
   cy.fixture('JAT-XML_1receiver__(ISS BBcare).xml', 'binary')
@@ -1443,6 +1524,63 @@ Cypress.Commands.add('uploadFiles', (fileNames) => {
     cy.get('.file-upload-button').click(); // Open dialog
     cy.get('input[type="file"]').attachFile(uploads);
   });
+});
+
+// ── SupportView setup commands ───────────────────────────────────────────────
+// These commands wrap repeated SupportView UI setup patterns.
+// FUTURE: Replace with cy.request() calls once SV API auth + endpoints are documented.
+
+Cypress.Commands.add('svSearchCompany', () => {
+  cy.get('#searchButton>span').click({ force: true });
+  cy.get('.search-dialog>form>.form-fields>.searchText-wrap').eq(0).type(Cypress.env('company'));
+  cy.get('.search-dialog>form>div>.mat-primary').click();
+  cy.wait(1500);
+});
+
+Cypress.Commands.add('svLogout', () => {
+  cy.get('.loading-wrapper', { timeout: 15000 }).should('not.exist');
+  cy.get('.logout-icon').click();
+  cy.get('.confirm-buttons > :nth-child(2)').click();
+  cy.url().should('include', Cypress.env('baseUrl'));
+});
+
+Cypress.Commands.add('svOpenAdminUserRights', (username) => {
+  cy.get('.mdc-button__label').contains(/Admin User|Admin Benutzer/i).should('be.visible').click();
+  cy.get('.search').click({ force: true });
+  cy.get('input[formcontrolname="userName"]').type(username);
+  cy.get('button[type="submit"]').click();
+  cy.wait(2000);
+  cy.get('.mdc-button__label').contains(/Rechte|Rights/i).should('be.visible').click();
+});
+
+// toEnable and toDisable: arrays of [english, german] role name pairs
+Cypress.Commands.add('svUpdateRoles', (toEnable = [], toDisable = []) => {
+  cy.get('.mat-mdc-checkbox > div > .mdc-label').should('exist').each(($label) => {
+    const text = $label.text().trim();
+    cy.wrap($label).parent().find('input[type="checkbox"]').then(($cb) => {
+      cy.wrap($cb).invoke('prop', 'checked').then((isChecked) => {
+        if (toEnable.some(([en, de]) => text === en || text === de) && !isChecked) {
+          cy.wrap($cb).click({ force: true });
+        }
+        if (toDisable.some(([en, de]) => text === en || text === de) && isChecked) {
+          cy.wrap($cb).click({ force: true });
+        }
+      });
+    });
+  });
+  cy.wait(1000);
+});
+
+Cypress.Commands.add('svSaveRoles', () => {
+  cy.get('button[type="submit"]').click();
+  cy.wait(1000);
+  cy.get('.mat-mdc-simple-snack-bar > .mat-mdc-snack-bar-label')
+    .should('be.visible')
+    .invoke('text')
+    .then((text) => {
+      expect(text.trim()).to.match(/Rights updated|Rechte aktualisiert/);
+    });
+  cy.wait(1500);
 });
 
 // ── FriendlyCaptcha solver ────────────────────────────────────────────────────

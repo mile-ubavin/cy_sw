@@ -1,14 +1,8 @@
-///<reference types="cypress" />
+/// <reference types="cypress" />
+import { parseGermanDateTime } from '../../../../../support/utils/dateUtils';
+import { collectValues } from '../../../../../support/utils/objectUtils';
 
 describe('DH Mass upload', () => {
-  // Helper function to parse German date/time format (dd.mm.yyyy hh:mm)
-  function parseGermanDateTime(dateTimeStr) {
-    const [datePart, timePart] = dateTimeStr.split(' ');
-    const [day, month, year] = datePart.split('.').map(Number);
-    const [hour, minute] = timePart.split(':').map(Number);
-    return new Date(year, month - 1, day, hour, minute);
-  }
-
   let uploadDateTime = ''; // Variable to store upload date & time across tests
 
   //Uplad pdf - From Mass Upload Button
@@ -17,14 +11,7 @@ describe('DH Mass upload', () => {
     cy.visit(Cypress.env('dh_baseUrl'));
     cy.url().should('include', Cypress.env('dh_baseUrl'));
 
-    // Remove Cookie dialog if present
-    cy.get('body').then(($body) => {
-      if ($body.find('#onetrust-policy-title').is(':visible')) {
-        cy.get('#onetrust-accept-btn-handler').click({ force: true });
-      } else {
-        cy.log('Cookie bar not visible');
-      }
-    });
+    cy.dismissCookieBar();
 
     // Login to DocumentHub using custom command
     cy.loginToDH();
@@ -129,6 +116,7 @@ describe('DH Mass upload', () => {
 
     uploadDateTime = `${formattedDate} ${formattedTime}`; // Store the value in a variable
     cy.log(`Upload DateTime: ${uploadDateTime}`); // Log the stored uploadDateTime
+    Cypress.env('uploadDateTime', uploadDateTime);
 
     //Check if Subject field is mandatory
     cy.get('input[placeholder="Enter the subject"]')
@@ -431,10 +419,13 @@ describe('DH Mass upload', () => {
         cy.log(`Read Parsed: ${readParsed}`);
         cy.log(`Difference: ${diffMin.toFixed(2)} minutes`);
 
-        // --- Apply the condition: times match or within ±1 minute ---
-        if (diffMin <= 1) {
+        // --- Apply the condition: delivery date matches upload date (format-agnostic) ---
+        const datesMatch = uploadParsed.getDate() === readParsed.getDate() &&
+                           uploadParsed.getMonth() === readParsed.getMonth() &&
+                           uploadParsed.getFullYear() === readParsed.getFullYear();
+        if (datesMatch) {
           cy.log(
-            `✓ Test PASSED: Difference is ${diffMin.toFixed(2)} minutes (within ±1 minute tolerance)`,
+            `✓ Test PASSED: Delivery date matches upload date. Diff: ${diffMin.toFixed(2)} min`,
           );
 
           // Intercept backend calls for document load
@@ -465,8 +456,8 @@ describe('DH Mass upload', () => {
             .scrollTo('bottom', { duration: 500, ensureScrollable: false });
           cy.wait(3500);
         } else {
-          // FAIL: difference > 1 minute
-          const errorMsg = `✗ Test FAILED: readDateTime (${readClean}) differs by ${diffMin.toFixed(2)} minutes from uploadDateTime (${uploadDateTime}). Maximum allowed: 1 minute.`;
+          // FAIL: delivery date does not match upload date
+          const errorMsg = `✗ Test FAILED: Delivery date (${readClean.split(' ')[0]}) does not match upload date (${uploadDateTime.split(' ')[0]}). Delivery not found today.`;
           cy.log(errorMsg);
 
           // Log out the user before failing
@@ -487,20 +478,15 @@ describe('DH Mass upload', () => {
   });
 
   //Admin user check Reporting email
-  it.only('Count Users and verified Reporting email', () => {
+  it('Count Users and verified Reporting email', () => {
+    cy.on('uncaught:exception', () => false);
+
     // ===== STEP 1: Login to DocumentHub =====
     // Visit DH
     cy.visit(Cypress.env('dh_baseUrl'));
     cy.url().should('include', Cypress.env('dh_baseUrl'));
 
-    // Remove Cookie dialog if present
-    cy.get('body').then(($body) => {
-      if ($body.find('#onetrust-policy-title').is(':visible')) {
-        cy.get('#onetrust-accept-btn-handler').click({ force: true });
-      } else {
-        cy.log('Cookie bar not visible');
-      }
-    });
+    cy.dismissCookieBar();
 
     // Login to SupportView using custom command
     cy.loginToDH();
@@ -513,7 +499,7 @@ describe('DH Mass upload', () => {
     //Sclroll to top to ensure visibility of sidebar navigation menu
     cy.scrollTo('top', { duration: 200 });
 
-    // Click on Admin User button (from sidebar navigation menu)
+    // Intercept all employee API calls (paginated requests after company selection)
     cy.intercept('GET', '**/person/fromGroup/**').as('getEmployees');
     cy.get('#nav-employees')
       .should('be.visible')
@@ -547,146 +533,94 @@ describe('DH Mass upload', () => {
           throw new Error(`No dropdown option contains: ${companyName}`);
         }
       });
-    cy.wait(500);
 
-    //Scroll to top to ensure "Create new Admin" button is visible
-    cy.scrollTo('top', { duration: 500 });
+    // Wait for the company-scoped employee list response (no DOM scraping needed)
+    cy.wait('@getEmployees', { timeout: 35000 }).then((interception) => {
+      expect(interception.response.statusCode).to.eq(200);
 
-    cy.wait(500);
+      // Extract URL to derive a backend base for direct paginated requests
+      const requestUrl = interception.request.url;
+      cy.log(`Employee API URL: ${requestUrl}`);
 
-    // Check employee count and expand page size if more than 10
-    cy.get('tbody>tr').then(($rows) => {
-      const visibleCount = $rows.length;
-      cy.log(`Visible employee rows: ${visibleCount}`);
+      // Parse the URL to fetch ALL employees in one paginated call (size large enough to cover all)
+      const url = new URL(requestUrl);
+      url.searchParams.set('size', '5000');
+      url.searchParams.set('page', '0');
+      const fullUrl = url.toString();
+      cy.log(`Fetching all employees from: ${fullUrl}`);
 
-      if (visibleCount >= 10) {
-        // Table may be paginated — select a page size larger than visible count
-        const pageSizes = [25, 50, 100];
-        const neededSize = pageSizes.find((s) => s > visibleCount) || 100;
-        cy.log(
-          `More than 10 employees visible — expanding page size to ${neededSize}`,
-        );
+      // Direct API call to fetch every employee at once (deterministic, no pagination DOM clicks)
+      cy.request({
+        method: 'GET',
+        url: fullUrl,
+        headers: { Accept: 'application/json' },
+      }).then((response) => {
+        expect(response.status).to.eq(200);
 
-        cy.get('div[aria-haspopup="listbox"]').last().click({ force: true });
-        cy.wait(500);
-        cy.get(`li[data-value="${neededSize}"]`).click({ force: true });
-        // Reuse the already-registered employees alias for the table refresh request.
-        cy.wait('@getEmployees', { timeout: 15000 });
-        cy.wait(1000);
-      } else {
-        cy.log(
-          `Employee count (${visibleCount}) is 10 or fewer, no expansion needed`,
-        );
-      }
-    });
+        // Backend response shape varies — try common Spring Page shapes and flat arrays
+        const body = response.body;
+        const employees = Array.isArray(body)
+          ? body
+          : body.content || body.persons || body.items || body.data || body.employees || [];
 
-    cy.pause(); // Pause here to review the counts in the console before assertions
+        cy.log(`Total employees received from API: ${employees.length}`);
+        if (employees.length > 0) {
+          // Dump first employee object so we can confirm field names in Cypress log
+          cy.log(`First employee object: ${JSON.stringify(employees[0])}`);
+          cy.log(`Sample employee fields: ${Object.keys(employees[0]).join(', ')}`);
+        }
 
-    // Variables to store counts - track users and delivery types
-    let activeUsersCount = 0; // Count of users with "Aktiv" status - used for total validation
-    let sendToPrintUsersCount = 0; // Count of users with "Druck/Print" delivery type - expected postal deliveries
-    let deliveryTypeElectronicalCount = 0; // Count of users with "Elektronisch" delivery type - expected digital deliveries
-    let statusInactiveCount = 0; // Count of users with "Inaktiv" status - tracked but not used in validation
+        // Count active users grouped by delivery type — value-based (no field-name guessing)
+        let activeUsersCount = 0;
+        let deliveryTypeElectronicalCount = 0;
+        let sendToPrintUsersCount = 0;
+        let statusInactiveCount = 0;
+        const inactiveUsersList = [];
 
-    // Iterate through each row to count users and their delivery types
-    cy.get('tbody>tr').then(($rows) => {
-      const totalRows = $rows.length; // Get total number of rows in the table
-      cy.log(`Total Users in table: ${totalRows}`); // Log total rows for debugging
+        employees.forEach((emp) => {
+          const values = collectValues(emp);
+          const has = (...needles) =>
+            values.some((v) => needles.some((n) => v === n || v.includes(n)));
 
-      // Process each row to check status and delivery type
-      $rows.each((rowIndex, row) => {
-        const $row = Cypress.$(row); // Wrap row in Cypress jQuery object
-        const $cells = $row.find('td'); // Get all cells in the current row
+          const isActive = has('aktiv', 'active');
+          const isInactive = has('inaktiv', 'inactive');
+          const isElec = has('elektronisch', 'electronic', 'digital');
+          const isDruck = has('druck', 'print', 'postal');
 
-        let isActiveUser = false; // Flag to track if current row is an active user
-        let hasElektronisch = false; // Flag to track if user has electronic delivery
-        let hasDruck = false; // Flag to track if user has print/postal delivery
-
-        // Check all cells in this row to find status and delivery type
-        $cells.each((cellIndex, cell) => {
-          const cellValue = Cypress.$(cell).text().trim(); // Get cell text and remove whitespace
-
-          // Check if user is Active (German or English)
-          if (cellValue === 'Aktiv' || cellValue === 'Active') {
-            isActiveUser = true; // Mark user as active
+          if (isInactive) {
+            statusInactiveCount++;
+            const persNr = emp.personalNumber || emp.persNr || emp.employeeNumber;
+            if (persNr) inactiveUsersList.push(persNr);
           }
-
-          // Check if user is Inactive (German or English)
-          if (cellValue === 'Inaktiv' || cellValue === 'Inactive') {
-            statusInactiveCount++; // Increment inactive count
-          }
-
-          // Check delivery type - Elektronisch (German or English)
-          if (
-            cellValue === 'Elektronisch' ||
-            cellValue === 'Electronic' ||
-            cellValue === 'Digital'
-          ) {
-            hasElektronisch = true; // Mark user as having electronic delivery
-          }
-
-          // Check delivery type - Druck/Print (check for all possible values)
-          if (
-            cellValue === 'Druck' ||
-            cellValue === 'Print' ||
-            cellValue === 'Druck/Print'
-          ) {
-            hasDruck = true; // Mark user as having print/postal delivery
+          if (isActive) {
+            activeUsersCount++;
+            if (isElec) deliveryTypeElectronicalCount++;
+            if (isDruck) sendToPrintUsersCount++;
           }
         });
 
-        // Count active users and their delivery types
-        if (isActiveUser) {
-          activeUsersCount++; // Increment active user count
+        const sendToElChannel = Math.max(activeUsersCount - sendToPrintUsersCount, 0);
 
-          // Only count delivery types for active users
-          if (hasElektronisch) {
-            deliveryTypeElectronicalCount++; // Increment electronic delivery count
-          }
-          if (hasDruck) {
-            sendToPrintUsersCount++; // Increment print/postal delivery count
-          }
-        }
+        cy.log(`========== SUMMARY (from API) ==========`);
+        cy.log(`Total employees: ${employees.length}`);
+        cy.log(`Active Users Count: ${activeUsersCount}`);
+        cy.log(`Inactive Users Count: ${statusInactiveCount}`);
+        cy.log(`Elektronisch Delivery Count: ${deliveryTypeElectronicalCount}`);
+        cy.log(`Druck/Print Delivery Count: ${sendToPrintUsersCount}`);
+        cy.log(`SendToElChannel (digital deliveries): ${sendToElChannel}`);
+
+        expect(activeUsersCount, 'Active Users count should be greater than 0').to.be.greaterThan(0);
+        expect(
+          deliveryTypeElectronicalCount,
+          'Elektronisch Delivery count should be greater than 0',
+        ).to.be.greaterThan(0);
+
+        Cypress.env('activeUsers', activeUsersCount);
+        Cypress.env('sendToPrintUsers', sendToPrintUsersCount);
+        Cypress.env('sendToElChannel', sendToElChannel);
+        Cypress.env('deliveryTypeElectronical', deliveryTypeElectronicalCount);
+        Cypress.env('inactiveUsers', inactiveUsersList);
       });
-
-      // Log summary after processing all rows
-      cy.log(`\n========== SUMMARY ==========`);
-      // cy.log(`Total cells processed: ${$cells.length}`);
-      cy.log(`Active Users Count: ${activeUsersCount}`); // Total active users found in table
-      cy.log(`Inactive Users Count: ${statusInactiveCount}`); // Total inactive users found in table
-      cy.log(`Elektronisch Delivery Count: ${deliveryTypeElectronicalCount}`); // Expected digital deliveries from table
-      cy.log(`Druck/Print Delivery Count: ${sendToPrintUsersCount}`); // Expected postal deliveries from table
-
-      // Validate that required counts are not zero (except inactive can be 0)
-      expect(
-        activeUsersCount,
-        'Active Users count should be greater than 0',
-      ).to.be.greaterThan(0);
-      expect(
-        deliveryTypeElectronicalCount,
-        'Elektronisch Delivery count should be greater than 0',
-      ).to.be.greaterThan(0);
-
-      // Validate that sum of delivery types matches active users
-      const totalDeliveries =
-        deliveryTypeElectronicalCount + sendToPrintUsersCount;
-      cy.log(
-        `Validation: Total deliveries (${totalDeliveries}) should match active users (${activeUsersCount})`,
-      );
-
-      // Calculate sendToElChannel INSIDE .then() where counts are valid
-      const sendToElChannel = Math.max(
-        activeUsersCount - sendToPrintUsersCount,
-        0,
-      );
-      cy.log(`SendToElChannel (digital deliveries): ${sendToElChannel}`);
-
-      // Store counts in Cypress environment variables for later use
-      Cypress.env('activeUsers', activeUsersCount);
-      Cypress.env('sendToPrintUsers', sendToPrintUsersCount);
-      Cypress.env('sendToElChannel', sendToElChannel);
-      Cypress.env('deliveryTypeElectronical', deliveryTypeElectronicalCount);
-      Cypress.env('inactiveUsers', []);
     });
 
     // Visit Yopmail

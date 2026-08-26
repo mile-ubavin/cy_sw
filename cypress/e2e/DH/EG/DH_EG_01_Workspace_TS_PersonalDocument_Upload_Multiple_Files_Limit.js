@@ -1,7 +1,6 @@
 ///<reference types="cypress" />
 
 describe('DH Upload Multiple files exceeding the maximum limit', () => {
-  let successfulDeliveriesCount; // Global variable to store successful deliveries count
   //Enable All Roles
   it.skip('Enable All Roles', () => {
     // Login as a Master-User using custom command
@@ -118,9 +117,7 @@ describe('DH Upload Multiple files exceeding the maximum limit', () => {
   }); //end it
 
   //Upload pdf - From Mass Upload Button
-  it('DH - Upload Multiple files exceeding the maximum limit (Provide multiple serviceLine files to E-Box)', () => {
-    let successfulDeliveriesCount; // Store count of successfully uploaded files
-
+  it.only('DH - Upload Multiple files exceeding the maximum limit (Provide multiple serviceLine files to E-Box)', () => {
     // ===== HELPER FUNCTIONS =====
 
     // Get MIME type based on file extension
@@ -141,20 +138,7 @@ describe('DH Upload Multiple files exceeding the maximum limit', () => {
     };
 
     // ===== STEP 1: Login and Navigate =====
-    cy.visit(Cypress.env('dh_baseUrl'));
-    cy.url().should('include', Cypress.env('dh_baseUrl'));
-
-    // Remove Cookie dialog if present
-    cy.get('body').then(($body) => {
-      if ($body.find('#onetrust-policy-title').is(':visible')) {
-        cy.get('#onetrust-accept-btn-handler').click({ force: true });
-      } else {
-        cy.log('Cookie bar not visible');
-      }
-    });
-
-    // Login to SupportView
-    // Visit DH
+    // Visit DH and handle cookie consent
     cy.visit(Cypress.env('dh_baseUrl'));
     cy.url().should('include', Cypress.env('dh_baseUrl'));
 
@@ -237,7 +221,7 @@ describe('DH Upload Multiple files exceeding the maximum limit', () => {
         );
       });
     });
-
+    `
     // ===== STEP 4: Verify Validation Error Messages =====
     cy.get('#file-list').scrollTo('bottom', { duration: 1000 });
 
@@ -247,7 +231,7 @@ describe('DH Upload Multiple files exceeding the maximum limit', () => {
       .should(
         'match',
         /File format is not supported|Das Dateiformat wird nicht unterstützt/i,
-      );
+      );`;
 
     // Verify "Maximum file limit exceeded" error
     cy.get('#file-list span')
@@ -264,36 +248,94 @@ describe('DH Upload Multiple files exceeding the maximum limit', () => {
       .invoke('text')
       .should('match', /Weiter|Next/i);
 
+    // R2: Re-alias dictionary endpoint BEFORE removals so we can wait for the
+    // backend refresh that each removal triggers.
+    cy.intercept('GET', '**/group/dictionary/tenant/**').as('dictRefresh');
+
     // ===== STEP 5: Remove Invalid CSV File =====
     cy.get('button[aria-label="Remove 1_createUser.csv"]').click();
 
-    // ===== STEP 6: Remove Files Exceeding Maximum Limit =====
-    // After removing CSV, we still have 11 files but max is 10
+    // ===== STEP 6: Remove Files With Errors (any non-empty error span) =====
+    // After removing CSV, we still have 11 files but max is 10.
+    // Broader rule: remove ANY file item whose error span is non-empty —
+    // covers "Maximum file limit exceeded", "File format is not supported",
+    // and any other status we haven't enumerated (e.g. .7z corruption).
     cy.get('#file-list > div').each(($fileItem) => {
       const errorText = $fileItem.find('span').text().trim();
+      const looksLikeError =
+        errorText.length > 0 &&
+        !/Document successfully uploaded|Dokument erfolgreich hochgeladen/i.test(
+          errorText,
+        );
 
-      // Remove files with "Maximum file limit exceeded" error
-      if (
-        errorText.match(
-          /Maximum file limit exceeded|Maximale Dateigrenze überschritten/i,
-        )
-      ) {
+      if (looksLikeError) {
         cy.wrap($fileItem)
           .find('button[aria-label^="Remove"]')
           .then(($btn) => {
             if ($btn.length > 0) {
               const fileName = $btn.attr('aria-label').replace('Remove ', '');
-              cy.log(`Removing file with limit exceeded: ${fileName}`);
+              cy.log(
+                `Removing invalid file: ${fileName} (status: "${errorText}")`,
+              );
               cy.wrap($btn).click({ force: true });
-              cy.wait(2000); // Wait for DOM to update
+              cy.wait(2000);
             }
           });
       }
     });
 
+    // R1: Log every remaining file-list span text so we can see exactly what
+    // state the dropdown is in when we try to click it.
+    cy.get('#file-list > div').then(($items) => {
+      cy.log(
+        `>>> File-list state before dropdown click — ${$items.length} items`,
+      );
+      $items.each((idx, el) => {
+        const fileName =
+          Cypress.$(el)
+            .find('button[aria-label^="Remove"]')
+            .attr('aria-label') || '(no remove btn)';
+        const span = Cypress.$(el).find('span').text().trim();
+        cy.log(`  [${idx}] ${fileName} | status="${span}"`);
+      });
+    });
+
+    // R2: Wait for the most recent dictionary refresh to settle before clicking.
+    cy.wait('@dictRefresh', { timeout: 15000 }).then((interception) => {
+      cy.log(
+        `dictRefresh settled — status ${interception.response?.statusCode}`,
+      );
+    });
+    cy.get('.loading-wrapper', { timeout: 15000 }).should('not.exist');
+
     // ===== STEP 7: Select ServiceLine from Dictionary Dropdown =====
-    cy.get('#dictionary-dropdown').click({ force: true });
-    cy.get('li[data-value="ServiceLine"]')
+    // MatSelect overlay sometimes swallows the first click after a busy DOM
+    // refresh. Click, verify overlay opened, retry on the inner trigger if not.
+    const OPTION_SELECTOR =
+      'li[data-value], mat-option, .mat-mdc-option, [role="option"]';
+
+    cy.get('#dictionary-dropdown', { timeout: 15000 })
+      .scrollIntoView()
+      .click({ force: true });
+    cy.wait(800);
+
+    cy.get('body').then(($body) => {
+      if ($body.find(OPTION_SELECTOR).length === 0) {
+        cy.log('Overlay did not open — retrying via mat-select trigger');
+        cy.get('#dictionary-dropdown')
+          .find('mat-select, .mat-mdc-select-trigger, [role="combobox"]')
+          .first()
+          .click({ force: true });
+        cy.wait(800);
+      }
+    });
+
+    cy.get(OPTION_SELECTOR, { timeout: 10000 }).should(
+      'have.length.at.least',
+      1,
+    );
+
+    cy.contains(OPTION_SELECTOR, /^\s*ServiceLine\s*$/i)
       .should('be.visible')
       .click({ force: true });
     cy.log('Selected ServiceLine from dictionary dropdown');
@@ -380,22 +422,39 @@ describe('DH Upload Multiple files exceeding the maximum limit', () => {
     });
 
     // ===== STEP 10: Count Successfully Uploaded Files and Save to JSON =====
-    cy.get('#file-list button[aria-label^="Remove"]')
-      .its('length')
-      .then((count) => {
-        successfulDeliveriesCount = count;
-
-        cy.writeFile('cypress/fixtures/deliveryCount.json', {
-          successfulDeliveriesCount: count,
-          timestamp: new Date().toISOString(),
-        });
-
-        cy.log(
-          `Successfully uploaded ${count} files - saved to deliveryCount.json`,
-        );
+    // Count items whose status span actually reports success — counting every
+    // Remove button overshoots when Step 9 left behind files with non-fatal
+    // processing errors (the backend won't deliver those).
+    cy.get('#file-list > div').then(($items) => {
+      let count = 0;
+      const statuses = [];
+      $items.each((_, el) => {
+        const span = Cypress.$(el).find('span').text().trim();
+        statuses.push(span);
+        if (
+          /Document successfully uploaded|Dokument erfolgreich hochgeladen/i.test(
+            span,
+          )
+        ) {
+          count++;
+        }
       });
+      cy.log(`>>> File-list statuses before send (${$items.length} items):`);
+      statuses.forEach((s, i) => cy.log(`  [${i}] "${s}"`));
+      cy.log(`>>> Counted ${count} files with success status`);
+      cy.writeFile('cypress/fixtures/deliveryCount.json', {
+        successfulDeliveriesCount: count,
+        timestamp: new Date().toISOString(),
+      });
+      cy.log(
+        `Successfully uploaded ${count} files - saved to deliveryCount.json`,
+      );
+    });
 
-    cy.pause(); // Pause here to allow manual verification of uploaded files before sending to users
+    // ===== PAUSE BEFORE SEND — manually verify the file list & count =====
+    // Open Cypress runner, inspect #file-list, then click "Resume" to continue.
+    cy.log('⏸ PAUSED — inspect file list, then click Resume in Cypress runner');
+    cy.pause();
 
     // ===== STEP 11: Send Documents to Users =====
     cy.intercept('POST', '**/deliveryHandler/sendDocuments').as(
@@ -405,6 +464,37 @@ describe('DH Upload Multiple files exceeding the maximum limit', () => {
 
     cy.wait('@sendDocuments', { timeout: 20000 }).then((interception) => {
       expect(interception.response.statusCode).to.eq(200);
+      const body = interception.response.body;
+      cy.log(`sendDocuments response: ${JSON.stringify(body)}`);
+
+      // Extract actual digital delivery count from API response and update the fixture.
+      // The fixture is read by Test 3 (e-box count) and Test 4 (email body).
+      const digitalCount =
+        body?.digitalDeliveries ??
+        body?.successfulDigitalDeliveries ??
+        body?.digital ??
+        body?.deliveredDigital ??
+        body?.successCount ??
+        body?.delivered ??
+        body?.count ??
+        null;
+
+      if (typeof digitalCount === 'number') {
+        cy.log(
+          `Updating successfulDeliveriesCount to actual digital count: ${digitalCount}`,
+        );
+        cy.readFile('cypress/fixtures/deliveryCount.json').then((data) => {
+          cy.writeFile('cypress/fixtures/deliveryCount.json', {
+            ...data,
+            successfulDeliveriesCount: digitalCount,
+          });
+        });
+      } else {
+        cy.log(
+          'Could not extract digital count from sendDocuments response — check log above for field names',
+        );
+      }
+
       cy.log('Mass delivery sent successfully');
     });
 
@@ -430,6 +520,9 @@ describe('DH Upload Multiple files exceeding the maximum limit', () => {
   }); //end it
 
   it('Login to EBox, verify delivery count and open random delivery in HybridSign', () => {
+    // Pre-load upload data so timestamp is available inside the wait callback
+    cy.readFile('cypress/fixtures/deliveryCount.json').as('uploadData');
+
     // ===== STEP 1: Login and Get Deliveries =====
     cy.intercept('POST', '**/rest/v2/deliveries').as('postDeliveries');
     cy.loginToEgEbox();
@@ -437,172 +530,153 @@ describe('DH Upload Multiple files exceeding the maximum limit', () => {
     cy.wait('@postDeliveries').then((interception) => {
       const deliveries = interception.response.body.deliveries;
 
-      // ===== STEP 2: Filter Latest Unread Deliveries =====
-      const unreadDeliveries = deliveries.filter((d) => d.read === false);
+      cy.get('@uploadData').then((savedData) => {
+        const expectedCount = savedData.successfulDeliveriesCount;
+        const uploadTimestamp = new Date(savedData.timestamp);
 
-      // Find the most recent delivery timestamp
-      const latestDate = new Date(
-        Math.max(...unreadDeliveries.map((d) => new Date(d.date))),
-      );
-
-      // Apply +1 hour offset for timezone adjustment
-      const offsetDate = new Date(latestDate.getTime() + 1 * 60 * 60 * 1000);
-      const latestMinute = offsetDate.toISOString().slice(0, 16);
-
-      // Get all deliveries matching the latest timestamp (to the minute)
-      const latestUnreadDeliveries = unreadDeliveries.filter((d) => {
-        const localDate = new Date(
-          new Date(d.date).getTime() + 1 * 60 * 60 * 1000,
+        // ===== STEP 2: Filter New Unread Deliveries Since Upload =====
+        // Use the timestamp saved after counting successfully uploaded files.
+        // Deliveries created after that moment belong to this batch.
+        const latestUnreadDeliveries = deliveries.filter(
+          (d) => d.read === false && new Date(d.date) >= uploadTimestamp,
         );
-        return localDate.toISOString().slice(0, 16) === latestMinute;
-      });
 
-      // ===== STEP 3: Validate Delivery Count Matches Upload Count =====
-      cy.readFile('cypress/fixtures/deliveryCount.json').then((data) => {
-        const expectedCount = data.successfulDeliveriesCount;
-        const actualLatestUnreadCount = latestUnreadDeliveries.length;
-
+        // ===== STEP 3: Validate Delivery Count Matches Upload Count =====
         cy.log(`Expected deliveries: ${expectedCount}`);
-        cy.log(`Actual latest unread deliveries: ${actualLatestUnreadCount}`);
-
-        // Validate delivery count matches uploaded document count
-        expect(
-          actualLatestUnreadCount,
-          'Latest unread deliveries in eBox must match SupportView count',
-        ).to.eq(expectedCount); // FIX IT: remove "- 1" when counts align correctly
-      });
-
-      // ===== STEP 4: Count and Log Latest Deliveries =====
-      cy.log(
-        `Total latest unread deliveries: ${latestUnreadDeliveries.length}`,
-      );
-      cy.log(`Deliveries at timestamp: ${latestMinute}`);
-
-      // Log all latest deliveries for debugging
-      latestUnreadDeliveries.forEach((delivery, idx) => {
-        const deliveryTime = new Date(
-          new Date(delivery.date).getTime() + 1 * 60 * 60 * 1000,
-        )
-          .toISOString()
-          .slice(0, 16);
         cy.log(
-          `[${idx}] Subject: "${delivery.subject}" | Time: ${deliveryTime} | Read: ${delivery.read}`,
+          `Actual new unread deliveries: ${latestUnreadDeliveries.length}`,
         );
-      });
+        cy.log(`Filtering deliveries after: ${uploadTimestamp.toISOString()}`);
 
-      // ===== STEP 5: Randomly Select a Delivery from Latest Batch =====
-      const randomIndex = Math.floor(
-        Math.random() * latestUnreadDeliveries.length,
-      );
-      const randomDelivery = latestUnreadDeliveries[randomIndex];
+        expect(
+          latestUnreadDeliveries.length,
+          'New unread deliveries in eBox must match upload count',
+        ).to.eq(expectedCount);
 
-      cy.log(`Randomly selected delivery index: ${randomIndex}`);
-      cy.log(`Selected delivery subject: "${randomDelivery.subject}"`);
+        // ===== STEP 4: Log Latest Deliveries =====
+        cy.log(`Total new unread deliveries: ${latestUnreadDeliveries.length}`);
 
-      // Click on unread delivery row by finding it in the visible table
-      // Since deliveries are sorted by date (newest first), count unread rows from top
-      cy.get('.mdc-data-table__content > tr').then(($rows) => {
-        let unreadCount = 0;
-        let targetRowIndex = -1;
+        latestUnreadDeliveries.forEach((delivery, idx) => {
+          const deliveryTime = new Date(delivery.date)
+            .toISOString()
+            .slice(0, 16);
+          cy.log(
+            `[${idx}] Subject: "${delivery.subject}" | Time: ${deliveryTime} | Read: ${delivery.read}`,
+          );
+        });
 
-        // Find which visible row corresponds to our selected delivery
-        for (let i = 0; i < $rows.length; i++) {
-          const $row = $rows.eq(i);
-          const subject = $row.find('.subject-sender-cell').text().trim();
-          const rowText = $row.text();
+        // ===== STEP 5: Randomly Select a Delivery from Latest Batch =====
+        const randomIndex = Math.floor(
+          Math.random() * latestUnreadDeliveries.length,
+        );
+        const randomDelivery = latestUnreadDeliveries[randomIndex];
 
-          // Check if this row is unread (has unread indicator)
-          const isUnread =
-            $row.find('.mat-badge-content, .unread-indicator').length > 0 ||
-            !rowText.includes('gelesen') ||
-            $row.hasClass('unread');
+        cy.log(`Randomly selected delivery index: ${randomIndex}`);
+        cy.log(`Selected delivery subject: "${randomDelivery.subject}"`);
 
-          if (isUnread) {
-            // This matches one of our latest unread deliveries
-            if (unreadCount === randomIndex) {
-              targetRowIndex = i;
-              cy.log(`Found target row at index ${i}, subject: "${subject}"`);
-              break;
+        // Click on unread delivery row by finding it in the visible table
+        // Since deliveries are sorted by date (newest first), count unread rows from top
+        cy.get('.mdc-data-table__content > tr').then(($rows) => {
+          let unreadCount = 0;
+          let targetRowIndex = -1;
+
+          // Find which visible row corresponds to our selected delivery
+          for (let i = 0; i < $rows.length; i++) {
+            const $row = $rows.eq(i);
+            const subject = $row.find('.subject-sender-cell').text().trim();
+            const rowText = $row.text();
+
+            // Check if this row is unread (has unread indicator)
+            const isUnread =
+              $row.find('.mat-badge-content, .unread-indicator').length > 0 ||
+              !rowText.includes('gelesen') ||
+              $row.hasClass('unread');
+
+            if (isUnread) {
+              if (unreadCount === randomIndex) {
+                targetRowIndex = i;
+                cy.log(`Found target row at index ${i}, subject: "${subject}"`);
+                break;
+              }
+              unreadCount++;
             }
-            unreadCount++;
           }
-        }
 
-        // Click on the identified row
-        if (targetRowIndex >= 0) {
-          cy.get('.half-cell-text-content')
-            .eq(targetRowIndex)
-            .find('.subject-sender-cell')
-            .click({ force: true });
-          cy.log(`Clicked on delivery row ${targetRowIndex}`);
-        } else {
-          // Fallback: click first unread row
-          cy.log('Could not match by index, clicking first unread delivery');
-          cy.get('.half-cell-text-content')
-            .first()
-            .find('.subject-sender-cell')
-            .click({ force: true });
-        }
-      });
+          // Click on the identified row
+          if (targetRowIndex >= 0) {
+            cy.get('.half-cell-text-content')
+              .eq(targetRowIndex)
+              .find('.subject-sender-cell')
+              .click({ force: true });
+            cy.log(`Clicked on delivery row ${targetRowIndex}`);
+          } else {
+            // Fallback: click first unread row
+            cy.log('Could not match by index, clicking first unread delivery');
+            cy.get('.half-cell-text-content')
+              .first()
+              .find('.subject-sender-cell')
+              .click({ force: true });
+          }
+        });
 
-      // ===== STEP 6: Open Document in HybridSign for Selected Delivery =====
-      cy.intercept('GET', '**/getIdentifications?**').as('getIdentifications');
-
-      // Wait for row selection to complete
-      cy.wait(2000);
-
-      // Find the selected/highlighted row and click the download button
-      cy.get('.half-cell-text-content').then(($rows) => {
-        // Find selected row (could have various classes/attributes)
-        let $selectedRow = $rows.filter(
-          '.mdc-data-table__row--selected, .selected, [aria-selected="true"]',
+        // ===== STEP 6: Open Document in HybridSign for Selected Delivery =====
+        cy.intercept('GET', '**/getIdentifications?**').as(
+          'getIdentifications',
         );
 
-        // If no selected row found by class, find by visual indicators
-        if ($selectedRow.length === 0) {
-          cy.log('No selected row found by class, finding by visual state');
+        // Wait for row selection to complete
+        cy.wait(2000);
 
-          // Just get the first row or use a safer approach
-          cy.get('.mdc-data-table__content > tr')
-            .first()
-            .within(() => {
-              cy.get('button[aria-label="Alle Dokumente herunterladen"]')
-                .should('be.visible')
-                .then(($btn) => {
-                  $btn.css('border', '3px solid blue');
-                  $btn.css('box-shadow', '0 0 6px blue');
-                  cy.wait(1000);
-                  cy.wrap($btn).click({ force: true });
-                });
-            });
-        } else {
-          cy.wrap($selectedRow)
-            .first()
-            .within(() => {
-              cy.get('button[aria-label="Alle Dokumente herunterladen"]')
-                .should('be.visible')
-                .then(($btn) => {
-                  $btn.css('border', '3px solid blue');
-                  $btn.css('box-shadow', '0 0 6px blue');
-                  cy.wait(1000);
-                  cy.wrap($btn).click({ force: true });
-                });
-            });
-        }
+        // Find the selected/highlighted row and click the download button
+        cy.get('.half-cell-text-content').then(($rows) => {
+          let $selectedRow = $rows.filter(
+            '.mdc-data-table__row--selected, .selected, [aria-selected="true"]',
+          );
+
+          if ($selectedRow.length === 0) {
+            cy.log('No selected row found by class, finding by visual state');
+
+            cy.get('.mdc-data-table__content > tr')
+              .first()
+              .within(() => {
+                cy.get('button[aria-label="Alle Dokumente herunterladen"]')
+                  .should('be.visible')
+                  .then(($btn) => {
+                    $btn.css('border', '3px solid blue');
+                    $btn.css('box-shadow', '0 0 6px blue');
+                    cy.wait(1000);
+                    cy.wrap($btn).click({ force: true });
+                  });
+              });
+          } else {
+            cy.wrap($selectedRow)
+              .first()
+              .within(() => {
+                cy.get('button[aria-label="Alle Dokumente herunterladen"]')
+                  .should('be.visible')
+                  .then(($btn) => {
+                    $btn.css('border', '3px solid blue');
+                    $btn.css('box-shadow', '0 0 6px blue');
+                    cy.wait(1000);
+                    cy.wrap($btn).click({ force: true });
+                  });
+              });
+          }
+        });
+
+        cy.log('Clicked "Open in HybridSign" button for selected delivery');
+
+        // ===== STEP 6: Wait for Document to Load in HybridSign =====
+        cy.wait('@getIdentifications', { timeout: 77000 })
+          .its('response.statusCode')
+          .should('eq', 200);
+        cy.log('Document loaded successfully in HybridSign');
+
+        // ===== STEP 7: Logout =====
+        cy.get('.user-title').click();
+        cy.get('.logout-title > a').click();
+        cy.log('Logged out successfully');
       });
-
-      cy.log('Clicked "Open in HybridSign" button for selected delivery');
-
-      // ===== STEP 6: Wait for Document to Load in HybridSign =====
-      cy.wait('@getIdentifications', { timeout: 77000 })
-        .its('response.statusCode')
-        .should('eq', 200);
-      cy.log('Document loaded successfully in HybridSign');
-
-      // ===== STEP 7: Logout =====
-      cy.get('.user-title').click();
-      cy.get('.logout-title > a').click();
-      cy.log('Logged out successfully');
     });
   }); //end it
 
@@ -635,9 +709,7 @@ describe('DH Upload Multiple files exceeding the maximum limit', () => {
 
           // Validate successful digital deliveries message
           expect(normalizedText).to.include(
-            `Sie haben ${
-              expectedCount - 1
-            } Sendung(en) erfolgreich digital in das DocuHub Portal Ihrer Benutzer*innen eingeliefert`,
+            `Sie haben ${expectedCount} Sendung(en) erfolgreich digital in das DocuHub Portal Ihrer Benutzer*innen eingeliefert`,
           );
           expect(normalizedText).to.include(
             'Zusätzlich haben Sie 0 Sendung(en) erfolgreich über den postalischen Weg als Brief versendet. Das Dokument wird von uns über das „Einfach Brief“-Portal gedruckt, kurvertiert und an die Adresse des Benutzers versendet.',

@@ -1,0 +1,1002 @@
+<body>
+        <script src="https://oepag.paymentsandbox.cloud/vendor/jquery-2.2.4-patched.min.js"></script>
+		<script src="//cms-static-gateway.paymentsandbox.cloud/r0/root/9yUgbqhFYCkT9eTHvf4hhY/vhost/sandbox.ixopay.com/rev/9yUgbqhFYCkT9eTHvf4h9d/js/bootstrap.min.js" type="text/javascript"></script>
+        
+        <form id="payment-form" accept-charset="UTF-8" action="https://oepag.paymentsandbox.cloud/payment/47bdf3f8e914645cff71" method="POST" onsubmit="Ixopay.PaymentFormV2.submitPaymentForm(); return false;"><input type="hidden" name="uuid" id="uuid" value="47bdf3f8e914645cff71"><input type="hidden" name="__fp" id="__fp" value="082d01a77e00bef02cdae8ae1494c669"><input type="hidden" name="__tdbd" id="__tdbd" value="{&quot;java&quot;:false,&quot;language&quot;:&quot;en-US&quot;,&quot;colorDepth&quot;:24,&quot;screenHeight&quot;:864,&quot;screenWidth&quot;:1536,&quot;tz&quot;:-120,&quot;userAgent&quot;:&quot;Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36&quot;,&quot;platform&quot;:&quot;Win32&quot;}"><input type="hidden" name="__applePayToken" id="__applePayToken" value=""><input type="hidden" name="__surcharge" id="__surcharge" value=""><input type="hidden" name="__gst" id="__gst" value="">
+
+        <!-- German -->
+<script data-main="payment-js" src="https://oepag.paymentsandbox.cloud/js/integrated/payment.min.js"></script>
+<script data-main="payment-widget-js" src="https://oepag.paymentsandbox.cloud/js/integrated/payment-widget.min.js"></script>
+
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+<link rel="stylesheet" href="//cms-static-gateway.paymentsandbox.cloud/r0/root/9yUgbqhFYCkT9eTHvf4hhY/vhost/sandbox.ixopay.com/seq/2581/css/libs.css">
+<link rel="stylesheet" href="//cms-static-gateway.paymentsandbox.cloud/r0/root/9yUgbqhFYCkT9eTHvf4hhY/vhost/sandbox.ixopay.com/seq/2581/css/post.css">
+<link rel="preload" href="/font/postsans-regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="/font/postsans-bold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="/font/posticon.ttf" as="font" type="font/ttf" crossorigin="anonymous">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+
+    html{
+        overflow-y: scroll;
+    }
+
+    body{
+        font-size: 12px;
+        background-color: white;
+    }
+
+    .container{
+        min-width: 200px;
+        max-width: 600px;
+        margin: 0 auto;
+        background-color: white;
+        padding: 10px;
+        height: 100%;
+        min-height: 100%;
+    }
+
+    .payment-form{
+    }
+
+    .payment-form h2{
+    }
+
+    .th{
+        font-weight: bold;
+    }
+
+    .payment-selection-container,
+    .stored-payment-container {
+       margin: 0px;
+       padding: 0px;
+    }
+    .payment-method {
+        cursor: pointer;
+        background-color: #fff;
+        border: 1px solid #ccc;
+        margin: 8px;
+        padding: 10px;
+    }
+
+    .payment-method:hover {
+        box-shadow: 0 2px 6px rgba(0,0,0,.2);
+    }
+
+    .method-selected {
+        background-color: #fff;
+
+    }
+    .card-expired {
+        background-color: #cccccc;
+        color: #808080;
+    }
+    .card-expired div {
+        color: #808080;
+    }
+
+    .payment-method.method-selected img{
+    }
+
+    .payment-method:hover img{
+    }
+
+    .payment-method-trigger
+    .payment-method-trigger-expired{
+        clear: both;
+    }
+
+
+    .payment-method-trigger:hover .payment-method-data,
+    .payment-method-data.selected {
+    }
+
+    .payment-method-data img,
+    .payment-method-data input[type=radio],
+    .payment-method-data div
+    {
+        vertical-align: middle;
+    }
+
+    .floatinglabel .control-label{
+      padding: 0 !important;
+    }
+
+    .register_checkbox {
+        display: flex;
+    }
+
+    .register_checkbox div {
+    justify-content: center;
+    align-items: center;
+    margin: 5px;
+    }
+    .register_checkbox div input {
+     height: 90%
+    }
+
+   .payment-method-data img{
+        width: auto;
+        height: 100%;
+        max-height:20px;
+    }
+
+    .cvcicon {
+        width: auto;
+        height: 100%;
+        max-height: 16px;
+    }
+
+    .payment-method-data input[type=radio]{
+        margin: auto auto;
+    }
+
+   .payment-method-data div{
+        padding: 3px 2px;
+    }
+
+    .payment-method-data {
+        color: black;
+        font-size: 15px;
+        line-height: 17px;
+        cursor: pointer;
+    }
+
+    .payment-method-form{
+        margin-top:10px;
+        color: black;
+        font-size: 13px;
+        line-height: 15px;
+    }
+
+    .setNewPreferredInstrumentContainer{
+        margin-left: 65px;
+        margin-top: 10px;
+        display: none;
+    }
+
+    label{
+        font-size: 1em;
+        font-weight: normal;
+        margin-top: 4px;
+        margin-bottom: 0px;
+    }
+
+    div.info{
+        color: var(--error-color);
+        display: none;
+        margin-left: 17px;
+    }
+
+    hr{
+        margin-top: 3px;
+        margin-bottom: 3px;
+        border-top-color: #dddddd;
+    }
+
+    .btn{
+        margin: 10px 10px 10px 0px;
+        min-height: 4em;
+    }
+
+    .btn-arrow::after {
+        font-family: picons;
+    }
+
+    #proceed-btn,
+    #togglePaymentMethods {
+        font-weight: bold;
+    }
+
+    #togglePaymentMethods{
+        /* width: 264px; */
+        padding: 10px;
+    }
+
+    #card-expired {
+        color: red;
+    }
+
+    /* bootstrap overwrite */
+    .panel-heading{
+        font-size: 15px;
+        font-weight: bold;
+    }
+
+    .panel-body{
+        font-size: 1.2em;
+    }
+
+    .panel-default>.panel-heading{
+        /* INSERT OPTIONAL LOGO HERE */
+        background: var(--primary-color) url("") no-repeat top right;
+        background-size: 100px auto;
+    }
+
+    .form-control{
+        height: 50px;
+        padding: 5px 6px;
+        border-radius: 2px;
+        font-size: 16px;
+        line-height: 1.33;
+        border-color: #ccc;
+        padding-left: 15px;
+        padding-right: 15px;
+        font-family: Post Sans,PostSans,Arial,sans-serif;
+    }
+
+    .form-control:focus{
+        border-color: #66afe9;
+        outline: 0;
+        box-shadow: inset 0 1px 1px
+        rgba(0,0,0,.075),0 0 8px
+        rgba(102,175,233,.6);
+    }
+
+
+
+    .container-fluid:first-child{
+        padding-top: 5px;
+        padding-bottom: 0px;
+    }
+
+    /* errors */
+    .error-block{
+        display: none;
+        font-size: 0.9em;
+        color: #a94442;
+    }
+    .has-error .error-block{
+        display: block;
+    }
+    .has-error [id^='number_div_']{
+        border: #a94442 solid 1px;
+    }
+
+    .stored-label {
+        margin-top:16px;
+        margin-left: 8px;
+        font-size:14px;
+        font-weight:normal;
+
+    }
+    .other-label {
+        margin-top:16px;
+        margin-left: 8px;
+        font-size:14px;
+        font-weight:normal;
+
+    }
+
+    .auftragsdaten-header {
+        font-size:20px;
+        font-weight:bold;
+        margin-left:8px;
+        margin-bottom:8px;
+    }
+    .auftragsdatenlabel {
+        font-size:14px;
+        font-weight:normal;
+    }
+    .auftragsdaten {
+        font-size:14px;
+        font-weight:bold;
+    }
+
+    .auftragsdatenlabelxl {
+        font-size:18px;
+        font-weight:normal;
+    }
+    .auftragsdatenxl {
+        font-size:18px;
+        font-weight:bold;
+    }
+
+    @media all and (max-width:480px) {
+    .btnmobileblock {
+        width: 100%; display:block;
+        margin-left: 0;
+        margin-right: 0;
+        text-align: center;
+    }
+    }
+
+    #cvv_div_Creditcard:after {
+        <img src="//cms-static-gateway.paymentsandbox.cloud/r0/root/9yUgbqhFYCkT9eTHvf4hhY/vhost/sandbox.ixopay.com/rev/p9Wkxt4qUgjh4HZAEJXiny/img/paymentmethods/cvc.png" alt="CVC Icon" class="cvcicon" />
+    }
+
+    @font-face {
+    font-family:picons;
+    src:url("//cms-static-gateway.paymentsandbox.cloud/r0/root/9yUgbqhFYCkT9eTHvf4hhY/vhost/sandbox.ixopay.com/rev/Bkjqfap89qgmLaH7gjzcVz/fonts/posticon.eot");
+    src:url("//cms-static-gateway.paymentsandbox.cloud/r0/root/9yUgbqhFYCkT9eTHvf4hhY/vhost/sandbox.ixopay.com/rev/Bkjqfap89qgmLaH7gjzcVv/fonts/posticon.ttf ") format("truetype"),
+        url("//cms-static-gateway.paymentsandbox.cloud/r0/root/9yUgbqhFYCkT9eTHvf4hhY/vhost/sandbox.ixopay.com/rev/Bkjqfap89qgmLaH7gjzcWp/fonts/posticon.woff ") format("woff");
+    font-weight:400;
+    font-style:normal
+    }
+
+    .pi {
+        font-family:picons;
+    }
+
+    .gpay-card-info-container {
+    	width: 100%;
+    }
+</style>
+
+
+    <div class="container">
+        <!-- First of all do some sanity checks and correct conflicting parameters -->
+        
+            <!-- look out for preferred method -->
+
+                                                                                                                                                
+            <!-- if preferred token does not fit to preferred paymentmethod then forget the preferred token or set it to a token of the right payment method -->
+                                                                                                                                                                                                                        
+        
+
+        <!-- TRANSACTION INFORMATION -->
+        <div class="panel-body">
+            <div class="container-fluid">
+
+                <div class="row">
+                    <div class="col">
+                        <div class="row"><div class="auftragsdaten-header"><h1 class="payment-heading" style="font-size: 40px; font-weight: 400;">Auftragsdaten</h1></div></div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-6 col-md-7 col-sm-8 hidden-xs" style="border-right: 1px solid #bbb" ;"="">
+                        <div class="row">
+                            <div class="col-sm-5 auftragsdatenlabel">Datum:</div>
+                            <div class="col-sm-7 auftragsdaten">12.08.2026</div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-5 auftragsdatenlabel">Bestellung:</div>
+                            <div class="col-sm-7 auftragsdaten">Post DH-9765224</div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 col-md-5 col-sm-4 hidden-xs">
+                        <div class="row">
+                            <div class="col-sm-4 auftragsdatenlabelxl">Gesamt:</div>
+                            <div class="col-sm-8 auftragsdatenxl">0.78 EUR</div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-xs-12 hidden-sm hidden-md hidden-lg">
+                        <div class="row">
+                            <div class="col-sm-4 auftragsdatenlabel">Datum:</div>
+                            <div class="col-sm-6 auftragsdaten">12.08.2026</div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-4 auftragsdatenlabel">Bestellung:</div>
+                            <div class="col-sm-6 auftragsdaten">Post DH-9765224</div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-4 auftragsdatenlabel">Gesamt:</div>
+                            <div class="col-sm-6 auftragsdaten">0.78 EUR</div>
+                        </div>
+                    </div>
+                </div>
+
+                            </div>
+
+            <!-- SHOW STORED PAYMENT METHODS -->
+                                        <div class="stored-label">Ihre gespeicherten Zahlungsarten</div>
+
+                <div class="container-fluid stored-payment-container ">
+
+                    <!-- loops through enabled payment methods -->
+                                            
+                             <!-- check if card is still valid -->
+                                                                                                                        			                                                                                        <div class="row payment-method">
+                                <div class="container-fluid payment-method-trigger">
+                                    <div class="row payment-method-data">
+                                        <div class="col-2 col-xs-2 col-sm-1 align-self-center">
+                                                                                                                                                                                                                                                                            <input id="method-select-Creditcard-pt--a240fb7e7898ee184c72" type="radio" name="method-select" class="preferredInstrument">
+                                            <label class="sr-only" for="method-select-Creditcard-pt--a240fb7e7898ee184c72">Zahlungsart auswählen: Creditcard 411111******1111</label>
+                                            <input type="hidden" class="ptToken" name="ptToken" value="pt::a240fb7e7898ee184c72">
+                                            <input type="hidden" name="paymentMethod" value="Creditcard">
+                                        </div>
+
+
+                                        <div class="col-10 col-xs-10 col-sm-11 p-data">
+
+                                                                                            	<div class="row align-items-center">
+                                                	<div class="col-3">
+                                                    	Kredit­karte
+                                                	</div>
+                                                	<div class="col-4">
+                                                    	<div>Bojan Madov</div>
+                                                    	                                                    	<div>4111 11** **** 1111</div>
+                                                	</div>
+                                                	<div class="col-3">
+                                                    	<div>gültig bis</div>
+                                                    	<div>01/2031</div>
+                                                	</div>
+                                                	<div class="col-2">
+                                                    	 <img src="//cms-static-gateway.paymentsandbox.cloud/r0/root/9yUgbqhFYCkT9eTHvf4hhY/vhost/sandbox.ixopay.com/rev/Bkjqfap89qgmLaH7gjzc1r/img/paymentmethods/visa.png">                                                     	                                                	</div>
+                                            	</div>
+												
+                                                												<div class="row align-items-center hidden">
+                                                    <div class="register_checkbox hidden">
+                                                        <div><input type="checkbox" name="setAsPreferredInstrument" class="setAsPreferredInstrument" id="setAsPreferredInstrument-stored-Creditcard" checked=""> </div>
+                                                        <div><label for="setAsPreferredInstrument-">als vorausgewählt speichern.(wird versteckt)</label></div>
+                                                    </div>
+
+                                                    <div class="register_checkbox hidden">
+                                                        <div><input type="checkbox" name="rememberMethod" class="rememberMethod " id="rememberMethod-stored-Creditcard" checked=""></div>
+                                                        <div><label for="rememberMethod-">Zahlungsart merken (wird versteckt)</label></div>
+                                                    </div>
+	                                            </div>
+                                        </div><!-- col-10 end -->
+                                    </div><!-- payment method data end -->
+                                </div><!-- paymetn method trigger end -->
+                            </div><!-- payment method end -->
+                        
+                             <!-- check if card is still valid -->
+                                                                                                                        			                                                                                        <div class="row payment-method  ">
+                                <div class="container-fluid payment-method-trigger">
+                                    <div class="row payment-method-data">
+                                        <div class="col-2 col-xs-2 col-sm-1 align-self-center">
+                                                                                                                                                                                                                                                                            <input id="method-select-Creditcard-pt--849d4542d2e310f2cc9d" type="radio" name="method-select">
+                                            <label class="sr-only" for="method-select-Creditcard-pt--849d4542d2e310f2cc9d">Zahlungsart auswählen: Creditcard 411111******1111</label>
+                                            <input type="hidden" class="ptToken" name="ptToken" value="pt::849d4542d2e310f2cc9d">
+                                            <input type="hidden" name="paymentMethod" value="Creditcard">
+                                        </div>
+
+
+                                        <div class="col-10 col-xs-10 col-sm-11 p-data">
+
+                                                                                            	<div class="row align-items-center">
+                                                	<div class="col-3">
+                                                    	Kredit­karte
+                                                	</div>
+                                                	<div class="col-4">
+                                                    	<div>Bojan Madov</div>
+                                                    	                                                    	<div>4111 11** **** 1111</div>
+                                                	</div>
+                                                	<div class="col-3">
+                                                    	<div>gültig bis</div>
+                                                    	<div>01/2031</div>
+                                                	</div>
+                                                	<div class="col-2">
+                                                    	 <img src="//cms-static-gateway.paymentsandbox.cloud/r0/root/9yUgbqhFYCkT9eTHvf4hhY/vhost/sandbox.ixopay.com/rev/Bkjqfap89qgmLaH7gjzc1r/img/paymentmethods/visa.png">                                                     	                                                	</div>
+                                            	</div>
+												
+                                                												<div class="row align-items-center hidden">
+                                                    <div class="register_checkbox hidden">
+                                                        <div><input type="checkbox" name="setAsPreferredInstrument" class="setAsPreferredInstrument" id="setAsPreferredInstrument-stored-Creditcard" checked=""> </div>
+                                                        <div><label for="setAsPreferredInstrument-">als vorausgewählt speichern.(wird versteckt)</label></div>
+                                                    </div>
+
+                                                    <div class="register_checkbox hidden">
+                                                        <div><input type="checkbox" name="rememberMethod" class="rememberMethod " id="rememberMethod-stored-Creditcard" checked=""></div>
+                                                        <div><label for="rememberMethod-">Zahlungsart merken (wird versteckt)</label></div>
+                                                    </div>
+	                                            </div>
+                                        </div><!-- col-10 end -->
+                                    </div><!-- payment method data end -->
+                                </div><!-- paymetn method trigger end -->
+                            </div><!-- payment method end -->
+                                                                    <div class="row">
+                    </div>
+
+                    <div class="setNewPreferredInstrumentContainer hidden">
+                            <input type="checkbox" name="setAsPreferredInstrument" id="setNewPreferredInstrument" checked=""> <label for="setNewPreferredInstrument">als Präferenz speichern</label>
+                    </div>
+
+
+                </div><!-- stored payments container end -->
+                        <!-- STORED PAYMENT METHODS END -->
+
+            <!-- PAYMENT SELECTION -->
+            
+            <div class="other-label" style="display: none;">Weitere Zahlungsarten</div>
+
+            <div class="container-fluid payment-selection-container">
+
+                                            	<div class="wallet-methods" style="padding: 20px 10px 0;">
+                        <input type="hidden" name="paymentMethod" value="Creditcard">
+                        <!-- Apple Pay -->
+                        <div class="form-group" id="apple-pay-container" style="display: none">
+                            <div id="apple-pay-div">
+                                <button id="btn-applepay" class="apple-pay-button apple-pay-button-black" style="cursor: pointer; opacity: 0.3; width: 100%; height: 40px; display: block;" type="button" disabled="disabled">&nbsp;</button>
+                            </div>
+                        </div>
+
+                        <!-- Google Pay -->
+                        <div class="form-group">
+                            <div id="google-pay-div" data-button-type="plain" style="opacity: 1;">
+                                <script src="https://pay.google.com/gp/p/js/pay.js"></script>
+                            <div><button class="gpay-button black plain short en border-inset" id="gpay-button-online-api-id" type="button" aria-label="Google Pay"></button></div></div>
+                        </div>
+                	</div>
+                                                                                    
+            
+
+                <!-- loops through enabled payment methods set on the metaconnector -->
+                
+                    <div class="row payment-method  method-selected" data-method="Creditcard" style="display: none;">
+                        <div class="container-fluid payment-method-trigger">
+                            <div class="row payment-method-data">
+
+                                <div class="col-2 col-xs-2 col-sm-1 align-self-center">
+                                                                        <input id="method-select-Creditcard" type="radio" name="method-select">
+                                    <label class="sr-only" for="method-select-Creditcard">Zahlungsart auswählen: Creditcard</label>
+                                </div>
+
+
+                                <div class="col-10 col-xs-10 col-sm-11">
+                                    <div class="row align-items-center">
+                                        
+                                        <!--
+                                        for each method add an appropriate image (CDE static folder)
+                                        to set the image size, see css: .payment-method img
+                                        -->
+                                                                                <div class="col-10"><span>Kredit­karte</span></div>
+                                        <div class="col-2 text-center">
+                                            <img src="//cms-static-gateway.paymentsandbox.cloud/r0/root/9yUgbqhFYCkT9eTHvf4hhY/vhost/sandbox.ixopay.com/rev/Bkjqfap89qgmLaH7gjzc1r/img/paymentmethods/visa.png" alt="Creditcard">
+                                            <img src="//cms-static-gateway.paymentsandbox.cloud/r0/root/9yUgbqhFYCkT9eTHvf4hhY/vhost/sandbox.ixopay.com/rev/Bkjqfap89qgmLaH7gjzcix/img/paymentmethods/mastercard.png" alt="Creditcard">
+                                        </div>
+                                                                            </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+
+                        <!-- payment form -->
+                        <div class="container-fluid payment-form" id="payment-form-Creditcard" style="" data-method="Creditcard" data-apimethod="Creditcard">
+
+                            <input type="hidden" name="paymentMethod" value="Creditcard">
+
+                            <div class="row payment-method-form">
+                                <div class="col-sm-11 col-sm-offset-1">
+
+                                    <!-- fields which were set as mandatory on the connector, or are defined in variable "forceFields" will be displayed here -->
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            
+                                    
+                                        <input type="hidden" name="publicKey" value="hMXqYmBF8baDmXTmrLek">
+                                        <input type="hidden" name="cardToken" id="cardToken" value="">
+
+
+                                        <div class="form-group row">
+                                            <div class="floatinglabel col-md-12">
+                                                <label for="cardHolder" class="control-label required">Karteninhaber</label>
+                                            </div>
+                                            <input type="text" name="cardHolder" id="cardHolder" value="" class="form-control check-populated" placeholder="Karteninhaber">
+                                            <span class="col-sm-7 col-sm-offset-5 error-block"></span>                                
+                                        </div>
+
+                                        <div class="form-group row">
+                                            <div class="floatinglabel col-md-12">
+                                                <label class="control-label required">Kreditkartennummer</label>
+                                            </div>
+                                            <div id="number_div_Creditcard" class="form-control"><iframe src="https://secure.ixopay.com/iframes/pan.html" name="vault-master-1dngfdwf8" width="100%" height="100%" style="border: 0px;"></iframe></div>
+                                            <span class="col-sm-7 col-sm-offset-5 error-block"></span>
+                                        </div>
+
+                                        <div class="form-group row">
+                                            <div class="floatinglabel is-populated col-md-12">
+                                                <label for="expiry" class="control-label required">gültig bis</label>
+                                            </div>
+                                                <select name="expiry" id="expiry" class="form-control check-populated">
+                                                                                                            <option value="08/2026">08 / 2026</option>
+                                                                                                            <option value="09/2026">09 / 2026</option>
+                                                                                                            <option value="10/2026">10 / 2026</option>
+                                                                                                            <option value="11/2026">11 / 2026</option>
+                                                                                                            <option value="12/2026">12 / 2026</option>
+                                                                                                            <option value="01/2027">01 / 2027</option>
+                                                                                                            <option value="02/2027">02 / 2027</option>
+                                                                                                            <option value="03/2027">03 / 2027</option>
+                                                                                                            <option value="04/2027">04 / 2027</option>
+                                                                                                            <option value="05/2027">05 / 2027</option>
+                                                                                                            <option value="06/2027">06 / 2027</option>
+                                                                                                            <option value="07/2027">07 / 2027</option>
+                                                                                                            <option value="08/2027">08 / 2027</option>
+                                                                                                            <option value="09/2027">09 / 2027</option>
+                                                                                                            <option value="10/2027">10 / 2027</option>
+                                                                                                            <option value="11/2027">11 / 2027</option>
+                                                                                                            <option value="12/2027">12 / 2027</option>
+                                                                                                            <option value="01/2028">01 / 2028</option>
+                                                                                                            <option value="02/2028">02 / 2028</option>
+                                                                                                            <option value="03/2028">03 / 2028</option>
+                                                                                                            <option value="04/2028">04 / 2028</option>
+                                                                                                            <option value="05/2028">05 / 2028</option>
+                                                                                                            <option value="06/2028">06 / 2028</option>
+                                                                                                            <option value="07/2028">07 / 2028</option>
+                                                                                                            <option value="08/2028">08 / 2028</option>
+                                                                                                            <option value="09/2028">09 / 2028</option>
+                                                                                                            <option value="10/2028">10 / 2028</option>
+                                                                                                            <option value="11/2028">11 / 2028</option>
+                                                                                                            <option value="12/2028">12 / 2028</option>
+                                                                                                            <option value="01/2029">01 / 2029</option>
+                                                                                                            <option value="02/2029">02 / 2029</option>
+                                                                                                            <option value="03/2029">03 / 2029</option>
+                                                                                                            <option value="04/2029">04 / 2029</option>
+                                                                                                            <option value="05/2029">05 / 2029</option>
+                                                                                                            <option value="06/2029">06 / 2029</option>
+                                                                                                            <option value="07/2029">07 / 2029</option>
+                                                                                                            <option value="08/2029">08 / 2029</option>
+                                                                                                            <option value="09/2029">09 / 2029</option>
+                                                                                                            <option value="10/2029">10 / 2029</option>
+                                                                                                            <option value="11/2029">11 / 2029</option>
+                                                                                                            <option value="12/2029">12 / 2029</option>
+                                                                                                            <option value="01/2030">01 / 2030</option>
+                                                                                                            <option value="02/2030">02 / 2030</option>
+                                                                                                            <option value="03/2030">03 / 2030</option>
+                                                                                                            <option value="04/2030">04 / 2030</option>
+                                                                                                            <option value="05/2030">05 / 2030</option>
+                                                                                                            <option value="06/2030">06 / 2030</option>
+                                                                                                            <option value="07/2030">07 / 2030</option>
+                                                                                                            <option value="08/2030">08 / 2030</option>
+                                                                                                            <option value="09/2030">09 / 2030</option>
+                                                                                                            <option value="10/2030">10 / 2030</option>
+                                                                                                            <option value="11/2030">11 / 2030</option>
+                                                                                                            <option value="12/2030">12 / 2030</option>
+                                                                                                            <option value="01/2031">01 / 2031</option>
+                                                                                                            <option value="02/2031">02 / 2031</option>
+                                                                                                            <option value="03/2031">03 / 2031</option>
+                                                                                                            <option value="04/2031">04 / 2031</option>
+                                                                                                            <option value="05/2031">05 / 2031</option>
+                                                                                                            <option value="06/2031">06 / 2031</option>
+                                                                                                            <option value="07/2031">07 / 2031</option>
+                                                                                                            <option value="08/2031">08 / 2031</option>
+                                                                                                            <option value="09/2031">09 / 2031</option>
+                                                                                                            <option value="10/2031">10 / 2031</option>
+                                                                                                            <option value="11/2031">11 / 2031</option>
+                                                                                                            <option value="12/2031">12 / 2031</option>
+                                                                                                            <option value="01/2032">01 / 2032</option>
+                                                                                                            <option value="02/2032">02 / 2032</option>
+                                                                                                            <option value="03/2032">03 / 2032</option>
+                                                                                                            <option value="04/2032">04 / 2032</option>
+                                                                                                            <option value="05/2032">05 / 2032</option>
+                                                                                                            <option value="06/2032">06 / 2032</option>
+                                                                                                            <option value="07/2032">07 / 2032</option>
+                                                                                                            <option value="08/2032">08 / 2032</option>
+                                                                                                            <option value="09/2032">09 / 2032</option>
+                                                                                                            <option value="10/2032">10 / 2032</option>
+                                                                                                            <option value="11/2032">11 / 2032</option>
+                                                                                                            <option value="12/2032">12 / 2032</option>
+                                                                                                            <option value="01/2033">01 / 2033</option>
+                                                                                                            <option value="02/2033">02 / 2033</option>
+                                                                                                            <option value="03/2033">03 / 2033</option>
+                                                                                                            <option value="04/2033">04 / 2033</option>
+                                                                                                            <option value="05/2033">05 / 2033</option>
+                                                                                                            <option value="06/2033">06 / 2033</option>
+                                                                                                            <option value="07/2033">07 / 2033</option>
+                                                                                                            <option value="08/2033">08 / 2033</option>
+                                                                                                            <option value="09/2033">09 / 2033</option>
+                                                                                                            <option value="10/2033">10 / 2033</option>
+                                                                                                            <option value="11/2033">11 / 2033</option>
+                                                                                                            <option value="12/2033">12 / 2033</option>
+                                                                                                            <option value="01/2034">01 / 2034</option>
+                                                                                                            <option value="02/2034">02 / 2034</option>
+                                                                                                            <option value="03/2034">03 / 2034</option>
+                                                                                                            <option value="04/2034">04 / 2034</option>
+                                                                                                            <option value="05/2034">05 / 2034</option>
+                                                                                                            <option value="06/2034">06 / 2034</option>
+                                                                                                            <option value="07/2034">07 / 2034</option>
+                                                                                                            <option value="08/2034">08 / 2034</option>
+                                                                                                            <option value="09/2034">09 / 2034</option>
+                                                                                                            <option value="10/2034">10 / 2034</option>
+                                                                                                            <option value="11/2034">11 / 2034</option>
+                                                                                                            <option value="12/2034">12 / 2034</option>
+                                                                                                            <option value="01/2035">01 / 2035</option>
+                                                                                                            <option value="02/2035">02 / 2035</option>
+                                                                                                            <option value="03/2035">03 / 2035</option>
+                                                                                                            <option value="04/2035">04 / 2035</option>
+                                                                                                            <option value="05/2035">05 / 2035</option>
+                                                                                                            <option value="06/2035">06 / 2035</option>
+                                                                                                            <option value="07/2035">07 / 2035</option>
+                                                                                                            <option value="08/2035">08 / 2035</option>
+                                                                                                            <option value="09/2035">09 / 2035</option>
+                                                                                                            <option value="10/2035">10 / 2035</option>
+                                                                                                            <option value="11/2035">11 / 2035</option>
+                                                                                                            <option value="12/2035">12 / 2035</option>
+                                                                                                            <option value="01/2036">01 / 2036</option>
+                                                                                                            <option value="02/2036">02 / 2036</option>
+                                                                                                            <option value="03/2036">03 / 2036</option>
+                                                                                                            <option value="04/2036">04 / 2036</option>
+                                                                                                            <option value="05/2036">05 / 2036</option>
+                                                                                                            <option value="06/2036">06 / 2036</option>
+                                                                                                            <option value="07/2036">07 / 2036</option>
+                                                                                                            <option value="08/2036">08 / 2036</option>
+                                                                                                            <option value="09/2036">09 / 2036</option>
+                                                                                                            <option value="10/2036">10 / 2036</option>
+                                                                                                            <option value="11/2036">11 / 2036</option>
+                                                                                                            <option value="12/2036">12 / 2036</option>
+                                                                                                            <option value="01/2037">01 / 2037</option>
+                                                                                                            <option value="02/2037">02 / 2037</option>
+                                                                                                            <option value="03/2037">03 / 2037</option>
+                                                                                                            <option value="04/2037">04 / 2037</option>
+                                                                                                            <option value="05/2037">05 / 2037</option>
+                                                                                                            <option value="06/2037">06 / 2037</option>
+                                                                                                            <option value="07/2037">07 / 2037</option>
+                                                                                                            <option value="08/2037">08 / 2037</option>
+                                                                                                            <option value="09/2037">09 / 2037</option>
+                                                                                                            <option value="10/2037">10 / 2037</option>
+                                                                                                            <option value="11/2037">11 / 2037</option>
+                                                                                                            <option value="12/2037">12 / 2037</option>
+                                                                                                            <option value="01/2038">01 / 2038</option>
+                                                                                                            <option value="02/2038">02 / 2038</option>
+                                                                                                            <option value="03/2038">03 / 2038</option>
+                                                                                                            <option value="04/2038">04 / 2038</option>
+                                                                                                            <option value="05/2038">05 / 2038</option>
+                                                                                                            <option value="06/2038">06 / 2038</option>
+                                                                                                            <option value="07/2038">07 / 2038</option>
+                                                                                                            <option value="08/2038">08 / 2038</option>
+                                                                                                    </select>
+                                        </div>
+
+                                        <div class="form-group row">
+                                            <div class="floatinglabel col-md-12">
+                                                <label class="control-label required">CVC</label>
+                                            </div>
+                                            <div id="cvv_div_Creditcard" class="form-control"><iframe src="https://secure.ixopay.com/iframes/cvv.html" name="vault-slave-1dngfdwf8" width="100%" height="100%" style="border: 0px;"></iframe></div>
+                                            <span class="col-sm-7 col-sm-offset-5 error-block"></span>
+                                        </div>
+                                    
+                                                                            
+                                            <div class="register_checkbox ">
+                                                <div><input type="checkbox" name="doRegister" class="doRegister " id="doRegister-Creditcard"></div>
+                                                <div>
+                                                <label for="doRegister-Creditcard">Bezahlart für den nächsten Kauf merken.
+                                                        Bei Ihrer nächsten kostenpflichtigen Bestellung kann eine sofortige Abbuchung von Ihrer Kreditkarte erfolgen.                                                                                                            </label>
+                                                </div>
+                                            </div>
+
+                                            <div class="register_checkbox hidden">
+                                                <div><input type="checkbox" name="setAsPreferredInstrument" class="setAsPreferredInstrument" id="setAsPreferredInstrument-Creditcard"> </div>
+                                                <div><label for="setAsPreferredInstrument-Creditcard">als vorausgewählt speichern.(wird versteckt)</label></div>
+                                            </div>
+                                        
+                                        <div class="register_checkbox hidden">
+                                            <div><input type="checkbox" name="rememberMethod" class="rememberMethod " id="rememberMethod-Creditcard"></div>
+                                            <div><label for="rememberMethod-Creditcard">Zahlungsart merken (wird versteckt)</label></div>
+                                        </div>
+
+                                    
+                                </div>
+                            </div>
+                        </div><!-- container fluid end -->
+                    </div><!-- payment form end -->
+
+                
+                    <div class="row payment-method " data-method="PaypalExpress" style="display: none;">
+                        <div class="container-fluid payment-method-trigger">
+                            <div class="row payment-method-data">
+
+                                <div class="col-2 col-xs-2 col-sm-1 align-self-center">
+                                                                        <input id="method-select-PaypalExpress" type="radio" name="method-select">
+                                    <label class="sr-only" for="method-select-PaypalExpress">Zahlungsart auswählen: PaypalExpress</label>
+                                </div>
+
+
+                                <div class="col-10 col-xs-10 col-sm-11">
+                                    <div class="row align-items-center">
+                                        
+                                        <!--
+                                        for each method add an appropriate image (CDE static folder)
+                                        to set the image size, see css: .payment-method img
+                                        -->
+                                                                                <div class="col-10"><span>PayPal</span></div>
+                                        <div class="col-2 text-center"><img src="//cms-static-gateway.paymentsandbox.cloud/r0/root/9yUgbqhFYCkT9eTHvf4hhY/vhost/sandbox.ixopay.com/rev/MA8AdheDc7bWSd3hje56tF/img/paymentmethods/paypal.png" alt="PaypalExpress"></div>
+                                                                            </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+
+                        <!-- payment form -->
+                        <div class="container-fluid payment-form" id="payment-form-PaypalExpress" style="display: none;" data-method="PaypalExpress" data-apimethod="PaypalExpress">
+
+                            <input type="hidden" name="paymentMethod" value="PaypalExpress">
+
+                            <div class="row payment-method-form">
+                                <div class="col-sm-11 col-sm-offset-1">
+
+                                    <!-- fields which were set as mandatory on the connector, or are defined in variable "forceFields" will be displayed here -->
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            
+                                    
+                                        Die Eingabe Ihres PayPal Accounts ist in einem späteren Schritt erforderlich. Sie werden zu PayPal weitergeleitet.
+
+                                    
+                                                                            
+                                            <div class="register_checkbox hidden">
+                                                <div><input type="checkbox" name="doRegister" class="doRegister " id="doRegister-PaypalExpress"></div>
+                                                <div>
+                                                <label for="doRegister-PaypalExpress">Bezahlart für den nächsten Kauf merken.
+                                                                                                                Bei Ihrer nächsten kostenpflichtigen Bestellung kann eine sofortige Abbuchung von Ihrem PayPal-Account erfolgen. Hinweis: Diese Funktion muss zusätzlich in Ihrem Account aktiviert werden.                                                    </label>
+                                                </div>
+                                            </div>
+
+                                            <div class="register_checkbox hidden">
+                                                <div><input type="checkbox" name="setAsPreferredInstrument" class="setAsPreferredInstrument" id="setAsPreferredInstrument-PaypalExpress"> </div>
+                                                <div><label for="setAsPreferredInstrument-PaypalExpress">als vorausgewählt speichern.(wird versteckt)</label></div>
+                                            </div>
+                                        
+                                        <div class="register_checkbox hidden">
+                                            <div><input type="checkbox" name="rememberMethod" class="rememberMethod " id="rememberMethod-PaypalExpress" checked=""></div>
+                                            <div><label for="rememberMethod-PaypalExpress">Zahlungsart merken (wird versteckt)</label></div>
+                                        </div>
+
+                                    
+                                </div>
+                            </div>
+                        </div><!-- container fluid end -->
+                    </div><!-- payment form end -->
+
+                
+                    <div class="row payment-method " data-method="Sofort" style="display: none;">
+                        <div class="container-fluid payment-method-trigger">
+                            <div class="row payment-method-data">
+
+                                <div class="col-2 col-xs-2 col-sm-1 align-self-center">
+                                                                        <input id="method-select-Sofort" type="radio" name="method-select">
+                                    <label class="sr-only" for="method-select-Sofort">Zahlungsart auswählen: Sofort</label>
+                                </div>
+
+
+                                <div class="col-10 col-xs-10 col-sm-11">
+                                    <div class="row align-items-center">
+                                        
+                                        <!--
+                                        for each method add an appropriate image (CDE static folder)
+                                        to set the image size, see css: .payment-method img
+                                        -->
+                                                                                <div class="col-10"><span>Sofortüberweisung</span></div>
+                                        <div class="col-2 text-center"><img src="//cms-static-gateway.paymentsandbox.cloud/r0/root/9yUgbqhFYCkT9eTHvf4hhY/vhost/sandbox.ixopay.com/rev/YU4nSgPvQV5kpjTgXBRP2F/img/paymentmethods/sofort.png" alt="Sofort"></div>
+                                                                            </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+
+                        <!-- payment form -->
+                        <div class="container-fluid payment-form" id="payment-form-Sofort" style="display: none;" data-method="Sofort" data-apimethod="Sofort">
+
+                            <input type="hidden" name="paymentMethod" value="Sofort">
+
+                            <div class="row payment-method-form">
+                                <div class="col-sm-11 col-sm-offset-1">
+
+                                    <!-- fields which were set as mandatory on the connector, or are defined in variable "forceFields" will be displayed here -->
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            
+                                    
+                                        <input type="hidden" name="klarnaAuthToken" id="klarna-auth-token">
+                                        <div id="klarna-div"><div data-cid="klarna-pay-now-static" style="display: none; position: relative; overflow: hidden; max-width: 600px; min-width: 280px; width: 100%;"><div><style>._1786533566188 {
+  position: absolute;
+  z-index: 100;
+  background-color: rgb(126, 211, 33);
+  color: rgb(255, 255, 255);
+  padding: 10px 20px;
+  margin-bottom: 8px;
+  font-size: 10px;
+  text-align: center;
+  letter-spacing: 1px;
+  cursor: default;
+  font-family: Helvetica, Arial, sans-serif;
+  line-height: 0.8px;
+  right: 8px;
+  border-radius: 0px 0px 5px 5px;
+  transition: transform 0.5s ease 0.5s;
+}
+._1786533566188:hover { transform: translateY(-100%); }
+@media (max-width: 570px) {
+  ._1786533566188 {
+    position: relative;
+    right: 0px;
+  }
+  ._1786533566188:hover { transform: none; }
+}</style><div class="_1786533566188">TESTDRIVE</div></div><iframe src="https://js.playground.klarna.com/kp/one-offering/v1/apps/widget.html#baseUrl=https%3A%2F%2Fjs.playground.klarna.com%2Feu%2Fkp&amp;component=pay-now-v2&amp;design=opf&amp;features=0&amp;intent=buy&amp;locale=de_AT&amp;sessionId=81bec55b-61ea-68ac-8072-d0533279d59d&amp;variant=index&amp;debug=false&amp;delegateOpeningLinks=false" title="Klarna Widget" style="width: 100%; text-align: left; height: 12px; display: none; border: 0px; pointer-events: initial; position: static; top: 0px; left: 0px; opacity: 1;"></iframe></div><div id="osm_shadow_host" data-theme="light"></div></div>
+
+                                    
+                                                                            
+                                        <div class="register_checkbox hidden">
+                                            <div><input type="checkbox" name="rememberMethod" class="rememberMethod " id="rememberMethod-Sofort" checked=""></div>
+                                            <div><label for="rememberMethod-Sofort">Zahlungsart merken (wird versteckt)</label></div>
+                                        </div>
+
+                                    
+                                </div>
+                            </div>
+                        </div><!-- container fluid end -->
+                    </div><!-- payment form end -->
+
+                
+                <!-- SHOW MORE PAYMENT METHODS BUTTON -->
+                                <!-- show because there might be payment methods not shown right now -->
+				<div class="row align-items-center payment-method-data" id="alternativePaymentList">
+                    <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 col-xs-12 text-center">
+                        <button type="button" id="togglePaymentMethods" class="btn btn-link">
+                            Weitere Zahlungsarten anzeigen
+                        </button>
+                    </div>
+                    <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 col-xs-12 text-center">
+                    
+                       	
+                       		                        <img src="//cms-static-gateway.paymentsandbox.cloud/r0/root/9yUgbqhFYCkT9eTHvf4hhY/vhost/sandbox.ixopay.com/rev/Bkjqfap89qgmLaH7gjzc1r/img/paymentmethods/visa.png" alt="Visa Logo" style="padding-right: 10px">
+    	                    <img src="//cms-static-gateway.paymentsandbox.cloud/r0/root/9yUgbqhFYCkT9eTHvf4hhY/vhost/sandbox.ixopay.com/rev/Bkjqfap89qgmLaH7gjzcix/img/paymentmethods/mastercard.png" alt="Mastercard Logo" style="padding-right: 10px">
+                                            
+                       	
+                       	        	                <img src="//cms-static-gateway.paymentsandbox.cloud/r0/root/9yUgbqhFYCkT9eTHvf4hhY/vhost/sandbox.ixopay.com/rev/MA8AdheDc7bWSd3hje56tF/img/paymentmethods/paypal.png" alt="PayPal Logo" style="padding-right: 10px">
+                                            
+                       	
+                       	            	            <img src="//cms-static-gateway.paymentsandbox.cloud/r0/root/9yUgbqhFYCkT9eTHvf4hhY/vhost/sandbox.ixopay.com/rev/YU4nSgPvQV5kpjTgXBRP2F/img/paymentmethods/sofort.png" alt="Sofort Logo">
+                                                                </div>
+                </div>
+                                <!-- SHOW MORE PAYMENT METHODS BUTTON EMD -->
+
+            </div><!-- payment selection not stored payment methods end -->
+
+
+            <!-- FINISH BUTTONS -->
+            <div class="container-fluid payment-button-container">
+
+                <div class="row">
+                    <div class="col-12">
+                            <button type="submit" name="pay" id="proceed-btn" value="submit" class="btn btn-primary btn-lg pull-right btn-arrow btnmobileblock">
+                                Bezahlen
+                            </button>
+                            <button type="button" name="cancel_btn" id="cancel_btn" value="cancel" class="btn btn-secondary btnmobileblock" onclick="Ixopay.PaymentFormV2.cancelPaymentForm('https://oepag.paymentsandbox.cloud/payment/cancel/47bdf3f8e914645cff71');">
+                                Zahlung abbrechen
+                            </button>
+                    </div>
+                </div>
+            </div>
+         </div>
+    </div>
+
+
+
+<script type="text/javascript">
+	$(function() {
+
+        /**
+         * display form of corresponding payment method
+         */
+        $('.payment-selection-container .payment-method-trigger').on('click', function(evt) {
+
+            if ( ! $(evt.target).parents('.payment-method').hasClass('method-selected') )
+            {
+                let selected = $(evt.target).parents('.payment-method');
+                let paymentMethod = selected.data('method');
+
+
+                $('.payment-form').slideUp();
+                if( $('#payment-form-'+paymentMethod+':hidden').length > 0 ){
+                    $('#payment-form-'+paymentMethod).slideDown();
+                }
+
+                //mark selected img + radio
+                $('.payment-method.method-selected').removeClass('method-selected');
+                $('.payment-method-data input[type=radio]').removeAttr('checked');
+
+                selected.addClass('method-selected');
+                selected.find('input[type=radio]').prop('checked', 'on');
+            }
+        });
+
+        /**
+         * mark selected (stored) payment instrument as active/selected
+         */
+        $('.stored-payment-container .payment-method-trigger').on('click', function(evt) {
+
+            if ( ! $(evt.target).parents('.payment-method').hasClass('method-selected') )
+            {
+                let selected = $(evt.target).parents('.payment-method');
+                let paymentMethod = selected.data('method');
+
+                $('.payment-form').slideUp();
+                if( $('#payment-form-'+paymentMethod+':hidden').length > 0 ){
+                    $('#payment-form-'+paymentMethod).slideDown();
+                }
+
+
+                //mark selected img + radio
+                $('.payment-method.method-selected').removeClass('method-selected');
+                $('.payment-method-data input[type=radio]').removeAttr('checked');
+
+                selected.

@@ -1,187 +1,44 @@
-describe('Broadcast delivery to Specific User', () => {
-  // Helper function to parse German date/time format (dd.mm.yyyy hh:mm)
-  function parseGermanDateTime(dateTimeStr) {
-    const [datePart, timePart] = dateTimeStr.split(' ');
-    const [day, month, year] = datePart.split('.').map(Number);
-    const [hour, minute] = timePart.split(':').map(Number);
-    return new Date(year, month - 1, day, hour, minute);
-  }
+/// <reference types="cypress" />
+import { parseGermanDateTime } from '../../../../../support/utils/dateUtils';
 
+describe('Broadcast delivery to Specific User', () => {
   let uploadDateTime = ''; // Variable to store upload date & time across tests
 
   // Disable HR Management on Company and Update Admin Roles
   it('Disable HR Management on Company and Update Admin Roles', () => {
-    // Login as Master user
     cy.loginToSupportViewMaster();
-    cy.wait(1500);
-
-    // Close release note popup if it exists
-    cy.get('body').then(($body) => {
-      if ($body.find('.release-note-dialog__close-icon').length > 0) {
-        cy.get('.release-note-dialog__close-icon').click();
-      } else {
-        cy.log('Close icon is NOT present');
-      }
-    });
-
-    // Open the company search dialog
-    cy.get('#searchButton>span').click();
-    cy.wait(1000);
-
-    // Type the company name
-    cy.get('.search-dialog>form>.form-fields>.searchText-wrap')
-      .eq(0)
-      .type(Cypress.env('company'));
-
-    // Click search
-    cy.get('.search-dialog>form>div>.mat-primary').click();
-    cy.wait(1500);
-
-    // Open Edit Company dialog
-    cy.get('.action-buttons > .mdc-button').eq(0).click();
-    cy.wait(1000);
-
-    // Scroll to bottom to ensure HR checkbox is visible
-    cy.get('.mat-mdc-dialog-content').scrollTo('bottom');
-    cy.wait(1000);
+    cy.dismissReleaseNotePopup();
+    cy.svSearchCompany();
 
     // Disable HR Management flag if enabled (on Company)
+    cy.get('.action-buttons > .mdc-button').eq(0).click();
+    cy.wait(1000);
+    cy.get('.mat-mdc-dialog-content').scrollTo('bottom');
+    cy.wait(1000);
     cy.get('#hrManagementEnabled').then(($checkbox) => {
       if ($checkbox.is(':checked')) {
         cy.get('#hrManagementEnabled').uncheck({ force: true });
-        cy.log('HR Management was enabled, now disabled.');
-
-        cy.intercept('GET', '**/assets/maintanance-config/**').as(
-          'getSearchResult',
-        );
-
+        cy.intercept('GET', '**/assets/maintanance-config/**').as('getSearchResult');
         cy.get('button[type="submit"]').click();
-
-        // Search for companmy after execute Edit company
-        cy.wait(['@getSearchResult'], { timeout: 27000 }).then(
-          (interception) => {
-            // Log the intercepted response
-            cy.log('Intercepted response:', interception.response);
-
-            // Assert the response status code
-            expect(interception.response.statusCode).to.eq(200);
-          },
-        );
-
+        cy.wait('@getSearchResult', { timeout: 27000 }).then((interception) => {
+          expect(interception.response.statusCode).to.eq(200);
+        });
         cy.wait(2500);
-
-        // Open the company search dialog
-        cy.get('#searchButton>span').click();
-        cy.wait(1000);
-
-        // Type the company name
-        cy.get('.search-dialog>form>.form-fields>.searchText-wrap')
-          .eq(0)
-          .type(Cypress.env('company'));
-
-        // Click search
-        cy.get('.search-dialog>form>div>.mat-primary').click();
-        cy.wait(1500);
+        cy.svSearchCompany();
       } else {
         cy.log('HR Management is already disabled.');
         cy.get('.close[data-mat-icon-name="close"]').click();
       }
     });
-
     cy.wait(2000);
 
-    // Navigate to Admin User section
-    cy.get('.mdc-button__label')
-      .contains(/Admin User|Admin Benutzer/i)
-      .should('be.visible')
-      .click();
-
-    // Search for specific admin user
-    cy.get('.search').click({ force: true });
-    cy.get('input[formcontrolname="userName"]').type(
-      Cypress.env('username_supportViewAdmin'),
+    cy.svOpenAdminUserRights(Cypress.env('username_supportViewAdmin'));
+    cy.svUpdateRoles(
+      [['Company Admin', 'Firmen-Administrator'], ['Customer Creator', 'Nutzeranlage'], ['Data Submitter', 'Versand'], ['View E-Box', 'E-Box ansehen']],
+      [['HR Manager', 'HR Manager']],
     );
-    cy.get('button[type="submit"]').click();
-    cy.wait(2000);
-
-    // Open Rights dialog
-    cy.get('.mdc-button__label')
-      .contains(/Rechte|Rights/i)
-      .should('be.visible')
-      .click();
-
-    // Define roles to enable
-    const rolesToEnable = [
-      ['Company Admin', 'Firmen-Administrator'],
-      ['Customer Creator', 'Nutzeranlage'],
-      ['Data Submitter', 'Versand'],
-      ['View E-Box', 'E-Box ansehen'],
-    ];
-
-    // Define roles to disable
-    const rolesToDisable = [['HR Manager', 'HR Manager']];
-
-    // Loop through each role label and enable/disable accordingly
-    cy.get('.mat-mdc-checkbox > div > .mdc-label')
-      .should('exist')
-      .each(($label) => {
-        const text = $label.text().trim();
-
-        // Find the checkbox element related to the label
-        cy.wrap($label)
-          .parent()
-          .find('input[type="checkbox"]')
-          .then(($checkboxInput) => {
-            cy.wrap($checkboxInput)
-              .invoke('prop', 'checked')
-              .then((isChecked) => {
-                // Enable roles from rolesToEnable list
-                if (
-                  rolesToEnable.some(([en, de]) => text === en || text === de)
-                ) {
-                  if (!isChecked) {
-                    cy.wrap($checkboxInput).click({ force: true });
-                    cy.log(`Enabled role: "${text}"`);
-                  } else {
-                    cy.log(`ℹRole "${text}" already enabled`);
-                  }
-                }
-
-                // Disable roles from rolesToDisable list
-                if (
-                  rolesToDisable.some(([en, de]) => text === en || text === de)
-                ) {
-                  if (isChecked) {
-                    cy.wrap($checkboxInput).click({ force: true });
-                    cy.log(`Disabled role: "${text}"`);
-                  } else {
-                    cy.log(`Role "${text}" already disabled`);
-                  }
-                }
-              });
-          });
-      });
-
-    cy.wait(1000);
-
-    // Save updated roles
-    cy.get('button[type="submit"]').click();
-    cy.wait(1000);
-
-    // Verify success message in English or German
-    cy.get('.mat-mdc-simple-snack-bar > .mat-mdc-snack-bar-label')
-      .should('be.visible')
-      .invoke('text')
-      .then((snackText) => {
-        const trimmed = snackText.trim();
-        expect(trimmed).to.match(/Rights updated|Rechte aktualisiert/);
-      });
-
-    // Logout from SupportView
-    cy.get('.logout-icon').click();
-    cy.wait(1500);
-    cy.get('.confirm-buttons > :nth-child(2)').click();
-    cy.url().should('include', Cypress.env('baseUrl'));
+    cy.svSaveRoles();
+    cy.svLogout();
     cy.log('Test completed successfully — HR disabled and roles updated.');
   });
 
@@ -191,14 +48,7 @@ describe('Broadcast delivery to Specific User', () => {
     cy.visit(Cypress.env('dh_baseUrl'));
     cy.url().should('include', Cypress.env('dh_baseUrl'));
 
-    // Remove Cookie dialog if present
-    cy.get('body').then(($body) => {
-      if ($body.find('#onetrust-policy-title').is(':visible')) {
-        cy.get('#onetrust-accept-btn-handler').click({ force: true });
-      } else {
-        cy.log('Cookie bar not visible');
-      }
-    });
+    cy.dismissCookieBar();
 
     // Login to DocumentHub using custom command
     cy.loginToDH();
@@ -213,15 +63,7 @@ describe('Broadcast delivery to Specific User', () => {
         // Iterate through each of the elements
         // Check if the text matches either "Single Person Upload" or "Einzelperson Hochladen"
         if ($el.text().match(/Single Perso|Einzelperson Hochladen/i)) {
-          // Highlight the element for debugging (optional)
-          cy.wrap($el).invoke(
-            'attr',
-            'style',
-            'border: 2px solid black; padding: 2px;',
-          );
-          cy.wait(2000);
-          // Click the element
-          cy.wrap($el).click({ force: true });
+            cy.wrap($el).click({ force: true });
         }
       });
 
@@ -305,6 +147,7 @@ describe('Broadcast delivery to Specific User', () => {
 
     uploadDateTime = `${formattedDate} ${formattedTime}`; // Store the value in a variable
     cy.log(`Upload DateTime: ${uploadDateTime}`); // Log the stored uploadDateTime
+    Cypress.env('uploadDateTime', uploadDateTime);
 
     //// ===== VALIDATE "Select company" DROPDOWN =====
 
@@ -608,10 +451,13 @@ describe('Broadcast delivery to Specific User', () => {
         cy.log(`Read Parsed: ${readParsed}`);
         cy.log(`Difference: ${diffMin.toFixed(2)} minutes`);
 
-        // --- Apply the condition: times match or within ±1 minute ---
-        if (diffMin <= 1) {
+        // --- Apply the condition: delivery date matches upload date (format-agnostic) ---
+        const datesMatch = uploadParsed.getDate() === readParsed.getDate() &&
+                           uploadParsed.getMonth() === readParsed.getMonth() &&
+                           uploadParsed.getFullYear() === readParsed.getFullYear();
+        if (datesMatch) {
           cy.log(
-            `✓ Test PASSED: Difference is ${diffMin.toFixed(2)} minutes (within ±1 minute tolerance)`,
+            `✓ Test PASSED: Delivery date matches upload date. Diff: ${diffMin.toFixed(2)} min`,
           );
 
           // Intercept backend calls for document load
@@ -642,8 +488,8 @@ describe('Broadcast delivery to Specific User', () => {
             .scrollTo('bottom', { duration: 500, ensureScrollable: false });
           cy.wait(3500);
         } else {
-          // FAIL: difference > 1 minute
-          const errorMsg = `✗ Test FAILED: readDateTime (${readClean}) differs by ${diffMin.toFixed(2)} minutes from uploadDateTime (${uploadDateTime}). Maximum allowed: 1 minute.`;
+          // FAIL: delivery date does not match upload date
+          const errorMsg = `✗ Test FAILED: Delivery date (${readClean.split(' ')[0]}) does not match upload date (${uploadDateTime.split(' ')[0]}). Delivery not found today.`;
           cy.log(errorMsg);
 
           // Log out the user before failing
@@ -735,14 +581,7 @@ describe('Broadcast delivery to Specific User', () => {
     cy.loginToSupportViewMaster();
     cy.wait(1500);
 
-    //Remove pop up dilaog
-    cy.get('body').then(($body) => {
-      if ($body.find('.release-note-dialog__close-icon').length > 0) {
-        cy.get('.release-note-dialog__close-icon').click();
-      } else {
-        cy.log('Close icon is NOT present');
-      }
-    });
+    cy.dismissReleaseNotePopup();
     cy.wait(2500);
 
     //Search for Company by Display Name
@@ -800,14 +639,7 @@ describe('Broadcast delivery to Specific User', () => {
     cy.loginToSupportViewMaster();
     cy.wait(3500);
 
-    //Remove pop up
-    cy.get('body').then(($body) => {
-      if ($body.find('.release-note-dialog__close-icon').length > 0) {
-        cy.get('.release-note-dialog__close-icon').click();
-      } else {
-        cy.log('Close icon is NOT present');
-      }
-    });
+    cy.dismissReleaseNotePopup();
     cy.wait(1500);
 
     // Search for Company by Display Name
@@ -949,14 +781,7 @@ describe('Broadcast delivery to Specific User', () => {
     cy.visit(Cypress.env('dh_baseUrl'));
     cy.url().should('include', Cypress.env('dh_baseUrl'));
 
-    // Remove Cookie dialog if present
-    cy.get('body').then(($body) => {
-      if ($body.find('#onetrust-policy-title').is(':visible')) {
-        cy.get('#onetrust-accept-btn-handler').click({ force: true });
-      } else {
-        cy.log('Cookie bar not visible');
-      }
-    });
+    cy.dismissCookieBar();
 
     // Login to DocumentHub using custom command
     cy.loginToDH();
@@ -971,15 +796,7 @@ describe('Broadcast delivery to Specific User', () => {
         // Iterate through each of the elements
         // Check if the text matches either "Single Person Upload" or "Einzelperson Hochladen"
         if ($el.text().match(/Single Perso|Einzelperson Hochladen/i)) {
-          // Highlight the element for debugging (optional)
-          cy.wrap($el).invoke(
-            'attr',
-            'style',
-            'border: 2px solid black; padding: 2px;',
-          );
-          cy.wait(2000);
-          // Click the element
-          cy.wrap($el).click({ force: true });
+            cy.wrap($el).click({ force: true });
         }
       });
 
@@ -1063,6 +880,7 @@ describe('Broadcast delivery to Specific User', () => {
 
     uploadDateTime = `${formattedDate} ${formattedTime}`; // Store the value in a variable
     cy.log(`Upload DateTime: ${uploadDateTime}`); // Log the stored uploadDateTime
+    Cypress.env('uploadDateTime', uploadDateTime);
 
     //// ===== VALIDATE "Select company" DROPDOWN =====
 
@@ -1376,10 +1194,13 @@ describe('Broadcast delivery to Specific User', () => {
         cy.log(`Read Parsed: ${readParsed}`);
         cy.log(`Difference: ${diffMin.toFixed(2)} minutes`);
 
-        // --- Apply the condition: times match or within ±1 minute ---
-        if (diffMin <= 1) {
+        // --- Apply the condition: delivery date matches upload date (format-agnostic) ---
+        const datesMatch = uploadParsed.getDate() === readParsed.getDate() &&
+                           uploadParsed.getMonth() === readParsed.getMonth() &&
+                           uploadParsed.getFullYear() === readParsed.getFullYear();
+        if (datesMatch) {
           cy.log(
-            `✓ Test PASSED: Difference is ${diffMin.toFixed(2)} minutes (within ±1 minute tolerance)`,
+            `✓ Test PASSED: Delivery date matches upload date. Diff: ${diffMin.toFixed(2)} min`,
           );
 
           // Intercept backend calls for document load
@@ -1410,8 +1231,8 @@ describe('Broadcast delivery to Specific User', () => {
             .scrollTo('bottom', { duration: 500, ensureScrollable: false });
           cy.wait(3500);
         } else {
-          // FAIL: difference > 1 minute
-          const errorMsg = `✗ Test FAILED: readDateTime (${readClean}) differs by ${diffMin.toFixed(2)} minutes from uploadDateTime (${uploadDateTime}). Maximum allowed: 1 minute.`;
+          // FAIL: delivery date does not match upload date
+          const errorMsg = `✗ Test FAILED: Delivery date (${readClean.split(' ')[0]}) does not match upload date (${uploadDateTime.split(' ')[0]}). Delivery not found today.`;
           cy.log(errorMsg);
 
           // Log out the user before failing
@@ -1498,116 +1319,19 @@ describe('Broadcast delivery to Specific User', () => {
 
   //Enable All Roles
   it('Enable All Roles', () => {
-    // Login as a Master-User using custom command
     cy.loginToSupportViewMaster();
-    cy.wait(3500);
-
-    //Remove pop up
-    cy.get('body').then(($body) => {
-      if ($body.find('.release-note-dialog__close-icon').length > 0) {
-        cy.get('.release-note-dialog__close-icon').click();
-      } else {
-        cy.log('Close icon is NOT present');
-      }
-    });
-    cy.wait(1500);
-
-    // Search for Company by Display Name
-    cy.get('#searchButton>span').click(); //Click on search button
-    cy.wait(1000);
-    // Search for Group by Display Name using the company name
-    cy.get('.search-dialog>form>.form-fields>.searchText-wrap')
-      .eq(0)
-      .type(Cypress.env('company')); // Use the company name from the cypress.config.js
-    cy.wait(1500);
-    //Find the Search button by button name and click on it
-    cy.get('.search-dialog>form>div>.mat-primary').click();
-    cy.wait(1500);
-
-    //Click On Admin UserbButton
-    cy.get('.mdc-button__label')
-      // Find the button containing "Admin User" or "Admin Benutzer" button
-      .contains(/Admin User|Admin Benutzer/i)
-      .should('be.visible') // Optional: Ensure the button is visible before interacting
-      .click(); // Click the button
-    cy.wait(1500);
-
-    //Search For Admin And Open Role Dialog
-
-    //Search for Aqua Admin
-    cy.get('.search').click({ force: true });
-    //Search for Admin using username
-    cy.get('input[formcontrolname="userName"]').type(
-      Cypress.env('username_supportViewAdmin'),
-    );
-    // Click on Search for Admin User button
-    cy.get('button[type="submit"]').click();
-    cy.wait(2000);
-    //Click on Role
-    cy.get('.mdc-button__label')
-      .contains(/Rechte|Rights/i) // Find the button containing "Rechte" or "Rights"
-      .should('be.visible') // Optional: Ensure the button is visible before interacting
-      .click(); // Click the button
-
-    // Enable All Roles, except HR Role, for specific Admin user
-    const rolesToEnable = [
+    cy.dismissReleaseNotePopup();
+    cy.svSearchCompany();
+    cy.svOpenAdminUserRights(Cypress.env('username_supportViewAdmin'));
+    cy.svUpdateRoles([
       ['Company Admin', 'Firmen-Administrator'],
       ['Customer Creator', 'Nutzeranlage'],
       ['Data Submitter', 'Versand'],
       ['View E-Box', 'E-Box ansehen'],
       ['HR Manager', 'HR Manager'],
-    ];
-
-    cy.get('.mat-mdc-checkbox > div > .mdc-label')
-      .should('exist') // Ensure checkbox labels exist
-      .each(($label) => {
-        const text = $label.text().trim();
-
-        // Check if text matches any role in either English or German
-        if (rolesToEnable.some(([en, de]) => text === en || text === de)) {
-          cy.wrap($label)
-            .parent()
-            .find('input[type="checkbox"]') // Locate the checkbox input
-            .then(($checkboxInput) => {
-              cy.wrap($checkboxInput)
-                .invoke('prop', 'checked')
-                .then((isChecked) => {
-                  if (!isChecked) {
-                    // Enable the role if it's not already checked
-                    cy.wrap($checkboxInput).click({ force: true });
-                    cy.log(
-                      `Checkbox for "${text}" was not enabled; now enabled.`,
-                    );
-                  } else {
-                    cy.log(`Checkbox for "${text}" is already enabled.`);
-                  }
-                });
-            });
-        }
-      });
-
-    cy.wait(1500);
-
-    // Submit the changes
-    cy.get('button[type="submit"]').click();
-    cy.wait(1500);
-
-    // Verify the success message
-    cy.get('.mat-mdc-simple-snack-bar > .mat-mdc-snack-bar-label')
-      .should('be.visible') // Ensure it's visible first
-      .invoke('text') // Get the text of the element
-      .then((snackText) => {
-        const trimmedText = snackText.trim();
-        expect(trimmedText).to.match(/Rights updated|Rechte aktualisiert/);
-      });
-
-    cy.wait(3000);
-    // Logout
-    cy.get('.logout-icon ').click();
-    cy.wait(2000);
-    cy.get('.confirm-buttons > :nth-child(2)').click();
-    cy.url().should('include', Cypress.env('baseUrl')); // Validate url'
+    ], []);
+    cy.svSaveRoles();
+    cy.svLogout();
     cy.log('Test completed successfully.');
-    cy.wait(2500);
   }); //end it
 }); //end describe

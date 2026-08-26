@@ -1,0 +1,6 @@
+{
+  "htmlLength": 99239,
+  "matchText": "Weitere Zahlungsarten",
+  "idx": 21303,
+  "snippet": "ent\">als Präferenz speichern</label>\n                    </div>\n\n\n                </div><!-- stored payments container end -->\n                        <!-- STORED PAYMENT METHODS END -->\n\n            <!-- PAYMENT SELECTION -->\n            \n            <div class=\"other-label\" style=\"display: none;\">Weitere Zahlungsarten</div>\n\n            <div class=\"container-fluid payment-selection-container\">\n\n                                            \t<div class=\"wallet-methods\" style=\"padding: 20px 10px 0;\">\n                        <input type=\"hidden\" name=\"paymentMethod\" value=\"Creditcard\">\n          "
+}

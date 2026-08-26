@@ -15,6 +15,8 @@
 require('cypress-xpath');
 // Import @testing-library/cypress to enable cy.findByRole, cy.findByText, etc.
 import '@testing-library/cypress/add-commands';
+// cypress-real-events: registers cy.realHover(), cy.realClick(), etc.
+import 'cypress-real-events/support';
 // Import commands.js using ES2015 syntax:
 import './commands';
 
