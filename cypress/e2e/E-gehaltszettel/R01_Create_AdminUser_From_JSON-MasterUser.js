@@ -130,7 +130,7 @@ describe('Masteruser - Create Admin User From JSON', () => {
               .then((text) => {
                 const trimmedText = text.trim();
                 expect(trimmedText).to.match(
-                  /User deleted succesfully|Benutzer erfolgreich gelöscht/
+                  /User deleted succesfully|Benutzer erfolgreich gelöscht/,
                 );
               });
           }
@@ -212,7 +212,7 @@ describe('Masteruser - Create Admin User From JSON', () => {
     cy.get('input[formcontrolname="email"]').type(adminUser.email); // Email
 
     cy.intercept('POST', '**/supportView/v1/person/editXUser**').as(
-      'editXUser'
+      'editXUser',
     );
     cy.get('button[type="submit"]').click();
 
@@ -232,7 +232,7 @@ describe('Masteruser - Create Admin User From JSON', () => {
         // Trim the text and validate it
         const trimmedText = text.trim();
         expect(trimmedText).to.match(
-          /Admin User created|Admin Benutzer angelegt/
+          /Admin User created|Admin Benutzer angelegt/,
         );
       });
 
@@ -268,7 +268,7 @@ describe('Masteruser - Create Admin User From JSON', () => {
         // Trim the text and validate it
         const trimmedText = text.trim();
         expect(trimmedText).to.match(
-          /User already exists|Benutzer existiert bereits/
+          /User already exists|Benutzer existiert bereits/,
         );
       });
 
@@ -354,7 +354,7 @@ describe('Masteruser - Create Admin User From JSON', () => {
       .then((emails) => {
         // Create an array of email subjects
         const emailSubjects = [...emails].map((email) =>
-          email.textContent.trim()
+          email.textContent.trim(),
         );
 
         // Variables to store email indices
@@ -365,12 +365,12 @@ describe('Masteruser - Create Admin User From JSON', () => {
         emailSubjects.forEach((subject, index) => {
           if (
             subject.includes(
-              'Neuer Benutzer e-Gehaltszettel Portal – Benutzername'
+              'Neuer Benutzer DocuHub Portal – Benutzername',
             )
           ) {
             usernameEmailIndex = index;
           } else if (
-            subject.includes('Neuer Benutzer e-Gehaltszettel Portal – Passwort')
+            subject.includes('Neuer Benutzer DocuHub Portal – Passwort')
           ) {
             passwordEmailIndex = index;
           }
@@ -386,7 +386,7 @@ describe('Masteruser - Create Admin User From JSON', () => {
 
           cy.iframe('#ifmail')
             .find(
-              '#mail>div>div:nth-child(2)>div:nth-child(3)>table>tbody>tr>td>p:nth-child(2)>span'
+              '#mail>div>div:nth-child(2)>div:nth-child(3)>table>tbody>tr>td>p:nth-child(2)>span',
             )
             .invoke('text')
             .then((innerText) => {
@@ -420,7 +420,7 @@ describe('Masteruser - Create Admin User From JSON', () => {
 
           cy.iframe('#ifmail')
             .find(
-              '#mail>div>div:nth-child(2)>div:nth-child(3)>table>tbody>tr>td>p:nth-child(2)>span'
+              '#mail>div>div:nth-child(2)>div:nth-child(3)>table>tbody>tr>td>p:nth-child(2)>span',
             )
             .invoke('text')
             .then((innerText) => {
@@ -526,7 +526,7 @@ describe('Masteruser - Create Admin User From JSON', () => {
             .then((text) => {
               const trimmedText = text.trim();
               const isValid = buttonLabelsCompaniesPage.some(
-                (label) => label.en === trimmedText || label.de === trimmedText
+                (label) => label.en === trimmedText || label.de === trimmedText,
               );
 
               // Assert that the button text matches one of the expected labels
@@ -565,7 +565,7 @@ describe('Masteruser - Create Admin User From JSON', () => {
             .then((text) => {
               const trimmedText = text.trim();
               const isValid = buttonLabels.some(
-                (label) => label.en === trimmedText || label.de === trimmedText
+                (label) => label.en === trimmedText || label.de === trimmedText,
               );
 
               // Assert that the button text matches one of the expected labels
@@ -591,7 +591,7 @@ describe('Masteruser - Create Admin User From JSON', () => {
             .click({ force: true });
           cy.wait(1000);
           cy.get('input[formcontrolname="newPassword"]').type(
-            Cypress.env('password_supportViewAdmin')
+            Cypress.env('password_supportViewAdmin'),
           );
           //Click on eye icon
           cy.get('button>mat-icon[data-mat-icon-name="password_invisible"]')
@@ -599,7 +599,7 @@ describe('Masteruser - Create Admin User From JSON', () => {
             .click({ force: true });
           cy.wait(1000);
           cy.get('input[formcontrolname="confirmedNewPassword"]').type(
-            Cypress.env('password_supportViewAdmin')
+            Cypress.env('password_supportViewAdmin'),
           );
           //Click on eye icon
           cy.get('button>mat-icon[data-mat-icon-name="password_invisible"]')
@@ -645,13 +645,13 @@ describe('Masteruser - Create Admin User From JSON', () => {
   //         if (
   //           usernameEmailIndex === -1 &&
   //           subject.includes(
-  //             'Neuer Benutzer e-Gehaltszettel Portal – Benutzername'
+  //             'Neuer Benutzer DocuHub Portal – Benutzername'
   //           )
   //         ) {
   //           usernameEmailIndex = i;
   //         } else if (
   //           passwordEmailIndex === -1 &&
-  //           subject.includes('Neuer Benutzer e-Gehaltszettel Portal – Passwort')
+  //           subject.includes('Neuer Benutzer DocuHub Portal – Passwort')
   //         ) {
   //           passwordEmailIndex = i;
   //         }
@@ -918,7 +918,7 @@ describe('Masteruser - Create Admin User From JSON', () => {
         // Trim the text and validate it
         const trimmedText = text.trim();
         expect(trimmedText).to.match(
-          /User deleted succesfully|Benutzer erfolgreich gelöscht/
+          /User deleted succesfully|Benutzer erfolgreich gelöscht/,
         );
       });
 

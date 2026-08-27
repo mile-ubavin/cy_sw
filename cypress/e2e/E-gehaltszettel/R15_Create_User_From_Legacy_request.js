@@ -205,7 +205,7 @@ describe('Create_User_From_Legacy_request', () => {
   //GetCookie and Store it as a global variable/Create user via Legacy request with dynamic BillersInvoiceRecipientID
   it('Create user via Legacy request with dynamic BillersInvoiceRecipientID', () => {
     cy.intercept('POST', '**/login/user').as('getToken');
-    cy.loginToSupportViewAdmin();
+    cy.loginToSupportViewMaster();
 
     cy.wait('@getToken', { timeout: 47000 }).then((interception) => {
       expect(interception.response.statusCode).to.eq(200);
@@ -328,7 +328,7 @@ Password: Test1234!
     cy.iframe('#ifinbox')
       .find('.mctn > .m > button > .lms')
       .eq(0)
-      .should('include.text', 'Ihr neuer Benutzer im e-Gehaltszettel Portal'); //Validate subject of Verification email
+      .should('include.text', 'Ihr neuer Benutzer im DocuHub Portal'); //Validate subject of Verification email
 
     cy.iframe('#ifmail')
       .find(
@@ -403,10 +403,7 @@ Password: Test1234!
           .find('.mctn > .m > button > .lms')
           .eq(0)
 
-          .should(
-            'include.text',
-            'Passwort zurücksetzen e-Gehaltszettel Portal',
-          ); //Validate subject of Verification email
+          .should('include.text', 'Passwort zurücksetzen DocuHub Portal'); //Validate subject of Verification email
         let initialUrl_pass;
         cy.iframe('#ifmail')
           .find(

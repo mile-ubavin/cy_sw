@@ -1028,7 +1028,7 @@ describe('Send welcome mail via post/EinfachBrief', () => {
     cy.iframe('#ifinbox')
       .find('.mctn > .m > button > .lms')
       .first()
-      .should('contain.text', 'Versandreport e-Gehaltszettel Portal');
+      .should('contain.text', 'Versandreport DocuHub Portal');
 
     // Validate email body
     cy.iframe('#ifmail')

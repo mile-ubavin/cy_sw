@@ -428,7 +428,7 @@ describe('Upload valid Serviceline files, validate Success and Warring messages'
       cy.iframe('#ifinbox')
         .find('.mctn > .m > button > .lms')
         .eq(index)
-        .should('include.text', 'Versandreport e-Gehaltszettel Portal');
+        .should('include.text', 'Versandreport DocuHub Portal');
     }
 
     // Access the inbox iframe and validate the email subject
@@ -451,7 +451,7 @@ describe('Upload valid Serviceline files, validate Success and Warring messages'
         expect(normalizedText).to.include(
           'Zusätzlich haben Sie 0 Sendung(en) erfolgreich über den postalischen Weg als Brief versendet. Das Dokument wird von uns über das „Einfach Brief“-Portal gedruckt, kurvertiert und an die Adresse des Benutzers versendet.'
         );
-        expect(normalizedText).to.include('Ihr e-Gehaltszettel Team');
+        expect(normalizedText).to.include('Ihr DocuHub Team');
       });
 
     cy.wait(4500);
@@ -884,7 +884,7 @@ describe('Upload valid Serviceline files, validate Success and Warring messages'
       cy.iframe('#ifinbox')
         .find('.mctn > .m > button > .lms')
         .eq(index)
-        .should('include.text', 'Versandreport e-Gehaltszettel Portal');
+        .should('include.text', 'Versandreport DocuHub Portal');
     }
 
     // Access the inbox iframe and validate the email subject
@@ -902,7 +902,7 @@ describe('Upload valid Serviceline files, validate Success and Warring messages'
 
         // Validate that the email body contains the expected text
         expect(normalizedText).to.include(
-          'Sie haben 1 Sendung(en) erfolgreich digital in das e-Gehaltszettel Portal Ihrer Benutzer*innen eingeliefertZusätzlich haben Sie 0 Sendung(en) erfolgreich über den postalischen Weg als Brief versendet. Das Dokument wird von uns über das „Einfach Brief“-Portal gedruckt, kurvertiert und an die Adresse des Benutzers versendet.1 Sendung(en) die Sie elektronisch verschicken wollten, konnten nicht zugestellt werden.Folgende Personalnummern sind davon betroffen:System Biller Id: INVALID, Personalnummern: ABBA000100279311Ihr e-Gehaltszettel Team'
+          'Sie haben 1 Sendung(en) erfolgreich digital in das e-Gehaltszettel Portal Ihrer Benutzer*innen eingeliefertZusätzlich haben Sie 0 Sendung(en) erfolgreich über den postalischen Weg als Brief versendet. Das Dokument wird von uns über das „Einfach Brief“-Portal gedruckt, kurvertiert und an die Adresse des Benutzers versendet.1 Sendung(en) die Sie elektronisch verschicken wollten, konnten nicht zugestellt werden.Folgende Personalnummern sind davon betroffen:System Biller Id: INVALID, Personalnummern: ABBA000100279311Ihr DocuHub Team'
         );
       });
 

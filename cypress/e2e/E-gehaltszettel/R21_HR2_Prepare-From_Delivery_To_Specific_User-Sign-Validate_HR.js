@@ -489,7 +489,7 @@ describe('HR2_Prepare-From_Delivery_To_Specific_User-Sign-Validate_HR', () => {
       cy.iframe('#ifinbox')
         .find('.mctn > .m > button > .lms')
         .eq(index)
-        .should('include.text', 'Versandreport e-Gehaltszettel Portal');
+        .should('include.text', 'Versandreport DocuHub Portal');
     }
 
     // Access the inbox iframe and validate the email subject
@@ -512,7 +512,7 @@ describe('HR2_Prepare-From_Delivery_To_Specific_User-Sign-Validate_HR', () => {
         expect(normalizedText).to.include(
           'Zusätzlich haben Sie 0 Sendung(en) erfolgreich über den postalischen Weg als Brief versendet. Das Dokument wird von uns über das „Einfach Brief“-Portal gedruckt, kurvertiert und an die Adresse des Benutzers versendet.',
         );
-        expect(normalizedText).to.include('Ihr e-Gehaltszettel Team');
+        expect(normalizedText).to.include('Ihr DocuHub Team');
       });
 
     cy.wait(4500);

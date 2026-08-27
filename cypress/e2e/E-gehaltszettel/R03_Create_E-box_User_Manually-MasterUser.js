@@ -272,7 +272,7 @@ describe('R03_Create User -Manual.js', () => {
     cy.iframe('#ifinbox')
       .find('.mctn > .m > button > .lms')
       .eq(0)
-      //.should('include.text', 'Ihr neuer Benutzer im e-Gehaltszettel Portal'); //Validate subject of Verification email
+      //.should('include.text', 'Ihr neuer Benutzer im DocuHub Portal'); //Validate subject of Verification email
       .should('include.text', 'Ihr neuer Benutzer im DocuHub Portal'); //Validate subject of Verification email
     cy.iframe('#ifmail')
       .find(
@@ -366,7 +366,7 @@ describe('R03_Create User -Manual.js', () => {
 
           // //.should(
           //   'include.text',
-          //   'Passwort zurücksetzen e-Gehaltszettel Portal',
+          //   'Passwort zurücksetzen DocuHub Portal',
 
           .should('include.text', 'Passwort zurücksetzen DocuHub Portal'); //Validate subject of Verification email
         let initialUrl_pass;

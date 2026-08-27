@@ -11,7 +11,7 @@ describe('adminUser-trigger ForgotPassword from SW', () => {
 
     cy.intercept(
       'POST',
-      '**/supportView/v1/person/supportViewRequestPasswordReset'
+      '**/supportView/v1/person/supportViewRequestPasswordReset',
     ).as('forgotPass');
 
     cy.get('.mat-mdc-input-element').type('nonExixtingUser');
@@ -42,7 +42,7 @@ describe('adminUser-trigger ForgotPassword from SW', () => {
         // Trim the text and validate it
         const trimmedText = text.trim();
         expect(trimmedText).to.match(
-          /Reset password failed|Passwortrücksetzen fehlgeschlagen/
+          /Reset password failed|Passwortrücksetzen fehlgeschlagen/,
         );
       });
     cy.wait(2500);
@@ -57,11 +57,11 @@ describe('adminUser-trigger ForgotPassword from SW', () => {
 
     cy.intercept(
       'POST',
-      '**/supportView/v1/person/supportViewRequestPasswordReset'
+      '**/supportView/v1/person/supportViewRequestPasswordReset',
     ).as('forgotPass'); // Move intercept BEFORE clicking the button
 
     cy.get('.mat-mdc-input-element').type(
-      Cypress.env('username_supportViewAdmin')
+      Cypress.env('username_supportViewAdmin'),
     );
     cy.wait(1500);
 
@@ -81,7 +81,7 @@ describe('adminUser-trigger ForgotPassword from SW', () => {
         // Trim the text and validate it
         const trimmedText = text.trim();
         expect(trimmedText).to.match(
-          /E-Mail for resetting the password was sent|Aktuelles Passwort/
+          /E-Mail for resetting the password was sent|Aktuelles Passwort/,
         );
       });
     cy.wait(2500);
@@ -101,11 +101,11 @@ describe('adminUser-trigger ForgotPassword from SW', () => {
       .find('.mctn > .m > button > .lms')
       .eq(0)
 
-      .should('include.text', 'Passwort zurücksetzen e-Gehaltszettel Portal'); //Validate subject of Verification email
+      .should('include.text', 'Passwort zurücksetzen DocuHub Portal'); //Validate subject of Verification email
 
     cy.iframe('#ifmail')
       .find(
-        '#mail>div>div:nth-child(2)>div:nth-child(3)>table>tbody>tr>td>p:nth-child(4)>span>a'
+        '#mail>div>div:nth-child(2)>div:nth-child(3)>table>tbody>tr>td>p:nth-child(4)>span>a',
       )
       .should('include.text', 'Neues Passwort erstellen ')
       .invoke('attr', 'href')
@@ -115,7 +115,7 @@ describe('adminUser-trigger ForgotPassword from SW', () => {
       });
     cy.iframe('#ifmail')
       .find(
-        '#mail>div>div:nth-child(2)>div:nth-child(3)>table>tbody>tr>td>p:nth-child(4)>span>a'
+        '#mail>div>div:nth-child(2)>div:nth-child(3)>table>tbody>tr>td>p:nth-child(4)>span>a',
       )
       .invoke('attr', 'target', '_self') //prevent opening in new tab
       .click();
@@ -159,12 +159,14 @@ describe('adminUser-trigger ForgotPassword from SW', () => {
     const newPassword = generateRandomPassword();
     cy.log(`Generated password: ${newPassword}`);
 
+    cy.pause();
     //Fill the Set password form
     cy.iframe('#ifmail')
       .find('input[formcontrolname="newPassword"]')
       .eq(1)
       .click({ force: true })
       .type(newPassword); //fill the newPassword
+
     cy.iframe('#ifmail')
       .find('mat-icon[data-mat-icon-name="password_invisible"]')
       .eq(2)
@@ -203,7 +205,7 @@ describe('adminUser-trigger ForgotPassword from SW', () => {
       .then((text) => {
         const trimmedText = text.trim();
         expect(trimmedText).to.match(
-          /Password successfully reset|Passwort erfolgreich zurückgesetzt/i
+          /Password successfully reset|Passwort erfolgreich zurückgesetzt/i,
         );
       });
 
@@ -269,7 +271,7 @@ describe('adminUser-trigger ForgotPassword from SW', () => {
       .click({ force: true });
     cy.wait(1000);
     cy.get('input[formcontrolname="newPassword"]').type(
-      Cypress.env('password_supportViewAdmin')
+      Cypress.env('password_supportViewAdmin'),
     );
     //Click on eye icon
     cy.get('button>mat-icon[data-mat-icon-name="password_invisible"]')
@@ -277,7 +279,7 @@ describe('adminUser-trigger ForgotPassword from SW', () => {
       .click({ force: true });
     cy.wait(1000);
     cy.get('input[formcontrolname="confirmedNewPassword"]').type(
-      Cypress.env('password_supportViewAdmin')
+      Cypress.env('password_supportViewAdmin'),
     );
     //Click on eye icon
     cy.get('button>mat-icon[data-mat-icon-name="password_invisible"]')
@@ -351,11 +353,11 @@ describe('adminUser-trigger ForgotPassword from SW', () => {
     cy.iframe('#ifinbox')
       .find('.mctn > .m > button > .lms')
       .eq(0)
-      .should('include.text', 'Passwort zurücksetzen e-Gehaltszettel Portal'); //Validate subject of Verification email
+      .should('include.text', 'Passwort zurücksetzen DocuHub Portal'); //Validate subject of Verification email
 
     cy.iframe('#ifmail')
       .find(
-        '#mail>div>div:nth-child(2)>div:nth-child(3)>table>tbody>tr>td>p:nth-child(4)>span>a'
+        '#mail>div>div:nth-child(2)>div:nth-child(3)>table>tbody>tr>td>p:nth-child(4)>span>a',
       )
       .should('include.text', 'Neues Passwort erstellen ')
       .invoke('attr', 'href')
@@ -365,12 +367,13 @@ describe('adminUser-trigger ForgotPassword from SW', () => {
 
     cy.iframe('#ifmail')
       .find(
-        '#mail>div>div:nth-child(2)>div:nth-child(3)>table>tbody>tr>td>p:nth-child(4)>span>a'
+        '#mail>div>div:nth-child(2)>div:nth-child(3)>table>tbody>tr>td>p:nth-child(4)>span>a',
       )
       .invoke('attr', 'target', '_self') //prevent opening in new tab
       .click({ force: true });
 
     cy.wait(5500);
+    cy.pause(); // Pause after navigating from Yopmail to the Set Password form
 
     // Generate different password scenarios
     const shortPass = generatePassword(Math.floor(Math.random() * 7) + 1, [
@@ -385,11 +388,11 @@ describe('adminUser-trigger ForgotPassword from SW', () => {
     ]);
     const weakPass = generatePassword(
       Math.floor(Math.random() * (64 - 8 + 1)) + 8,
-      ['upper', 'number']
+      ['upper', 'number'],
     );
     const validPass = generatePassword(
       Math.floor(Math.random() * (64 - 8 + 1)) + 8,
-      ['upper', 'lower', 'number', 'special']
+      ['upper', 'lower', 'number', 'special'],
     );
 
     cy.log(`Short Password (Invalid): ${shortPass}`);
@@ -421,7 +424,7 @@ describe('adminUser-trigger ForgotPassword from SW', () => {
       .then((text) => {
         const trimmedText = text.trim();
         expect(trimmedText).to.match(
-          /Passwords match|Passwörter stimmen überein/i
+          /Passwords match|Passwörter stimmen überein/i,
         );
       });
 
@@ -447,7 +450,7 @@ describe('adminUser-trigger ForgotPassword from SW', () => {
       .then((text) => {
         const trimmedText = text.trim();
         expect(trimmedText).to.match(
-          /The minimum length is 8|Die minimale Länge ist 8/i
+          /The minimum length is 8|Die minimale Länge ist 8/i,
         );
       });
     cy.wait(2500);
@@ -483,7 +486,7 @@ describe('adminUser-trigger ForgotPassword from SW', () => {
       .then((text) => {
         const trimmedText = text.trim();
         expect(trimmedText).to.match(
-          /Passwords match|Passwörter stimmen überein/i
+          /Passwords match|Passwörter stimmen überein/i,
         );
       });
 
@@ -506,7 +509,7 @@ describe('adminUser-trigger ForgotPassword from SW', () => {
       .then((text) => {
         const trimmedText = text.trim();
         expect(trimmedText).to.match(
-          /The maximum length is 64|Die maximale Länge ist 64/i
+          /The maximum length is 64|Die maximale Länge ist 64/i,
         );
       });
 
@@ -543,7 +546,7 @@ describe('adminUser-trigger ForgotPassword from SW', () => {
       .then((text) => {
         const trimmedText = text.trim();
         expect(trimmedText).to.match(
-          /Passwords match|Passwörter stimmen überein/i
+          /Passwords match|Passwörter stimmen überein/i,
         );
       });
 
@@ -610,7 +613,7 @@ describe('adminUser-trigger ForgotPassword from SW', () => {
       .then((text) => {
         const trimmedText = text.trim();
         expect(trimmedText).to.match(
-          /Password successfully reset|Passwort erfolgreich zurückgesetzt/i
+          /Password successfully reset|Passwort erfolgreich zurückgesetzt/i,
         );
       });
 
@@ -676,7 +679,7 @@ describe('adminUser-trigger ForgotPassword from SW', () => {
       .click({ force: true });
     cy.wait(1000);
     cy.get('input[formcontrolname="newPassword"]').type(
-      Cypress.env('password_supportViewAdmin')
+      Cypress.env('password_supportViewAdmin'),
     );
     //Click on eye icon
     cy.get('button>mat-icon[data-mat-icon-name="password_invisible"]')
@@ -684,7 +687,7 @@ describe('adminUser-trigger ForgotPassword from SW', () => {
       .click({ force: true });
     cy.wait(1000);
     cy.get('input[formcontrolname="confirmedNewPassword"]').type(
-      Cypress.env('password_supportViewAdmin')
+      Cypress.env('password_supportViewAdmin'),
     );
     //Click on eye icon
     cy.get('button>mat-icon[data-mat-icon-name="password_invisible"]')
@@ -720,11 +723,11 @@ describe('adminUser-trigger ForgotPassword from SW', () => {
       .find('.mctn > .m > button > .lms')
       .eq(0)
 
-      .should('include.text', 'Passwort zurücksetzen e-Gehaltszettel Portal'); //Validate subject of Verification email
+      .should('include.text', 'Passwort zurücksetzen DocuHub Portal'); //Validate subject of Verification email
 
     cy.iframe('#ifmail')
       .find(
-        '#mail>div>div:nth-child(2)>div:nth-child(3)>table>tbody>tr>td>p:nth-child(4)>span>a'
+        '#mail>div>div:nth-child(2)>div:nth-child(3)>table>tbody>tr>td>p:nth-child(4)>span>a',
       )
       .should('include.text', 'Neues Passwort erstellen ')
       .invoke('attr', 'href')
@@ -734,7 +737,7 @@ describe('adminUser-trigger ForgotPassword from SW', () => {
       });
     cy.iframe('#ifmail')
       .find(
-        '#mail>div>div:nth-child(2)>div:nth-child(3)>table>tbody>tr>td>p:nth-child(4)>span>a'
+        '#mail>div>div:nth-child(2)>div:nth-child(3)>table>tbody>tr>td>p:nth-child(4)>span>a',
       )
       .invoke('attr', 'target', '_self') //prevent opening in new tab
       .click();
@@ -784,7 +787,7 @@ describe('adminUser-trigger ForgotPassword from SW', () => {
       .then((text) => {
         const trimmedText = text.trim();
         expect(trimmedText).to.match(
-          /Reset password failed|Passwortrücksetzen fehlgeschlagen/i
+          /Reset password failed|Passwortrücksetzen fehlgeschlagen/i,
         );
       });
     cy.wait(2500);

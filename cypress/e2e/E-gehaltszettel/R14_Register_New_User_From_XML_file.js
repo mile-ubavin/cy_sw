@@ -420,7 +420,7 @@ describe('Register User from xml file', () => {
     cy.iframe('#ifinbox')
       .find('.mctn > .m > button > .lms')
       .eq(0)
-      .should('include.text', 'Neuer Benutzer angelegt e-Gehaltszettel Portal');
+      .should('include.text', 'Neuer Benutzer angelegt DocuHub Portal');
 
     //Extract un/pw from email body
     cy.iframe('#ifmail')

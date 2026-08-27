@@ -447,7 +447,7 @@ describe('Create and Update User`s data via CSV file', () => {
     cy.iframe('#ifinbox')
       .find('.mctn > .m > button > .lms')
       .eq(0)
-      .should('include.text', 'Ihr neuer Benutzer im e-Gehaltszettel Portal'); //Validate subject of Verification email
+      .should('include.text', 'Ihr neuer Benutzer im DocuHub Portal'); //Validate subject of Verification email
 
     cy.iframe('#ifmail')
       .find(
@@ -548,7 +548,7 @@ describe('Create and Update User`s data via CSV file', () => {
 
           .should(
             'include.text',
-            'Passwort zurücksetzen e-Gehaltszettel Portal'
+            'Passwort zurücksetzen DocuHub Portal'
           ); //Validate subject of Verification email
 
         let initialUrl_pass;

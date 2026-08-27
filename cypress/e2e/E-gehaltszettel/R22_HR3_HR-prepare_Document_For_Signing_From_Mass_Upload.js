@@ -642,7 +642,7 @@ describe('HR prepare_Document_For_Signing_From_Mass_Upload', () => {
         cy.iframe('#ifinbox')
           .find('.mctn > .m > button > .lms')
           .eq(0)
-          .should('include.text', 'Versandreport e-Gehaltszettel Portal');
+          .should('include.text', 'Versandreport DocuHub Portal');
 
         // ===== STEP 10: Extract and Validate Email Body Content =====
         cy.iframe('#ifmail')
@@ -709,7 +709,7 @@ describe('HR prepare_Document_For_Signing_From_Mass_Upload', () => {
               'Email should contain digital delivery message',
             );
             expect(normalizedText).to.include(
-              'Ihr e-Gehaltszettel Team',
+              'Ihr DocuHub Team',
               'Email should contain signature',
             );
 

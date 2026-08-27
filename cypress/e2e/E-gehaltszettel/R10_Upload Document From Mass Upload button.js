@@ -536,7 +536,7 @@ describe('Upload_XML_file_including_Enabling_and_Disabing_xml_templates.', () =>
           cy.iframe('#ifinbox')
             .find('.mctn > .m > button > .lms')
             .eq(index)
-            .should('include.text', 'Versandreport e-Gehaltszettel Portal');
+            .should('include.text', 'Versandreport DocuHub Portal');
         }
 
         // Define email body function
@@ -1179,7 +1179,7 @@ describe('Upload_XML_file_including_Enabling_and_Disabing_xml_templates.', () =>
           cy.iframe('#ifinbox')
             .find('.mctn > .m > button > .lms')
             .eq(index)
-            .should('include.text', 'Versandreport e-Gehaltszettel Portal');
+            .should('include.text', 'Versandreport DocuHub Portal');
         }
 
         // Define email body function

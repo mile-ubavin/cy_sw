@@ -559,7 +559,7 @@ describe('Upload Multiple Files (xml, txt, serviceline, pdf, zip, 7z)', () => {
       cy.iframe('#ifinbox')
         .find('.mctn > .m > button > .lms')
         .eq(index)
-        .should('include.text', 'Versandreport e-Gehaltszettel Portal');
+        .should('include.text', 'Versandreport DocuHub Portal');
     };
 
     const normalize = (str) => str.replace(/\s+/g, ' ').trim();
@@ -1092,7 +1092,7 @@ describe('Upload Multiple Files (xml, txt, serviceline, pdf, zip, 7z)', () => {
       cy.iframe('#ifinbox')
         .find('.mctn > .m > button > .lms')
         .eq(index)
-        .should('include.text', 'Versandreport e-Gehaltszettel Portal');
+        .should('include.text', 'Versandreport DocuHub Portal');
     };
 
     const normalize = (str) => str.replace(/\s+/g, ' ').trim();

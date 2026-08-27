@@ -59,25 +59,6 @@ describe('DH_EG Payment — Upload ServiceLine (New Card — VISA)', () => {
       .first()
       .click({ force: true });
 
-    // Capture upload date/time now (matches the moment the "eBox Open Delivery" test
-    // compares against — same pattern as DH_EG_01_Workspace_TS_PersonalDocument_Upload_Dictionary_305).
-    cy.then(() => {
-      const now = new Date();
-      const day = String(now.getDate()).padStart(2, '0');
-      const month = String(now.getMonth() + 1).padStart(2, '0');
-      const year = now.getFullYear();
-      const formattedTime = now
-        .toLocaleTimeString('de-DE', {
-          hour: '2-digit',
-          minute: '2-digit',
-          hour12: false,
-        })
-        .trim();
-      const uploadDateTime = `${day}.${month}.${year} ${formattedTime}`;
-      Cypress.env('uploadDateTime', uploadDateTime);
-      cy.log(`Upload DateTime: ${uploadDateTime}`);
-    });
-
     // ===== STEP 4: Click Next (move to Confirm & send) =====
     cy.contains('.linkbtn--primary', /Weiter|Next/i)
       .should('be.enabled')
@@ -453,25 +434,12 @@ describe('DH_EG Payment — Upload ServiceLine (New Card — VISA)', () => {
     cy.loginToEgEbox();
     cy.wait(2000);
 
-    // Retrieve upload time stored in previous test
-    let uploadDateTime = Cypress.env('uploadDateTime');
-
-    // If uploadDateTime is not set (test run in isolation), generate current time
-    if (!uploadDateTime) {
-      const now = new Date();
-      const formattedDate = now.toLocaleDateString('de-DE'); // Format: dd.mm.yyyy
-      const formattedTime = now.toLocaleTimeString('de-DE', {
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false,
-      });
-      uploadDateTime = `${formattedDate} ${formattedTime}`;
-      cy.log(
-        `Upload DateTime not found, using current time: ${uploadDateTime}`,
-      );
-    } else {
-      cy.log(`Stored Upload DateTime: ${uploadDateTime}`);
-    }
+    // Reference point: the moment payment succeeded, stamped by the payment test
+    // (STEP 14). This is much closer to when the backend actually creates the eBox
+    // delivery than the earlier "upload started" moment — using it lets us match
+    // tightly instead of accepting any delivery from today.
+    const paymentCompletedAt = Cypress.env('paymentCompletedAt') || Date.now();
+    const TOLERANCE_MIN = 2.5;
 
     // Find latest delivery and extract its date/time
     cy.get('.date-of-delivery-cell > .half-cell-text-content')
@@ -485,31 +453,20 @@ describe('DH_EG Payment — Upload ServiceLine (New Card — VISA)', () => {
           .replace(/\s+/g, ' ')
           .trim();
 
-        // --- Convert both datetimes to comparable JS Date objects ---
-        const uploadParsed = parseGermanDateTime(uploadDateTime);
         const readParsed = parseGermanDateTime(readClean);
+        const diffMin =
+          Math.abs(readParsed.getTime() - paymentCompletedAt) / 60000;
 
-        // --- Calculate difference in milliseconds ---
-        const diffMs = Math.abs(readParsed - uploadParsed);
-        const diffMin = diffMs / (1000 * 60);
-
-        cy.log(`Upload DateTime: ${uploadDateTime}`);
-        cy.log(`Read DateTime: ${readClean}`);
-        cy.log(`Upload Parsed: ${uploadParsed}`);
-        cy.log(`Read Parsed: ${readParsed}`);
+        cy.log(`Payment completed at: ${new Date(paymentCompletedAt)}`);
+        cy.log(`Latest delivery time: ${readParsed} (raw: "${readClean}")`);
         cy.log(`Difference: ${diffMin.toFixed(2)} minutes`);
 
-        // --- Apply the condition: delivery date matches upload date (format-agnostic) ---
-        // Matching on the DATE only (not exact minute) sidesteps clock-skew edge cases —
-        // backend can legitimately timestamp the delivery a minute or two off from the
-        // moment we captured as "upload done", but it's always the same calendar day.
-        const datesMatch =
-          uploadParsed.getDate() === readParsed.getDate() &&
-          uploadParsed.getMonth() === readParsed.getMonth() &&
-          uploadParsed.getFullYear() === readParsed.getFullYear();
-        if (datesMatch) {
+        // --- Only open the delivery if it was created within TOLERANCE_MIN of payment ---
+        // This is a much tighter check than matching by date alone, which would happily
+        // open ANY delivery from today, including ones unrelated to this payment run.
+        if (diffMin <= TOLERANCE_MIN) {
           cy.log(
-            `✓ Test PASSED: Delivery date matches upload date. Diff: ${diffMin.toFixed(2)} min`,
+            `✓ Test PASSED: Delivery is ${diffMin.toFixed(2)} min from payment completion (within ${TOLERANCE_MIN} min).`,
           );
 
           // Mark the matched delivery's date/time cell for visibility
@@ -551,8 +508,8 @@ describe('DH_EG Payment — Upload ServiceLine (New Card — VISA)', () => {
             .scrollTo('bottom', { duration: 500, ensureScrollable: false });
           cy.wait(3500);
         } else {
-          // FAIL: delivery date does not match upload date
-          const errorMsg = `✗ Test FAILED: Delivery date (${readClean.split(' ')[0]}) does not match upload date (${uploadDateTime.split(' ')[0]}). Delivery not found today.`;
+          // FAIL: latest delivery is too far from payment completion to be this run's
+          const errorMsg = `✗ Test FAILED: Latest delivery (${readClean}) is ${diffMin.toFixed(2)} min from payment completion (${new Date(paymentCompletedAt).toLocaleString()}), exceeds ${TOLERANCE_MIN} min tolerance.`;
           cy.log(errorMsg);
 
           // Log out the user before failing
@@ -573,14 +530,7 @@ describe('DH_EG Payment — Upload ServiceLine (New Card — VISA)', () => {
   });
 
   //Admin user check Reporting email
-  // retries: Yopmail is a third-party site outside our control — transient
-  // network hiccups (DNS/proxy/connection timeouts) reaching it shouldn't fail
-  // the whole run on their own.
   it('Yopmail - Get Reporting email', { retries: 2 }, () => {
-    // Yopmail's own page throws unrelated script errors (ads/analytics); don't let
-    // those fail this test — only our assertions below should decide pass/fail.
-    cy.on('uncaught:exception', () => false);
-
     // Visit Yopmail
     cy.visit('https://yopmail.com/en/');
 
