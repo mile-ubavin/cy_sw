@@ -1,3 +1,9 @@
 node_modules
 credentials.js
 chrome/
+
+# BMAD framework — lokalni alat, ne komituje se
+_bmad/
+_bmad-output/
+.claude/
+!.claude/settings.json
