@@ -2,6 +2,11 @@ node_modules
 credentials.js
 chrome/
 
+# Cypress runtime artifacts — generated on every run, never committed
+cypress/downloads/
+cypress/screenshots/
+cypress/videos/
+
 # BMAD framework — lokalni alat, ne komituje se
 _bmad/
 _bmad-output/

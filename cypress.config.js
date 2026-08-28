@@ -234,6 +234,34 @@ const getDownloadedPdf = async (input) => {
   return null;
 };
 
+// Task: Parse a downloaded PDF — returns page count, extracted text, and info.
+// Used to verify PDF content instead of trusting a passive sleep after download.
+const parsePdf = async (filePath) => {
+  const buf = fs.readFileSync(filePath);
+  const data = await pdfParse(buf);
+  return {
+    numpages: data.numpages,
+    text: data.text,
+    info: data.info,
+  };
+};
+
+// Task: Empty the downloads folder so tests can reliably detect the NEXT
+// downloaded file (not a stale one from a previous run).
+// cypress open does NOT trash downloads between runs — this task fixes that.
+const cleanDownloads = (downloadsDir) => {
+  if (!downloadsDir || !fs.existsSync(downloadsDir)) return 0;
+  const files = fs.readdirSync(downloadsDir);
+  for (const file of files) {
+    try {
+      fs.unlinkSync(path.join(downloadsDir, file));
+    } catch (_) {
+      /* file may be locked by browser download; ignore */
+    }
+  }
+  return files.length;
+};
+
 // Task: Get the latest downloaded CSV file
 const getDownloadedCSV = (downloadsDir) => {
   try {
@@ -1349,6 +1377,8 @@ module.exports = defineConfig({
         downloadZipAndReadFirstPdf,
         openPasswordProtectedPdf,
         getDownloadedPdf,
+        parsePdf,
+        cleanDownloads,
         getDownloadedCSV,
         getDownloadedZIP,
         downloadFileToFolder,
@@ -1470,7 +1500,7 @@ module.exports = defineConfig({
         },
       });
       //  Set executing tests on various environments, targeting appropriate json from const=environments
-      const envConfig = environments['eg_dev'];
+      const envConfig = environments['tages_dev'];
       return { ...config, env: { ...config.env, ...envConfig } };
     }, //end
     specPattern: 'cypress/e2e/**/*.{js,jsx,ts,tsx}', // Ensure this matches your structure
