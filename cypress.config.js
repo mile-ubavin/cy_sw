@@ -1500,7 +1500,7 @@ module.exports = defineConfig({
         },
       });
       //  Set executing tests on various environments, targeting appropriate json from const=environments
-      const envConfig = environments['tages_dev'];
+      const envConfig = environments['eg_dev'];
       return { ...config, env: { ...config.env, ...envConfig } };
     }, //end
     specPattern: 'cypress/e2e/**/*.{js,jsx,ts,tsx}', // Ensure this matches your structure

@@ -46,6 +46,10 @@ describe('DH_EG Payment — Upload 305 Dictionary (New Card — Mastercard)', ()
       .should('be.visible')
       .click({ force: true });
 
+    // MUI Select's dismissing Backdrop stays mounted during its 225ms fade-out
+    // and Cypress reports Weiter as "covered". Short sleep covers the transition.
+    cy.wait(500);
+
     // ===== STEP 4: Click Next (move to Confirm & send) =====
     cy.contains('.linkbtn--primary', /Weiter|Next/i)
       .should('be.enabled')

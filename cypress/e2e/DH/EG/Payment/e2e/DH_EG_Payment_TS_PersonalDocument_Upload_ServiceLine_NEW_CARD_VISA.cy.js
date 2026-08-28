@@ -59,6 +59,12 @@ describe('DH_EG Payment — Upload ServiceLine (New Card — VISA)', () => {
       .first()
       .click({ force: true });
 
+    // MUI Select's dismissing Backdrop (`MuiBackdrop-invisible`) stays mounted
+    // during its 225ms opacity fade-out — during that window Cypress reports the
+    // Weiter button as "covered by another element". A short sleep covers the
+    // transition without racing.
+    cy.wait(500);
+
     // ===== STEP 4: Click Next (move to Confirm & send) =====
     cy.contains('.linkbtn--primary', /Weiter|Next/i)
       .should('be.enabled')
@@ -419,7 +425,7 @@ describe('DH_EG Payment — Upload ServiceLine (New Card — VISA)', () => {
     cy.wait(5000);
 
     // Logout from DH
-    cy.get('.MuiButton-text').click();
+    cy.get('.MuiButton-text').click({ force: true });
     cy.wait(1000);
     cy.get('li[role="menuitem"]')
       .contains(/Abmelden|Logout/i)
